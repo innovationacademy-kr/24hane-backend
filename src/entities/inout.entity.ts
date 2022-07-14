@@ -1,12 +1,13 @@
 import Cluster from 'src/enums/cluster.enum';
 import InOut from 'src/enums/inout.enum';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Inout {
   @PrimaryGeneratedColumn()
   seq: number;
 
+  @Index()
   @Column()
   intra_id: string;
 
@@ -16,6 +17,6 @@ export class Inout {
   @Column()
   inout: InOut;
 
-  @Column()
+  @Column({ nullable: true })
   cluster: Cluster;
 }

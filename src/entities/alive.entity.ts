@@ -1,11 +1,12 @@
 import Cluster from 'src/enums/cluster.enum';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Alive {
   @PrimaryGeneratedColumn()
   seq: number;
 
+  @Index()
   @Column()
   intra_id: string;
 
@@ -15,6 +16,6 @@ export class Alive {
   @Column()
   timestamp: Date;
 
-  @Column()
+  @Column({ nullable: true })
   cluster: Cluster;
 }
