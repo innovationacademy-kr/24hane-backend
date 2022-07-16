@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module.e2e-spec';
 
-describe.skip('WebhookModule (e2e)', () => {
+describe('WebhookModule (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe.skip('WebhookModule (e2e)', () => {
     await app.init();
   });
 
-  describe.skip('POST /webhook', () => {
+  describe('POST /webhook', () => {
     test('POST /webhook (유효한 데이터 송부) -> 204 No Content', async () => {
       // given
       const data = {
@@ -26,11 +26,11 @@ describe.skip('WebhookModule (e2e)', () => {
 
       // when
       const response = await request(app.getHttpServer())
-        .post(`/product`)
+        .post(`/webhook`)
         .send(data);
 
       // then
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(201);
     });
 
     test('POST /webhook (일부 필드 누락된 데이터 송부) -> 400 Bad Request', async () => {
@@ -43,7 +43,7 @@ describe.skip('WebhookModule (e2e)', () => {
 
       // when
       const response = await request(app.getHttpServer())
-        .post(`/product`)
+        .post(`/webhook`)
         .send(data);
 
       // then

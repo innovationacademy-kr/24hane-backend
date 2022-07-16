@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
+import { WebhookModule } from './webhook/webhook.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import TypeOrmConfigService from './configs/typeorm.config';
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
     }),
+    WebhookModule,
   ],
   controllers: [AppController],
   providers: [AppService],
