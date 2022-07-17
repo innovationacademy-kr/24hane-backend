@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
+import { SessionMiddleware } from './session-middleware';
 import { UsageModule } from './usage/usage.module';
 import { WebhookModule } from './webhook/webhook.module';
 
@@ -20,8 +22,21 @@ import { WebhookModule } from './webhook/webhook.module';
     }),
     WebhookModule,
     UsageModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SessionMiddleware],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  constructor(public sessionMiddleware: SessionMiddleware) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        this.sessionMiddleware.expressSession,
+        this.sessionMiddleware.passportInit,
+        this.sessionMiddleware.passportSession,
+      )
+      .forRoutes('*');
+  }
+}

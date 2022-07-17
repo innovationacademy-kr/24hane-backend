@@ -1,4 +1,13 @@
-import { Controller, Get, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Logger,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
+import { CheckLogin } from 'src/auth/guard/check-login.guard';
+import { User } from 'src/auth/user.decorator';
+import { UsageResponseDto } from './dto/usage-response.dto';
 import { UsageService } from './usage.service';
 
 @Controller('usage')
@@ -8,26 +17,56 @@ export class UsageController {
   constructor(private usageService: UsageService) {}
 
   @Get('perday')
-  async getPerDay() {
-    this.logger.debug('call getPerDay request');
-    const userId = 'joopark'; // TODO: remove
+  @UseGuards(CheckLogin)
+  async getPerDay(
+    @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+  ): Promise<UsageResponseDto> {
+    this.logger.debug(`call getPerDay request by ${user.login}`);
+    const userId = user.login;
     const date = new Date();
-    return await this.usageService.getPerDay(userId, date);
+    const perday = await this.usageService.getPerDay(userId, date);
+    const latest = await this.usageService.getLatestDataById(userId);
+    return {
+      userId: user.login,
+      profile: user.image_url,
+      state: latest.inout,
+      ...perday,
+    };
   }
 
   @Get('perweek')
-  async getPerWeek() {
-    this.logger.debug('call getPerDay request');
-    const userId = 'joopark'; // TODO: remove
+  @UseGuards(CheckLogin)
+  async getPerWeek(
+    @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+  ): Promise<UsageResponseDto> {
+    this.logger.debug(`call getPerWeek request by ${user.login}`);
+    const userId = user.login;
     const date = new Date();
-    return await this.usageService.getPerWeek(userId, date);
+    const perweek = await this.usageService.getPerWeek(userId, date);
+    const latest = await this.usageService.getLatestDataById(userId);
+    return {
+      userId: user.login,
+      profile: user.image_url,
+      state: latest.inout,
+      ...perweek,
+    };
   }
 
   @Get('permonth')
-  async getPerMonth() {
-    this.logger.debug('call getPerDay request');
-    const userId = 'joopark'; // TODO: remove
+  @UseGuards(CheckLogin)
+  async getPerMonth(
+    @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+  ): Promise<UsageResponseDto> {
+    this.logger.debug(`call getPerMonth request by ${user.login}`);
+    const userId = user.login;
     const date = new Date();
-    return await this.usageService.getPerMonth(userId, date);
+    const permonth = await this.usageService.getPerMonth(userId, date);
+    const latest = await this.usageService.getLatestDataById(userId);
+    return {
+      userId: user.login,
+      profile: user.image_url,
+      state: latest.inout,
+      ...permonth,
+    };
   }
 }
