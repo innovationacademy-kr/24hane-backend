@@ -16,6 +16,7 @@ export default class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: this.configService.get('database.password'),
       database: this.configService.get('database.database'),
       entities: [`${__dirname}/../**/entities/*.entity.{js,ts}`],
+      logging: this.configService.get('log'),
       // cache: true, TODO: 추후에 캐시 전략 구상할 때 사용 예정
     };
   }
