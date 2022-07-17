@@ -13,7 +13,7 @@ export default () => ({
     clientsecret: process.env.CLIENT_CALLBACK,
   },
   jwt: process.env.JWT_SECRET,
-  log: process.env.LOG_DEBUG,
+  log: process.env.LOG_DEBUG === 'true' ? true : false,
   url: {
     client: process.env.URL_CLIENT,
     client_old: process.env.URL_CLIENT_OLD,
