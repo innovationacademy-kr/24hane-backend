@@ -14,36 +14,78 @@ export class UsageService {
     private webhookRepository: Repository<Inout>,
   ) {}
 
+  /**
+   * TODO 추후에 커스텀 리포지토리로 이동시킬 예정
+   * 유저 ID와 시간 간격 사이에 체크인, 체크아웃한 기록을 가져옴
+   *
+   * @param id 인트라 ID
+   * @param startDate 시작 시간
+   * @param endDate 끝 시간
+   * @returns InOut 엔티티 배열
+   */
+  async getInOutByIdAndDate(
+    id: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Inout[]> {
+    return this.webhookRepository.findBy({
+      intra_id: id,
+      timestamp: Between(startDate, endDate),
+    });
+  }
+
+  /**
+   * TODO 추후에 커스텀 리포지토리로 이동시킬 예정
+   * 유저 ID에 대한 가장 최신의 row를 가져옴
+   *
+   * @param id 인트라 ID
+   * @returns InOut 엔티티
+   */
+  async getLatestDataById(id: string): Promise<Inout> {
+    return this.webhookRepository
+      .createQueryBuilder('inout')
+      .where('inout.intra_id = :id', { id })
+      .orderBy('inout.seq', 'DESC')
+      .getOne();
+  }
+
+  getAccumulationTime(
+    inout: Inout[],
+    start: Date,
+    end: Date,
+    now?: Date,
+  ): number {
+    let durationTime = 0; // ms
+    for (let i = 0; i < inout.length; i++) {
+      if (inout[i].inout === InOut.OUT && i === 0) {
+        // NOTE 시작시간 이전까지 클러스터에 있었을 때 시작시간을 대상으로 구함.
+        durationTime += inout[i].timestamp.getTime() - start.getTime();
+      } else if (inout[i].inout === InOut.IN && i === inout.length - 1) {
+        // NOTE 끝시간 이후까지 클러스터에 있을 때 끝 시간을 대상으로 구하거나 구하지 말아야 함.
+        if (now && end.getTime() <= now.getTime()) {
+          // NOTE 현재 시간보다 끝 시간이 이전일 때는 구해야 함.
+          durationTime += end.getTime() - inout[i].timestamp.getTime();
+        }
+      } else {
+        if (inout[i].inout === InOut.OUT) {
+          // NOTE Out이면 이전 값에 상관하지 않고 차를 구함.
+          durationTime +=
+            inout[i].timestamp.getTime() - inout[i - 1].timestamp.getTime();
+        }
+      }
+    }
+    return durationTime;
+  }
+
   async getPerDay(userId: string, date: Date): Promise<UsageResponseDto> {
     const start = this.getStartOfDate(date);
     const end = this.getEndOfDate(date);
     this.logger.debug(
       `getPerDay(userId: ${userId}, date: ${start.toString()} < ${date.toString()} < ${end.toString()})`,
     );
-    const result = await this.webhookRepository.findBy({
-      intra_id: userId,
-      timestamp: Between(start, end),
-    });
-    const latest = await this.webhookRepository
-      .createQueryBuilder('inout')
-      .where('inout.intra_id = :userId', { userId })
-      .orderBy('inout.seq', 'DESC')
-      .getOne();
-    let durationTime = 0; // ms
-    for (let i = 0; i < result.length; i++) {
-      if (result[i].inout === InOut.OUT && i === 0) {
-        // NOTE 이전까지 클러스터에 있었을 때
-        durationTime += result[i].timestamp.getTime() - start.getTime();
-      } else if (result[i].inout === InOut.IN && i === result.length - 1) {
-        // NOTE 이후까지 클러스터에 있을 때
-        // NOTE 상황에 따라 다른데... 고민 필요... 일단 보류
-      } else {
-        if (result[i].inout === InOut.OUT) {
-          durationTime +=
-            result[i].timestamp.getTime() - result[i - 1].timestamp.getTime();
-        }
-      }
-    }
+    const result = await this.getInOutByIdAndDate(userId, start, end);
+    const latest = await this.getLatestDataById(userId);
+    const durationTime = this.getAccumulationTime(result, start, end);
     return {
       userId,
       profile: 'test',
@@ -60,33 +102,9 @@ export class UsageService {
     this.logger.debug(
       `getPerWeek(userId: ${userId}, date: ${start.toString()} < ${date.toString()} < ${end.toString()})`,
     );
-    const result = await this.webhookRepository.findBy({
-      intra_id: userId,
-      timestamp: Between(start, end),
-    });
-    const latest = await this.webhookRepository
-      .createQueryBuilder('inout')
-      .where('inout.intra_id = :userId', { userId })
-      .orderBy('inout.seq', 'DESC')
-      .getOne();
-    let durationTime = 0; // ms
-    for (let i = 0; i < result.length; i++) {
-      if (result[i].inout === InOut.OUT && i === 0) {
-        // NOTE 이전까지 클러스터에 있었을 때
-        durationTime +=
-          result[i].timestamp.getTime() -
-          this.getStartOfDate(result[i].timestamp).getTime();
-      } else if (result[i].inout === InOut.IN && i === result.length - 1) {
-        // NOTE 이후까지 클러스터에 있을 때
-        // NOTE 상황에 따라 다른데... 고민 필요... 일단 보류
-      } else {
-        if (result[i].inout === InOut.OUT) {
-          durationTime +=
-            result[i].timestamp.getTime() - result[i - 1].timestamp.getTime();
-        }
-      }
-    }
-    console.log(latest);
+    const result = await this.getInOutByIdAndDate(userId, start, end);
+    const latest = await this.getLatestDataById(userId);
+    const durationTime = this.getAccumulationTime(result, start, end);
     this.logger.debug(`getPerWeek(durationTime: ${durationTime} ms)`);
     return {
       userId,
@@ -104,31 +122,9 @@ export class UsageService {
     this.logger.debug(
       `getPerMonth(userId: ${userId}, date: ${start.toString()} < ${date.toString()} < ${end.toString()})`,
     );
-    const result = await this.webhookRepository.findBy({
-      intra_id: userId,
-      timestamp: Between(start, end),
-    });
-    const latest = await this.webhookRepository
-      .createQueryBuilder('inout')
-      .where('inout.intra_id = :userId', { userId })
-      .orderBy('inout.seq', 'DESC')
-      .getOne();
-    let durationTime = 0; // ms
-    for (let i = 0; i < result.length; i++) {
-      if (result[i].inout === InOut.OUT && i === 0) {
-        // NOTE 이전까지 클러스터에 있었을 때
-        durationTime += result[i].timestamp.getTime() - start.getTime();
-      } else if (result[i].inout === InOut.IN && i === result.length - 1) {
-        // NOTE 이후까지 클러스터에 있을 때
-        // NOTE 상황에 따라 다른데... 고민 필요... 일단 보류
-      } else {
-        if (result[i].inout === InOut.OUT) {
-          durationTime +=
-            result[i].timestamp.getTime() - result[i - 1].timestamp.getTime();
-        }
-      }
-    }
-    console.log(latest);
+    const result = await this.getInOutByIdAndDate(userId, start, end);
+    const latest = await this.getLatestDataById(userId);
+    const durationTime = this.getAccumulationTime(result, start, end);
     this.logger.debug(`getPerMonth(durationTime: ${durationTime} ms)`);
     return {
       userId,
