@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Inout } from 'src/entities/inout.entity';
-import { UsageResponseDto } from './dto/usage-response.dto';
 import InOut from 'src/enums/inout.enum';
+import { UsageDto } from './dto/usage.dto';
 
 @Injectable()
 export class UsageService {
@@ -77,59 +77,47 @@ export class UsageService {
     return durationTime;
   }
 
-  async getPerDay(userId: string, date: Date): Promise<UsageResponseDto> {
+  async getPerDay(userId: string, date: Date): Promise<UsageDto> {
     const start = this.getStartOfDate(date);
     const end = this.getEndOfDate(date);
     this.logger.debug(
       `getPerDay(userId: ${userId}, date: ${start.toString()} < ${date.toString()} < ${end.toString()})`,
     );
     const result = await this.getInOutByIdAndDate(userId, start, end);
-    const latest = await this.getLatestDataById(userId);
     const durationTime = this.getAccumulationTime(result, start, end);
     return {
-      userId,
-      profile: 'test',
-      state: latest.inout,
       durationTime,
       fromDate: start,
       toDate: end,
     };
   }
 
-  async getPerWeek(userId: string, date: Date): Promise<UsageResponseDto> {
+  async getPerWeek(userId: string, date: Date): Promise<UsageDto> {
     const start = this.getWeekOfMonday(date);
     const end = this.getWeekOfSunday(date);
     this.logger.debug(
       `getPerWeek(userId: ${userId}, date: ${start.toString()} < ${date.toString()} < ${end.toString()})`,
     );
     const result = await this.getInOutByIdAndDate(userId, start, end);
-    const latest = await this.getLatestDataById(userId);
     const durationTime = this.getAccumulationTime(result, start, end);
     this.logger.debug(`getPerWeek(durationTime: ${durationTime} ms)`);
     return {
-      userId,
-      profile: 'test',
-      state: latest.inout,
       durationTime: durationTime / 1000,
       fromDate: start,
       toDate: end,
     };
   }
 
-  async getPerMonth(userId: string, date: Date): Promise<UsageResponseDto> {
+  async getPerMonth(userId: string, date: Date): Promise<UsageDto> {
     const start = this.getStartOfMonth(date);
     const end = this.getEndOfMonth(date);
     this.logger.debug(
       `getPerMonth(userId: ${userId}, date: ${start.toString()} < ${date.toString()} < ${end.toString()})`,
     );
     const result = await this.getInOutByIdAndDate(userId, start, end);
-    const latest = await this.getLatestDataById(userId);
     const durationTime = this.getAccumulationTime(result, start, end);
     this.logger.debug(`getPerMonth(durationTime: ${durationTime} ms)`);
     return {
-      userId,
-      profile: 'test',
-      state: latest.inout,
       durationTime: durationTime / 1000,
       fromDate: start,
       toDate: end,

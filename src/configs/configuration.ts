@@ -10,9 +10,9 @@ export default () => ({
   ftAuth: {
     clientid: process.env.CLIENT_ID,
     secret: process.env.CLIENT_SECRET,
-    clientsecret: process.env.CLIENT_CALLBACK,
+    callbackuri: process.env.CLIENT_CALLBACK,
   },
-  jwt: process.env.JWT_SECRET,
+  authkey: process.env.JWT_OR_SESSION_SECRET,
   log: process.env.LOG_DEBUG === 'true' ? true : false,
   url: {
     client: process.env.URL_CLIENT,
