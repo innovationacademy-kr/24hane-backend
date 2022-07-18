@@ -43,14 +43,16 @@ export class UsageController {
     @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
   ): Promise<UsageResponseDto> {
     this.logger.debug(`call getPerDay request by ${user.login}`);
-    const userId = user.login;
+    const userId = user.login + 'asdf';
     const date = new Date();
     const perday = await this.usageService.getPerDay(userId, date);
     const latest = await this.usageService.getLatestDataById(userId);
+    const latestIn = await this.usageService.getLatestInById(userId);
     return {
       userId: user.login,
       profile: user.image_url,
-      state: latest.inout,
+      state: latest ? latest.inout : null,
+      lastCheckInAt: latestIn ? latestIn.timestamp : null,
       ...perday,
     };
   }
@@ -81,10 +83,12 @@ export class UsageController {
     const date = new Date();
     const perweek = await this.usageService.getPerWeek(userId, date);
     const latest = await this.usageService.getLatestDataById(userId);
+    const latestIn = await this.usageService.getLatestInById(userId);
     return {
       userId: user.login,
       profile: user.image_url,
-      state: latest.inout,
+      state: latest ? latest.inout : null,
+      lastCheckInAt: latestIn ? latestIn.timestamp : null,
       ...perweek,
     };
   }
@@ -115,10 +119,12 @@ export class UsageController {
     const date = new Date();
     const permonth = await this.usageService.getPerMonth(userId, date);
     const latest = await this.usageService.getLatestDataById(userId);
+    const latestIn = await this.usageService.getLatestInById(userId);
     return {
       userId: user.login,
       profile: user.image_url,
-      state: latest.inout,
+      state: latest ? latest.inout : null,
+      lastCheckInAt: latestIn ? latestIn.timestamp : null,
       ...permonth,
     };
   }
