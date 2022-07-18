@@ -20,13 +20,11 @@ export class UsageResponseDto {
   })
   state: InOut;
 
-  /*
   @ApiProperty({
     description: '마지막 입실 시간',
     example: new Date(),
   })
   lastCheckInAt: Date;
-  */
 
   @ApiProperty({
     description: '클러스터 체류시간 (초 단위)',
