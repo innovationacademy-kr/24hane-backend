@@ -5,6 +5,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // for URI Versioning
+  app.enableVersioning();
+
   // for Swagger
   const swaggerConfig = new DocumentBuilder()
     .setTitle('체크인 API (version 3) 명세서')

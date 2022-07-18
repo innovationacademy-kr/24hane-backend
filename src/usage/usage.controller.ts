@@ -12,7 +12,10 @@ import { UsageResponseDto } from './dto/usage-response.dto';
 import { UsageService } from './usage.service';
 
 @ApiTags('체류 시간 산출')
-@Controller('usage')
+@Controller({
+  version: '3',
+  path: 'usage',
+})
 export class UsageController {
   private logger = new Logger(UsageController.name);
 
