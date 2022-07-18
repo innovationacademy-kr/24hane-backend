@@ -1,8 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
@@ -24,8 +22,7 @@ import { WebhookModule } from './webhook/webhook.module';
     UsageModule,
     AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, SessionMiddleware],
+  providers: [SessionMiddleware],
 })
 export class AppModule implements NestModule {
   constructor(public sessionMiddleware: SessionMiddleware) {}

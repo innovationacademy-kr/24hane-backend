@@ -5,17 +5,38 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CheckLogin } from 'src/auth/guard/check-login.guard';
 import { User } from 'src/auth/user.decorator';
 import { UsageResponseDto } from './dto/usage-response.dto';
 import { UsageService } from './usage.service';
 
-@Controller('usage')
+@ApiTags('체류 시간 산출')
+@Controller({
+  version: '3',
+  path: 'usage',
+})
 export class UsageController {
   private logger = new Logger(UsageController.name);
 
   constructor(private usageService: UsageService) {}
 
+  /**
+   * 특정 일에 대해 체류했던 시간을 조회합니다.
+   *
+   * @param user 로그인한 사용자 세션
+   * @returns UsageResponseDto
+   */
+  @ApiOperation({
+    summary: '일별 체류시간 조회',
+    description: '일별 체류시간을 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: UsageResponseDto,
+    description: '조회 성공',
+  })
+  @ApiResponse({ status: 401, description: '접근 권한 없음' })
   @Get('perday')
   @UseGuards(CheckLogin)
   async getPerDay(
@@ -34,6 +55,22 @@ export class UsageController {
     };
   }
 
+  /**
+   * 특정 주에 대해 체류했던 시간을 조회합니다.
+   *
+   * @param user 로그인한 사용자 세션
+   * @returns UsageResponseDto
+   */
+  @ApiOperation({
+    summary: '주별 체류시간 조회',
+    description: '주별 체류시간을 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: UsageResponseDto,
+    description: '조회 성공',
+  })
+  @ApiResponse({ status: 401, description: '접근 권한 없음' })
   @Get('perweek')
   @UseGuards(CheckLogin)
   async getPerWeek(
@@ -52,6 +89,22 @@ export class UsageController {
     };
   }
 
+  /**
+   * 특정 월에 대해 체류했던 시간을 조회합니다.
+   *
+   * @param user 로그인한 사용자 세션
+   * @returns UsageResponseDto
+   */
+  @ApiOperation({
+    summary: '월별 체류시간 조회',
+    description: '월별 체류시간을 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: UsageResponseDto,
+    description: '조회 성공',
+  })
+  @ApiResponse({ status: 401, description: '접근 권한 없음' })
   @Get('permonth')
   @UseGuards(CheckLogin)
   async getPerMonth(
