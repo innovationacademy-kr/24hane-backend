@@ -11,7 +11,10 @@ import { WebhookRequestDto } from './dto/webhook-request.dto';
 import { WebhookService } from './webhook.service';
 
 @ApiTags('웹훅 API')
-@Controller('webhook')
+@Controller({
+  version: '3',
+  path: 'webhook',
+})
 @UsePipes(new ValidationPipe({ transform: true }))
 export class WebhookController {
   private logger = new Logger(WebhookController.name);
