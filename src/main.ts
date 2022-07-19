@@ -5,6 +5,12 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // enable CORS for everything
+  app.enableCors({
+    origin: '*',
+    credentials: true,
+  });
+
   // for URI Versioning
   app.enableVersioning();
 
