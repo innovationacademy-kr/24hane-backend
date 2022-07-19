@@ -101,7 +101,7 @@ export class UsageService {
     const result = await this.getInOutByIdAndDate(userId, start, end);
     const durationTime = this.getAccumulationTime(result, start, end);
     return {
-      durationTime,
+      durationTime: durationTime / 1000,
       fromDate: start,
       toDate: end,
     };
