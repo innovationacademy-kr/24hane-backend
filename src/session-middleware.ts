@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as session from 'express-session';
 import * as passport from 'passport';
+import * as cookieParser from 'cookie-parser';
 
 type Middleware = (req: any, res: any, next: (error?: any) => void) => void;
 
@@ -10,6 +11,7 @@ export class SessionMiddleware {
   expressSession: Middleware;
   passportInit: Middleware;
   passportSession: Middleware;
+  cookieParser: Middleware;
 
   constructor(private configService: ConfigService) {
     this.expressSession = session({
@@ -19,5 +21,6 @@ export class SessionMiddleware {
     });
     this.passportInit = passport.initialize();
     this.passportSession = passport.session();
+    this.cookieParser = cookieParser();
   }
 }

@@ -33,6 +33,7 @@ export class AppModule implements NestModule {
         this.sessionMiddleware.expressSession,
         this.sessionMiddleware.passportInit,
         this.sessionMiddleware.passportSession,
+        this.sessionMiddleware.cookieParser,
       )
       .forRoutes('*');
   }
