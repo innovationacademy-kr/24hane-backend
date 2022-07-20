@@ -18,6 +18,10 @@ export class SessionMiddleware {
       secret: this.configService.get('authkey'),
       resave: false,
       saveUninitialized: true,
+      name: this.configService.get('cookie.auth'),
+      cookie: {
+        domain: this.configService.get('cookie.domain'),
+      },
     });
     this.passportInit = passport.initialize();
     this.passportSession = passport.session();

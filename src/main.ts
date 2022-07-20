@@ -6,10 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // enable CORS for everything
-  app.enableCors({
-    origin: '*',
-    credentials: true,
-  });
+  app.enableCors();
 
   // for URI Versioning
   app.enableVersioning();
