@@ -12,4 +12,33 @@
 - `src`
   - 소스 코드 및 단위 테스트가 저장된 디렉토리
 - `test`
-  - e2e 테스트 코드가 저장된 
+  - e2e 테스트 코드가 저장된 디렉토리
+
+# 앱 구동 및 실행
+해당 앱은 환경변수가 설정되어 있어야 정상적으로 실행됨을 보증합니다. 또한 MySQL Database와의 연결이 필요합니다.
+
+## 앱 실행
+
+```bash
+# 개발 모드로 앱 실행
+$> npm run start
+
+# 개발 모드로 앱 실행 (코드 변경 시 자동으로 앱 재시작)
+$> npm run start:dev
+
+# 배포 모드로 앱 실행
+$> npm run start:prod
+```
+
+## 테스트 (jest)
+
+```bash
+# 단위 테스트
+$> npm run test
+
+# e2e (일종의 통합) 테스트
+$> npm run test:e2e
+
+# 단위 테스트 커버리지 측정
+$> npm run test:cov
+```
