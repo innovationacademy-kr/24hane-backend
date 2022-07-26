@@ -2,10 +2,12 @@ import {
   Controller,
   Get,
   Logger,
+  ParseIntPipe,
+  Query,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CheckLogin } from 'src/auth/guard/check-login.guard';
 import { User } from 'src/auth/user.decorator';
 import { UsageResponseDto } from './dto/usage-response.dto';
@@ -37,20 +39,30 @@ export class UsageController {
     description: '조회 성공',
   })
   @ApiResponse({ status: 401, description: '접근 권한 없음' })
+  @ApiQuery({
+    name: 'date',
+    description: '기준 날짜 (Optional)',
+    required: false,
+  })
   @Get('perday')
   @UseGuards(CheckLogin)
   async getPerDay(
     @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+    @Query('date') dateq: string,
   ): Promise<UsageResponseDto> {
-    this.logger.debug(`call getPerDay request by ${user.login}`);
+    this.logger.debug(
+      `call getPerDay request by ${user.login}, date Query : ${dateq}`,
+    );
     const userId = user.login;
-    const date = new Date();
+    const date = dateq ? new Date(dateq) : new Date();
     const perday = await this.usageService.getPerDay(userId, date);
     const latest = await this.usageService.getLatestDataById(userId);
+    const latestIn = await this.usageService.getLatestInById(userId);
     return {
       userId: user.login,
       profile: user.image_url,
-      state: latest.inout,
+      state: latest ? latest.inout : null,
+      lastCheckInAt: latestIn ? latestIn.timestamp : null,
       ...perday,
     };
   }
@@ -71,20 +83,30 @@ export class UsageController {
     description: '조회 성공',
   })
   @ApiResponse({ status: 401, description: '접근 권한 없음' })
+  @ApiQuery({
+    name: 'date',
+    description: '기준 날짜 (Optional)',
+    required: false,
+  })
   @Get('perweek')
   @UseGuards(CheckLogin)
   async getPerWeek(
     @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+    @Query('date') dateq: string,
   ): Promise<UsageResponseDto> {
-    this.logger.debug(`call getPerWeek request by ${user.login}`);
+    this.logger.debug(
+      `call getPerWeek request by ${user.login}, date Query : ${dateq}`,
+    );
     const userId = user.login;
-    const date = new Date();
+    const date = dateq ? new Date(dateq) : new Date();
     const perweek = await this.usageService.getPerWeek(userId, date);
     const latest = await this.usageService.getLatestDataById(userId);
+    const latestIn = await this.usageService.getLatestInById(userId);
     return {
       userId: user.login,
       profile: user.image_url,
-      state: latest.inout,
+      state: latest ? latest.inout : null,
+      lastCheckInAt: latestIn ? latestIn.timestamp : null,
       ...perweek,
     };
   }
@@ -105,20 +127,30 @@ export class UsageController {
     description: '조회 성공',
   })
   @ApiResponse({ status: 401, description: '접근 권한 없음' })
+  @ApiQuery({
+    name: 'date',
+    description: '기준 날짜 (Optional)',
+    required: false,
+  })
   @Get('permonth')
   @UseGuards(CheckLogin)
   async getPerMonth(
     @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+    @Query('date') dateq: string,
   ): Promise<UsageResponseDto> {
-    this.logger.debug(`call getPerMonth request by ${user.login}`);
+    this.logger.debug(
+      `call getPerMonth request by ${user.login}, date Query : ${dateq}`,
+    );
     const userId = user.login;
-    const date = new Date();
+    const date = dateq ? new Date(dateq) : new Date();
     const permonth = await this.usageService.getPerMonth(userId, date);
     const latest = await this.usageService.getLatestDataById(userId);
+    const latestIn = await this.usageService.getLatestInById(userId);
     return {
       userId: user.login,
       profile: user.image_url,
-      state: latest.inout,
+      state: latest ? latest.inout : null,
+      lastCheckInAt: latestIn ? latestIn.timestamp : null,
       ...permonth,
     };
   }

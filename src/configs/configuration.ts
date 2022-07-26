@@ -22,6 +22,7 @@ export default () => ({
   },
   cookie: {
     auth: process.env.COOKIE_AUTH,
+    domain: process.env.COOKIE_DOMAIN,
   },
   WebhookIpFilter: process.env.WEBHOOK_IP_FILTER,
 });

@@ -1,5 +1,5 @@
-import { Controller, Get, Redirect, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FtGuard } from './42/guard/ft.guard';
 
 @ApiTags('인증/인가 관련')
@@ -8,6 +8,11 @@ export class Auth42Controller {
   @ApiOperation({
     summary: '42 계정 로그인 링크',
     description: '42 OAuth를 이용해 로그인을 진행합니다.',
+  })
+  @ApiQuery({
+    name: 'redirect',
+    description: '로그인 후 리다이렉트 할 URI',
+    required: true,
   })
   @Get('42')
   @UseGuards(FtGuard)
@@ -21,7 +26,7 @@ export class Auth42Controller {
   })
   @Get('callback/42')
   @UseGuards(FtGuard)
-  @Redirect('/', 302)
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  ftcallback() {}
+  ftcallback(@Req() req, @Res() res) {
+    res.status(302).redirect(req.cookies['redirect']);
+  }
 }

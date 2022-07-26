@@ -49,6 +49,21 @@ export class UsageService {
       .getOne();
   }
 
+  /**
+   * TODO 추후에 커스텀 리포지토리로 이동시킬 예정
+   * 유저가 가장 최근에 클러스터에 입장한 기록을 가져옴
+   *
+   * @param id 인트라 ID
+   * @returns InOut 엔티티
+   */
+  async getLatestInById(id: string): Promise<Inout> {
+    return this.webhookRepository
+      .createQueryBuilder('inout')
+      .where('inout.inout = :in AND inout.intra_id = :id', { in: InOut.IN, id })
+      .orderBy('inout.seq', 'DESC')
+      .getOne();
+  }
+
   getAccumulationTime(
     inout: Inout[],
     start: Date,
@@ -86,7 +101,7 @@ export class UsageService {
     const result = await this.getInOutByIdAndDate(userId, start, end);
     const durationTime = this.getAccumulationTime(result, start, end);
     return {
-      durationTime,
+      durationTime: durationTime / 1000,
       fromDate: start,
       toDate: end,
     };
