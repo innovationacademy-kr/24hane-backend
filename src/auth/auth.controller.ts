@@ -1,6 +1,7 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FtGuard } from './42/guard/ft.guard';
+import { CheckLogin } from './guard/check-login.guard';
 
 @ApiTags('인증/인가 관련')
 @Controller('user/login')
@@ -29,4 +30,15 @@ export class Auth42Controller {
   ftcallback(@Req() req, @Res() res) {
     res.status(302).redirect(req.cookies['redirect']);
   }
+
+  @ApiOperation({
+    summary: '로그인 여부 확인',
+    description: '현재 로그인이 되어있는지의 여부를 확인합니다.',
+  })
+  @ApiResponse({ status: 204, description: '로그인이 되어 있음' })
+  @ApiResponse({ status: 401, description: '로그인이 되어있지 않음' })
+  @Get('islogin')
+  @UseGuards(CheckLogin)
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async islogin() {}
 }
