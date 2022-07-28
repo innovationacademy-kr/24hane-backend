@@ -1,6 +1,7 @@
 import Cluster from 'src/enums/cluster.enum';
 import { Entity, Column, Index, PrimaryGeneratedColumn } from 'typeorm';
 
+// deprecated
 @Entity()
 export class Alive {
   @PrimaryGeneratedColumn()
