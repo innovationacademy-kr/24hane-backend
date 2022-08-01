@@ -10,9 +10,9 @@ jobs:
       - name: 리모트 쉘 접속
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_DEVELOP_HOST }}
+          username: ${{ secrets.EC2_DEVELOP_USER }}
+          key: ${{ secrets.EC2_DEVELOP_SSH_KEY }}
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
@@ -30,9 +30,9 @@ jobs:
       - name: 리모트 쉘 접속
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_DEPLOY_HOST }}
+          username: ${{ secrets.EC2_DEPLOY_USER }}
+          key: ${{ secrets.EC2_DEPLOY_SSH_KEY }}
           script: |
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
