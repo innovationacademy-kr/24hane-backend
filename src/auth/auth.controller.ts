@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FtGuard } from './42/guard/ft.guard';
 import { CheckLogin } from './guard/check-login.guard';
@@ -39,6 +39,7 @@ export class Auth42Controller {
   @ApiResponse({ status: 401, description: '로그인이 되어있지 않음' })
   @Get('islogin')
   @UseGuards(CheckLogin)
+  @HttpCode(204)
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async islogin() {}
 }
