@@ -1,19 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('PAIR_INFO')
 export class PairInfo {
-  @PrimaryGeneratedColumn({
-    name: 'IDX',
-  })
-  idx: number;
-
-  @Column({
+  @PrimaryColumn({
     name: 'IN_DEVICE',
     type: 'int',
   })
   in_device: number;
 
-  @Column({
+  @PrimaryColumn({
     name: 'OUT_DEVICE',
     type: 'int',
   })

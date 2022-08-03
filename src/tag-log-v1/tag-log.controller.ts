@@ -11,6 +11,7 @@ import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CheckLogin } from 'src/auth/guard/check-login.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
+import { TagLogService } from './tag-log.service';
 
 @ApiTags('체류 시간 산출')
 @Controller({
@@ -20,7 +21,7 @@ import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 export class TagLogController {
   private logger = new Logger(TagLogController.name);
 
-  //constructor(private usageService: UsageService) {}
+  constructor(private tagLogService: TagLogService) {}
 
   /**
    * 특정 일에 대해 체류했던 시간을 조회합니다.

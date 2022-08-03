@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { UserInfo } from './user-info.entity';
 
 @Entity('CARD_ISSUANCE')
 export class CardIssuance {
@@ -22,23 +29,18 @@ export class CardIssuance {
 
   @Column({
     name: 'START_USE',
-    type: 'timestamp',
+    type: 'datetime',
   })
-  start_use: number;
+  start_use: Date;
 
   @Column({
     name: 'END_USE',
-    type: 'timestamp',
+    type: 'datetime',
     nullable: true,
   })
-  end_use: number;
+  end_use: Date;
 
-  /*
-  @Column({
-    name: 'UPDATE_AT',
-    type: 'timestamp',
-    nullable: true,
-  })
-  update_at: number;
-  */
+  @ManyToOne(() => UserInfo, (userInfo) => userInfo.user_id)
+  @JoinColumn({ name: 'USER_ID' })
+  userInfo: UserInfo;
 }
