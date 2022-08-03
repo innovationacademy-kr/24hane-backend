@@ -1,13 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 @Entity('DEVICE_INFO')
 export class DeviceInfo {
-  @PrimaryGeneratedColumn({
-    name: 'IDX',
-  })
-  idx: number;
-
-  @Column({
+  @PrimaryColumn({
     name: 'DEVICE_ID',
     type: 'int',
   })

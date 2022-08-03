@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm';
+import { CardIssuance } from './card-issuance.entity';
 
 @Entity('USER_INFO')
-export class Inout {
+export class UserInfo {
   @PrimaryColumn({
     name: 'USER_ID',
     type: 'int',
@@ -20,4 +21,7 @@ export class Inout {
     length: 50,
   })
   login: string;
+
+  @OneToMany(() => CardIssuance, (cardIssuance) => cardIssuance.userInfo)
+  cardIssuance: CardIssuance[];
 }
