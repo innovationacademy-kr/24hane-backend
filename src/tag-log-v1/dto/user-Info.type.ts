@@ -1,8 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import InOut from 'src/enums/inout.enum';
-import { UserAccumulationType } from './subType/UserAccumulation.type';
 
-export class MainInfoType {
+export class UserInfoType {
   @ApiProperty({
     description: '42 로그인 ID',
     example: 'joopark',
@@ -21,17 +20,17 @@ export class MainInfoType {
   })
   isAdmin: boolean;
 
-  @ApiProperty({
-    description: '개포 체류인원',
+  @ApiPropertyOptional({
+    description: '개포 체류인원 (Optional)',
     example: 42,
   })
-  gaepo: number;
+  gaepo?: number;
 
-  @ApiProperty({
-    description: '서초 체류인원',
+  @ApiPropertyOptional({
+    description: '서초 체류인원 (Optional)',
     example: 42,
   })
-  seocho: number;
+  seocho?: number;
 
   @ApiProperty({
     description: '본인의 클러스터 체류 여부',
@@ -39,10 +38,4 @@ export class MainInfoType {
     example: 'OUT',
   })
   inoutState: InOut;
-
-  @ApiProperty({
-    description: '일/월별 누적 시간',
-    type: UserAccumulationType,
-  })
-  accumulation: UserAccumulationType;
 }
