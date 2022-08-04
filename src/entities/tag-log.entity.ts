@@ -8,17 +8,17 @@ export class TagLog {
   idx: number;
 
   @Column({
-    name: 'A_TIME',
-    type: 'timestamp',
+    name: 'TAG_AT',
+    type: 'datetime',
   })
-  a_time: number;
+  tag_at: Date;
 
   @Column({
-    name: 'TAG_AT',
+    name: 'CARD_ID',
     type: 'varchar',
     length: 15,
   })
-  tag_at: string;
+  card_id: string;
 
   @Column({
     name: 'DEVICE_ID',
