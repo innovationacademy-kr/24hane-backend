@@ -8,6 +8,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserSessionDto } from 'src/auth/42/user.session.dto';
 import { CheckLogin } from 'src/auth/guard/check-login.guard';
 import { User } from 'src/auth/user.decorator';
 import InOut from 'src/enums/inout.enum';
@@ -65,7 +66,7 @@ export class TagLogController {
   @Get('perday')
   @UseGuards(CheckLogin)
   async getPerDay(
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+    @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
     @Query('day', ParseIntPipe) day: number,
@@ -121,7 +122,7 @@ export class TagLogController {
   @Get('permonth')
   @UseGuards(CheckLogin)
   async getPerMonth(
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+    @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserInOutLogsType> {
@@ -162,14 +163,12 @@ export class TagLogController {
   })
   @Get('maininfo')
   @UseGuards(CheckLogin)
-  async getMainInfo(
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
-  ): Promise<UserInfoType> {
+  async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
     this.logger.debug(`call getMainInfo request by ${user.login}`);
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
-      isAdmin: user.isAdmin,
+      isAdmin: user.is_staff,
       inoutState: InOut.IN,
     };
     return result;
@@ -195,7 +194,7 @@ export class TagLogController {
   @Get('accumulationTimes')
   @UseGuards(CheckLogin)
   async getAccumulationTimes(
-    @User(new ValidationPipe({ validateCustomDecorators: true })) user: any,
+    @User() user: UserSessionDto,
   ): Promise<UserAccumulationType> {
     this.logger.debug(`call getAccumulationTimes request by ${user.login}`);
     const result: UserAccumulationType = {
