@@ -6,6 +6,8 @@ import { UserInfo } from 'src/entities/user-info.entity';
 import { PairInfoRepository } from './repository/mysql/pair-info.repository';
 import { TagLogRepository } from './repository/mysql/tag-log.repository';
 import { UserInfoRepository } from './repository/mysql/user-info.repository';
+import { TagLogAdminController } from './tag-log-admin.controller';
+import { TagLogAdminService } from './tag-log-admin.service';
 import { TagLogController } from './tag-log.controller';
 import { TagLogService } from './tag-log.service';
 
@@ -27,7 +29,13 @@ const pairInfoRepo = {
 @Module({
   imports: [TypeOrmModule.forFeature([TagLog, UserInfo, PairInfo])],
   exports: [TypeOrmModule],
-  controllers: [TagLogController],
-  providers: [userInfoRepo, tagLogRepo, pairInfoRepo, TagLogService],
+  controllers: [TagLogController, TagLogAdminController],
+  providers: [
+    userInfoRepo,
+    tagLogRepo,
+    pairInfoRepo,
+    TagLogService,
+    TagLogAdminService,
+  ],
 })
 export class TagLogModule {}

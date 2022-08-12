@@ -12,4 +12,12 @@ export interface IUserInfoRepository {
     vaildEnd?: Date,
     vaildStart?: Date,
   ): Promise<string[]>;
+
+  /**
+   * 사용자 로그인 ID로 사용자의 ID를 반환합니다. 존재하지 않는 로그인 ID면 -1을 리턴합니다
+   *
+   * @param login 로그인 ID
+   * @return 42 ID
+   */
+  findIdByLogin(login: string): Promise<number>;
 }

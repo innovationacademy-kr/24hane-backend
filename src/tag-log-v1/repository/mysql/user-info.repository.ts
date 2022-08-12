@@ -33,4 +33,16 @@ export class UserInfoRepository implements IUserInfoRepository {
     }
     return result.cardIssuance.map((c) => c.card_id);
   }
+
+  async findIdByLogin(login: string): Promise<number> {
+    const result = await this.userInfoRepository.findOne({
+      where: {
+        login,
+      },
+    });
+    if (!result) {
+      return -1;
+    }
+    return result.user_id;
+  }
 }
