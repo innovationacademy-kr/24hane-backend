@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
-import { SessionMiddleware } from './session-middleware';
+import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
 //import { UsageModule } from './usage/usage.module';
 //import { WebhookModule } from './webhook/webhook.module';
@@ -32,10 +32,11 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(
+        this.sessionMiddleware.cookieParser,
+        this.sessionMiddleware.sessionByQuery,
         this.sessionMiddleware.expressSession,
         this.sessionMiddleware.passportInit,
         this.sessionMiddleware.passportSession,
-        this.sessionMiddleware.cookieParser,
       )
       .forRoutes('*');
   }

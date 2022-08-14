@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
-
-type Middleware = (req: any, res: any, next: (error?: any) => void) => void;
+import { Middleware } from './middleware';
+import { SessionByQuery } from './session-by-query.middleware';
 
 @Injectable()
 export class SessionMiddleware {
@@ -12,13 +12,14 @@ export class SessionMiddleware {
   passportInit: Middleware;
   passportSession: Middleware;
   cookieParser: Middleware;
+  sessionByQuery: Middleware;
 
   constructor(private configService: ConfigService) {
     this.expressSession = session({
       secret: this.configService.get('authkey'),
       resave: false,
       saveUninitialized: true,
-      name: this.configService.get('cookie.auth'),
+      name: 'session',
       cookie: {
         domain: this.configService.get('cookie.domain'),
       },
@@ -26,5 +27,6 @@ export class SessionMiddleware {
     this.passportInit = passport.initialize();
     this.passportSession = passport.session();
     this.cookieParser = cookieParser();
+    this.sessionByQuery = SessionByQuery;
   }
 }
