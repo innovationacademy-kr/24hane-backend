@@ -74,17 +74,14 @@ export class TagLogController {
     this.logger.debug(
       `call getPerDay request by ${user.login} at ${year}-${month}-${day}`,
     );
-    const inOutLogs = [
-      {
-        inTimeStamp: 1658984564,
-        outTimeStamp: 1658984574,
-        durationSecond: 10,
-      },
-    ];
+
+    const date = new Date(`${year}-${month}-${day}`);
+
+    const results = await this.tagLogService.getPerDay(user.userId, date);
     return {
       login: user.login,
       profileImage: user.image_url,
-      inOutLogs,
+      inOutLogs: results,
     };
   }
 
@@ -129,17 +126,14 @@ export class TagLogController {
     this.logger.debug(
       `call getPerDay request by ${user.login} at ${year}-${month}`,
     );
-    const inOutLogs = [
-      {
-        inTimeStamp: 1658984564,
-        outTimeStamp: 1658984574,
-        durationSecond: 10,
-      },
-    ];
+
+    const date = new Date(`${year}-${month}`);
+
+    const results = await this.tagLogService.getPerMonth(user.userId, date);
     return {
       login: user.login,
       profileImage: user.image_url,
-      inOutLogs,
+      inOutLogs: results,
     };
   }
 
@@ -197,9 +191,22 @@ export class TagLogController {
     @User() user: UserSessionDto,
   ): Promise<UserAccumulationType> {
     this.logger.debug(`call getAccumulationTimes request by ${user.login}`);
+    const date = new Date();
+    const resultDay = await this.tagLogService.getPerDay(user.userId, date);
+    const resultMonth = await this.tagLogService.getPerMonth(user.userId, date);
+
+    const resultDaySum = resultDay.reduce(
+      (prev, result) => result.durationSecond + prev,
+      0,
+    );
+    const resultMonthSum = resultMonth.reduce(
+      (prev, result) => result.durationSecond + prev,
+      0,
+    );
+
     const result: UserAccumulationType = {
-      todayAccumationTime: 3600,
-      monthAccumationTime: 12800,
+      todayAccumationTime: resultDaySum,
+      monthAccumationTime: resultMonthSum,
     };
     return result;
   }
