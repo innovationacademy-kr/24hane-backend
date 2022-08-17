@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PairInfo } from 'src/entities/pair-info.entity';
 import { TagLog } from 'src/entities/tag-log.entity';
 import { UserInfo } from 'src/entities/user-info.entity';
+import { UtilsModule } from 'src/utils/utils.module';
 import { PairInfoRepository } from './repository/mysql/pair-info.repository';
 import { TagLogRepository } from './repository/mysql/tag-log.repository';
 import { UserInfoRepository } from './repository/mysql/user-info.repository';
@@ -27,7 +28,10 @@ const pairInfoRepo = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TagLog, UserInfo, PairInfo])],
+  imports: [
+    TypeOrmModule.forFeature([TagLog, UserInfo, PairInfo]),
+    UtilsModule,
+  ],
   exports: [TypeOrmModule],
   controllers: [TagLogController, TagLogAdminController],
   providers: [
