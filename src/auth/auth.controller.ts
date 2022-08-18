@@ -1,19 +1,23 @@
 import { Controller, Get, HttpCode, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GoogleApi } from 'src/utils/google-api.component';
 import { FtGuard } from './42/guard/ft.guard';
 import { CheckLogin } from './guard/check-login.guard';
+import { User } from './user.decorator';
 
 @ApiTags('인증/인가 관련')
 @Controller('user/login')
 export class Auth42Controller {
+  constructor(private googleApi: GoogleApi) {}
+
   @ApiOperation({
     summary: '42 계정 로그인 링크',
-    description: '42 OAuth를 이용해 로그인을 진행합니다.',
+    description:
+      '42 OAuth를 이용해 로그인을 진행합니다. 만약 redirect가 없다면 로그인 후 관리자 권한으로 토큰을 송부하는 것을 시도합니다.',
   })
   @ApiQuery({
     name: 'redirect',
     description: '로그인 후 리다이렉트 할 URI',
-    required: true,
   })
   @Get('42')
   @UseGuards(FtGuard)
@@ -27,8 +31,26 @@ export class Auth42Controller {
   })
   @Get('callback/42')
   @UseGuards(FtGuard)
-  ftcallback(@Req() req, @Res() res) {
-    res.status(302).redirect(req.cookies['redirect']);
+  async ftcallback(@Req() req, @Res() res, @User() user) {
+    if (req.cookies['redirect']) {
+      res.status(302).redirect(req.cookies['redirect']);
+    } else {
+      if (user && user.is_staff) {
+        /**
+         * doosoo님의 요청으로 관리자 권한으로 로그인을 할 때 생성된 쿠키를 구글 스프레드시트로 송부하게 해두었습니다.
+         */
+        const success = await this.googleApi.transportData(
+          req.cookies['session'],
+        );
+        if (success) {
+          res.status(200).json({ msg: 'ok' });
+        } else {
+          res.status(500).json({ msg: 'internal service error' });
+        }
+      } else {
+        res.status(401).json({ msg: 'unauthorized' });
+      }
+    }
   }
 
   @ApiOperation({
