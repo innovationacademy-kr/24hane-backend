@@ -5,13 +5,11 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserSessionDto } from 'src/auth/42/user.session.dto';
 import { CheckLogin } from 'src/auth/guard/check-login.guard';
 import { User } from 'src/auth/user.decorator';
-import InOut from 'src/enums/inout.enum';
 import { UserAccumulationType } from './dto/user-accumulation.type';
 import { UserInfoType } from './dto/user-Info.type';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
