@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { TagLog } from 'src/entities/tag-log.entity';
+import InOut from 'src/enums/inout.enum';
 import { DateCalculator } from 'src/utils/date-calculator.component';
 import { PairInfoDto } from './dto/pair-info.dto';
 import { InOutLogType } from './dto/subType/InOutLog.type';
@@ -223,5 +224,22 @@ export class TagLogService {
     const resultPairs = this.getPairsByTagLogs(tagLogs, pairs);
 
     return resultPairs;
+  }
+
+  async checkClusterById(userId: number): Promise<InOut> {
+    const cardIds = await this.userInfoRepository.findCardIds(
+      userId,
+      new Date('2019-01-01 00:00:00'),
+      new Date('9999-08-05 23:59:59'),
+    );
+    const last = await this.tagLogRepository.findLatestTagLog(cardIds);
+    const inCards = await this.pairInfoRepository.findInGates();
+
+    if (last === null) {
+      return InOut.OUT;
+    }
+    return inCards.find((card) => card === last.device_id) === undefined
+      ? InOut.OUT
+      : InOut.IN;
   }
 }

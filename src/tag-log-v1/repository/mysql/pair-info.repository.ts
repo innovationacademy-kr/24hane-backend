@@ -13,4 +13,14 @@ export class PairInfoRepository implements IPairInfoRepository {
   async findAll(): Promise<PairInfoDto[]> {
     return await this.pairInfoRepository.find();
   }
+
+  async findInGates(): Promise<number[]> {
+    const result = await this.pairInfoRepository.find();
+    return result.map((col) => col.in_device);
+  }
+
+  async findOutGates(): Promise<number[]> {
+    const result = await this.pairInfoRepository.find();
+    return result.map((col) => col.out_device);
+  }
 }

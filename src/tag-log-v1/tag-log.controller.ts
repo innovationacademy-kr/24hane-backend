@@ -159,11 +159,12 @@ export class TagLogController {
   @UseGuards(CheckLogin)
   async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
     this.logger.debug(`call getMainInfo request by ${user.login}`);
+    const inoutState = await this.tagLogService.checkClusterById(user.userId);
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
       isAdmin: user.is_staff,
-      inoutState: InOut.IN,
+      inoutState: inoutState,
     };
     return result;
   }
