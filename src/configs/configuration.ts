@@ -14,15 +14,10 @@ export default () => ({
   },
   authkey: process.env.JWT_OR_SESSION_SECRET,
   log: process.env.LOG_DEBUG === 'true' ? true : false,
-  url: {
-    client: process.env.URL_CLIENT,
-    client_old: process.env.URL_CLIENT_OLD,
-    admin: process.env.URL_ADMIN,
-    root_host: process.env.URL_ROOTHOST,
+  googleApi: {
+    email: process.env.GOOGLEAPI_SERVICE_ACCOUNT_EMAIL,
+    key: process.env.GOOGLEAPI_SERVICE_ACCOUNT_PRIVATE_KEY,
+    spreadsheetId: process.env.GOOGLEAPI_SHEET_ID,
+    range: process.env.GOOGLEAPI_SHEET_RANGE,
   },
-  cookie: {
-    auth: process.env.COOKIE_AUTH,
-    domain: process.env.COOKIE_DOMAIN,
-  },
-  WebhookIpFilter: process.env.WEBHOOK_IP_FILTER,
 });
