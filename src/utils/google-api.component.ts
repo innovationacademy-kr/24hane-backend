@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { google } from 'googleapis';
+import { sheets, auth } from '@googleapis/sheets';
 
 /**
  * doosoo 팀장님의 요청에 따라 Google API를 이용해서 Spread Sheet로 Data를 송부하기 위한 컴포넌트입니다.
@@ -20,15 +20,15 @@ export class GoogleApi {
     const envRange = this.configService.get<string>('googleApi.range');
     this.logger.log(envEmail, envKey, envSsid, envRange);
     try {
-      const auth = new google.auth.JWT({
+      const googleAuth = new auth.JWT({
         email: envEmail,
         key: envKey,
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
-      const sheet = google.sheets('v4');
+      const sheet = sheets('v4');
       await sheet.spreadsheets.values.append({
         spreadsheetId: envSsid,
-        auth,
+        auth: googleAuth,
         range: envRange,
         valueInputOption: 'RAW',
         requestBody: {
