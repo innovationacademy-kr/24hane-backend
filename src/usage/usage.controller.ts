@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Logger,
-  ParseIntPipe,
   Query,
   UseGuards,
   ValidationPipe,

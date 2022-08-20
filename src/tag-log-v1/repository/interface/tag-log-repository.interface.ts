@@ -9,4 +9,18 @@ export interface ITagLogRepository {
    * @param end 기간 끝
    */
   findTagLogs(cardIDs: string[], start: Date, end: Date): Promise<TagLogDto[]>;
+
+  /**
+   * 특정 card ID들에 대해 가장 최신의 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
+   *
+   * @param cardIDs 카드 ID 배열
+   */
+  findLatestTagLog(cardIDs: string[]): Promise<TagLogDto | null>;
+
+  /**
+   * 특정 card ID들에 대해 가장 오래된 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
+   *
+   * @param cardIDs 카드 ID 배열
+   */
+  findFirstTagLog(cardIDs: string[]): Promise<TagLogDto | null>;
 }

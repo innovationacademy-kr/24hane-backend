@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Inout } from 'src/entities/inout.entity';
 import { WebhookController } from './webhook.controller';

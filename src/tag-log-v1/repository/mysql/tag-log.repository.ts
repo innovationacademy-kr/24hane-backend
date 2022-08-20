@@ -26,4 +26,28 @@ export class TagLogRepository implements ITagLogRepository {
     });
     return result;
   }
+
+  async findLatestTagLog(cardIDs: string[]): Promise<TagLogDto | null> {
+    const result = await this.tagLogRepository.findOne({
+      where: {
+        card_id: In(cardIDs),
+      },
+      order: {
+        tag_at: 'DESC',
+      },
+    });
+    return result;
+  }
+
+  async findFirstTagLog(cardIDs: string[]): Promise<TagLogDto | null> {
+    const result = await this.tagLogRepository.findOne({
+      where: {
+        card_id: In(cardIDs),
+      },
+      order: {
+        tag_at: 'ASC',
+      },
+    });
+    return result;
+  }
 }
