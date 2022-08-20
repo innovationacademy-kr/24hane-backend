@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@googleapis/sheets": "^3.0.2",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^8.0.0",
@@ -32,7 +33,6 @@
     "class-validator": "^0.13.2",
     "cookie-parser": "^1.4.6",
     "express-session": "^1.17.3",
-    "googleapis": "^105.0.0",
     "mysql2": "^2.3.3",
     "passport": "^0.6.0",
     "passport-42": "^1.2.6",
