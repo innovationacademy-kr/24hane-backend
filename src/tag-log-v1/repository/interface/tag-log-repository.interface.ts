@@ -23,4 +23,20 @@ export interface ITagLogRepository {
    * @param cardIDs 카드 ID 배열
    */
   findFirstTagLog(cardIDs: string[]): Promise<TagLogDto | null>;
+
+  /**
+   * 특정 출입태그 바로 이전 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
+   *
+   * @param idx 출입태그 고유 ID
+   * @param cardIDs 카드 ID 배열
+   */
+  findPrevTagLog(cardIDs: string[], idx: number): Promise<TagLogDto | null>;
+
+  /**
+   * 특정 출입태그 바로 다음 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
+   *
+   * @param idx 출입태그 고유 ID
+   * @param cardIDs 카드 ID 배열
+   */
+  findNextTagLog(cardIDs: string[], idx: number): Promise<TagLogDto | null>;
 }
