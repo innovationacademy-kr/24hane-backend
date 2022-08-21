@@ -39,12 +39,59 @@ export class TagLogService {
     return this.userInfoRepository.findCardIds(userId, vaildEnd, vaildStart);
   }
 
-  async getTagLogs(cardIDs: string[]): Promise<TagLog[]> {
-    return this.tagLogRepository.findTagLogs(
-      cardIDs,
-      new Date('2022-07-31T16:02:32.000Z'),
-      new Date('2099-09-09'),
-    );
+  /**
+   * 카드 태그 로그에 대해 로그 맨 앞, 맨 뒤 원소가 잘려 있다면 앞, 뒤에 가상의 입출입 로그를 삽입합니다.
+   * 삽입하는 로그는 짝 여부에 관계없이 전후 원소를 삽입합니다.
+   * 짝 일치 여부 판단은 다른 로직에서 진행합니다.
+   *
+   * @param taglogs TagLogDto[]
+   * @return TagLogDto[]
+   */
+  async trimTagLogs(
+    taglogs: TagLogDto[],
+    cardIDs: string[],
+    start: Date,
+    end: Date,
+  ): Promise<TagLogDto[]> {
+    // 1. 맨 앞의 로그를 가져옴.
+    const firstLog = taglogs.at(0);
+    if (firstLog) {
+      // 2. 맨 앞의 로그 이전의 로그를 가져옴.
+      const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
+        cardIDs,
+        firstLog.idx,
+      );
+      // NOTE: tag log에 기록된 첫번째 로그가 퇴실인 경우 현재는 짝을 맞추지 않음.
+      if (beforeFirstLog !== null) {
+        const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
+        taglogs.unshift({
+          tag_at: virtualEnterTime,
+          device_id: beforeFirstLog.device_id,
+          idx: -1,
+          card_id: beforeFirstLog.card_id,
+        });
+      }
+    }
+    // 3. 맨 뒤의 로그를 가져옴.
+    const lastLog = taglogs.at(-1);
+    if (lastLog) {
+      // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
+      const beforelastLog = await this.tagLogRepository.findNextTagLog(
+        cardIDs,
+        lastLog.idx,
+      );
+      // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
+      if (beforelastLog !== null) {
+        const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
+        taglogs.push({
+          tag_at: virtualLeaveTime,
+          device_id: beforelastLog.device_id,
+          idx: -1,
+          card_id: beforelastLog.card_id,
+        });
+      }
+    }
+    return taglogs;
   }
 
   /**
@@ -189,7 +236,14 @@ export class TagLogService {
       tagEnd,
     );
 
-    const resultPairs = this.getPairsByTagLogs(tagLogs, pairs);
+    const trimmedTagLogs = await this.trimTagLogs(
+      tagLogs,
+      cardIds,
+      tagStart,
+      tagEnd,
+    );
+
+    const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
 
     return resultPairs;
   }
@@ -221,11 +275,24 @@ export class TagLogService {
       tagEnd,
     );
 
-    const resultPairs = this.getPairsByTagLogs(tagLogs, pairs);
+    const trimmedTagLogs = await this.trimTagLogs(
+      tagLogs,
+      cardIds,
+      tagStart,
+      tagEnd,
+    );
+
+    const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
 
     return resultPairs;
   }
 
+  /**
+   * 사용자가 클러스터에 체류중인지 확인합니다.
+   *
+   * @param userId 사용자 ID
+   * @returns InOut 열거형
+   */
   async checkClusterById(userId: number): Promise<InOut> {
     const cardIds = await this.userInfoRepository.findCardIds(
       userId,
