@@ -1,4 +1,12 @@
-import { Controller, Get, HttpCode, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Logger,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GoogleApi } from 'src/utils/google-api.component';
 import { FtGuard } from './42/guard/ft.guard';
@@ -8,6 +16,8 @@ import { User } from './user.decorator';
 @ApiTags('인증/인가 관련')
 @Controller('user/login')
 export class Auth42Controller {
+  private logger = new Logger(Auth42Controller.name);
+
   constructor(private googleApi: GoogleApi) {}
 
   @ApiOperation({
@@ -32,6 +42,7 @@ export class Auth42Controller {
   @Get('callback/42')
   @UseGuards(FtGuard)
   async ftcallback(@Req() req, @Res() res, @User() user) {
+    this.logger.log(`login callback : ${user.login}`);
     if (req.cookies['redirect']) {
       res.status(302).redirect(req.cookies['redirect']);
     } else {
@@ -51,6 +62,24 @@ export class Auth42Controller {
         res.status(401).json({ msg: 'unauthorized' });
       }
     }
+  }
+
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '로그아웃을 수행합니다.',
+  })
+  @ApiResponse({ status: 204, description: '로그아웃 성공' })
+  @ApiResponse({ status: 401, description: '로그인이 되어있지 않음' })
+  @Get('logout/42')
+  @UseGuards(CheckLogin)
+  @HttpCode(204)
+  logout(@Req() req: any, @User() user) {
+    this.logger.log(`logout : ${user.login}`);
+    req.logout((err) => {
+      if (err) {
+        this.logger.error(`logout error : ${err}`);
+      }
+    });
   }
 
   @ApiOperation({
