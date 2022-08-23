@@ -39,6 +39,22 @@ export class Auth42Controller {
     description:
       '42 OAuth를 이용해 로그인이 완료되면 해당 주소로 리다이렉트됩니다.',
   })
+  @ApiResponse({
+    status: 302,
+    description: 'redirect가 있을 경우 리다이렉트됩니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '정상적으로 구글시트에 토큰을 송부하였습니다.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '구글시트 라이브러리 오류로 토큰 송부에 실패하였습니다.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: '42 계정이 운영진 계정이 아닙니다.',
+  })
   @Get('callback/42')
   @UseGuards(FtGuard)
   async ftcallback(@Req() req, @Res() res, @User() user) {
