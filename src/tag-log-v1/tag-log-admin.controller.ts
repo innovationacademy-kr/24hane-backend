@@ -72,18 +72,10 @@ export class TagLogAdminController {
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
       });
     }
-    const results: UserAccumulationMonthType[] = [
-      {
-        id: 123445,
-        login: 'joopark',
-        monthAccumationTime: 123456,
-      },
-      {
-        id: 4321,
-        login: 'kkim',
-        monthAccumationTime: 578363,
-      },
-    ];
+    const results = await this.tagLogAdminService.getAccumulationInMonthByAll(
+      year,
+      month,
+    );
     return results;
   }
 
@@ -140,12 +132,13 @@ export class TagLogAdminController {
         message: '서버상에 존재하지 않는 login ID입니다.',
       });
     }
-    const results: UserAccumulationMonthType = {
+    const result = await this.tagLogAdminService.getAccumulationInMonthById(
       id,
       login,
-      monthAccumationTime: 123456,
-    };
-    return results;
+      year,
+      month,
+    );
+    return result;
   }
 
   /**
@@ -190,13 +183,7 @@ export class TagLogAdminController {
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
       });
     }
-    const arr = [];
-    for (let index = 1; index < 31; index++) {
-      arr.push(index);
-    }
-    const user1 = this.tagLogAdminService.genDayType(12345, 'joopark', arr);
-    const user2 = this.tagLogAdminService.genDayType(4321, 'kkim', arr);
-    const results: UserAccumulationDayType[] = [user1, user2];
+    const results = await this.tagLogAdminService.getPerDaysByAll(year, month);
     return results;
   }
 
@@ -253,11 +240,12 @@ export class TagLogAdminController {
         message: '서버상에 존재하지 않는 login ID입니다.',
       });
     }
-    const arr = [];
-    for (let index = 1; index < 31; index++) {
-      arr.push(index);
-    }
-    const result = this.tagLogAdminService.genDayType(id, login, arr);
+    const result = this.tagLogAdminService.getPerDaysById(
+      id,
+      login,
+      year,
+      month,
+    );
     return result;
   }
 }

@@ -2,6 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
 import { IUserInfoRepository } from '../interface/user-info-repository.interface';
 import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { IdLoginDto } from 'src/tag-log-v1/dto/id-login.dto';
 
 export class UserInfoRepository implements IUserInfoRepository {
   constructor(
@@ -44,5 +45,21 @@ export class UserInfoRepository implements IUserInfoRepository {
       return -1;
     }
     return result.user_id;
+  }
+
+  async getAllIds(admin?: boolean): Promise<IdLoginDto[]> {
+    let obj = undefined;
+    if (admin) {
+      obj = {
+        is_admin: admin,
+      };
+    }
+    const result = await this.userInfoRepository.find({
+      where: obj,
+    });
+    return result.map((r) => ({
+      user_id: r.user_id,
+      login: r.login,
+    }));
   }
 }

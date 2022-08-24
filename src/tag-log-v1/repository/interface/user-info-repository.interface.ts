@@ -1,3 +1,5 @@
+import { IdLoginDto } from 'src/tag-log-v1/dto/id-login.dto';
+
 export interface IUserInfoRepository {
   /**
    * 사용자 ID로 사용자에 대한 카드 ID 목록을 반환합니다.
@@ -20,4 +22,11 @@ export interface IUserInfoRepository {
    * @return 42 ID
    */
   findIdByLogin(login: string): Promise<number>;
+
+  /**
+   * DB에 저장된 모든 ID를 리턴합니다.
+   *
+   * @param admin true: 관리자만, false: 카뎃만, undefined: 모두
+   */
+  getAllIds(admin?: boolean): Promise<IdLoginDto[]>;
 }

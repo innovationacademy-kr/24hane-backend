@@ -1,6 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { DateCalculator } from 'src/utils/date-calculator.component';
 import { UserAccumulationDayType } from './dto/admin/user-accumulation-day.type';
+import { UserAccumulationMonthType } from './dto/admin/user-accumulation-month.type';
 import { IUserInfoRepository } from './repository/interface/user-info-repository.interface';
+import { TagLogService } from './tag-log.service';
 
 @Injectable()
 export class TagLogAdminService {
@@ -9,6 +12,8 @@ export class TagLogAdminService {
   constructor(
     @Inject('IUserInfoRepository')
     private userInfoRepository: IUserInfoRepository,
+    private tagLogService: TagLogService,
+    private dateCalculator: DateCalculator,
   ) {}
 
   genDayType(
@@ -55,5 +60,103 @@ export class TagLogAdminService {
 
   async findIdByLogin(login: string): Promise<number> {
     return this.userInfoRepository.findIdByLogin(login);
+  }
+
+  /**
+   * 42 id와 로그인 id 정보를 통해 특정 년월에 클러스터에 체류한 시간을 구합니다.
+   *
+   * @param id
+   * @param login
+   * @param year
+   * @param month
+   * @returns UserAccumulationDayType
+   */
+  async getPerDaysById(
+    id: number,
+    login: string,
+    year: number,
+    month: number,
+  ): Promise<UserAccumulationDayType> {
+    const date = new Date(`${year}-${month}`);
+    const resultMonth = await this.tagLogService.getPerMonth(id, date);
+    const dayCount = this.dateCalculator.getDaysInMonth(year, month);
+    const dayArr = Array.from({ length: dayCount }, () => 0);
+    for (const log of resultMonth) {
+      const date = new Date(log.inTimeStamp * 1000);
+      const day = date.getDate();
+      dayArr[day - 1] += log.durationSecond;
+    }
+    return this.genDayType(id, login, dayArr);
+  }
+
+  /**
+   * 42 id와 로그인 id 정보를 통해 특정 년월에 클러스터에 체류한 누적시간을 구합니다.
+   *
+   * @param id
+   * @param login
+   * @param year
+   * @param month
+   * @returns UserAccumulationMonthType
+   */
+  async getAccumulationInMonthById(
+    id: number,
+    login: string,
+    year: number,
+    month: number,
+  ): Promise<UserAccumulationMonthType> {
+    const date = new Date(`${year}-${month}`);
+    const resultMonth = await this.tagLogService.getPerMonth(id, date);
+    const monthAccumationTime = resultMonth.reduce(
+      (prev, result) => result.durationSecond + prev,
+      0,
+    );
+    return {
+      id,
+      login,
+      monthAccumationTime,
+    };
+  }
+
+  /**
+   * DB에 저장된 모든 카뎃의 월의 일별 체류시간을 구합니다.
+   *
+   * @param year
+   * @param month
+   * @returns UserAccumulationDayType[]
+   */
+  async getPerDaysByAll(
+    year: number,
+    month: number,
+  ): Promise<UserAccumulationDayType[]> {
+    const cadets = await this.userInfoRepository.getAllIds(false);
+    return await Promise.all(
+      cadets.map((cadet) =>
+        this.getPerDaysById(cadet.user_id, cadet.login, year, month),
+      ),
+    );
+  }
+
+  /**
+   * DB에 저장된 모든 카뎃의 월 누적 체류시간을 구합니다.
+   *
+   * @param year
+   * @param month
+   * @returns UserAccumulationMonthType[]
+   */
+  async getAccumulationInMonthByAll(
+    year: number,
+    month: number,
+  ): Promise<UserAccumulationMonthType[]> {
+    const cadets = await this.userInfoRepository.getAllIds(false);
+    return await Promise.all(
+      cadets.map((cadet) =>
+        this.getAccumulationInMonthById(
+          cadet.user_id,
+          cadet.login,
+          year,
+          month,
+        ),
+      ),
+    );
   }
 }

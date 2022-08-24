@@ -102,4 +102,16 @@ export class DateCalculator {
   toTimestamp(date: Date): number {
     return Math.floor(date.getTime() / 1000);
   }
+
+  /**
+   * 주어진 년, 월에 대해 일의 개수를 구합니다.
+   *
+   * @param year 년
+   * @param month 월
+   * @return days 해당 달의 일의 개수
+   */
+  getDaysInMonth(year: number, month: number): number {
+    const date = new Date(year, month, 0);
+    return date.getDate();
+  }
 }
