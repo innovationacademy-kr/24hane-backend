@@ -33,11 +33,14 @@ export class AppModule implements NestModule {
     consumer
       .apply(
         this.sessionMiddleware.cookieParser,
-        this.sessionMiddleware.sessionByQuery,
         this.sessionMiddleware.expressSession,
         this.sessionMiddleware.passportInit,
         this.sessionMiddleware.passportSession,
       )
       .forRoutes('*');
+    // 관리자 API에만 세션을 쿼리로 삽입하는 미들웨어 적용
+    consumer
+      .apply(this.sessionMiddleware.sessionByQuery)
+      .forRoutes('*/admin/*');
   }
 }
