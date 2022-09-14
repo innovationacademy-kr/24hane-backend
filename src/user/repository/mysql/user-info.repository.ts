@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
 import { IUserInfoRepository } from '../interface/user-info-repository.interface';
 import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
-import { IdLoginDto } from 'src/tag-log-v1/dto/id-login.dto';
+import { IdLoginDto } from 'src/user/dto/id-login.dto';
 
 export class UserInfoRepository implements IUserInfoRepository {
   constructor(
