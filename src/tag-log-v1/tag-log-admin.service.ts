@@ -1,8 +1,8 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { UserService } from 'src/user/user.service';
 import { DateCalculator } from 'src/utils/date-calculator.component';
 import { UserAccumulationDayType } from './dto/admin/user-accumulation-day.type';
 import { UserAccumulationMonthType } from './dto/admin/user-accumulation-month.type';
-import { IUserInfoRepository } from './repository/interface/user-info-repository.interface';
 import { TagLogService } from './tag-log.service';
 
 @Injectable()
@@ -10,8 +10,7 @@ export class TagLogAdminService {
   private logger = new Logger(TagLogAdminService.name);
 
   constructor(
-    @Inject('IUserInfoRepository')
-    private userInfoRepository: IUserInfoRepository,
+    private userService: UserService,
     private tagLogService: TagLogService,
     private dateCalculator: DateCalculator,
   ) {}
@@ -59,7 +58,7 @@ export class TagLogAdminService {
   }
 
   async findIdByLogin(login: string): Promise<number> {
-    return this.userInfoRepository.findIdByLogin(login);
+    return this.userService.findIdByLogin(login);
   }
 
   /**
@@ -128,7 +127,7 @@ export class TagLogAdminService {
     year: number,
     month: number,
   ): Promise<UserAccumulationDayType[]> {
-    const cadets = await this.userInfoRepository.getAllIds(false);
+    const cadets = await this.userService.getAllIds(false);
     return await Promise.all(
       cadets.map((cadet) =>
         this.getPerDaysById(cadet.user_id, cadet.login, year, month),
@@ -147,7 +146,7 @@ export class TagLogAdminService {
     year: number,
     month: number,
   ): Promise<UserAccumulationMonthType[]> {
-    const cadets = await this.userInfoRepository.getAllIds(false);
+    const cadets = await this.userService.getAllIds(false);
     return await Promise.all(
       cadets.map((cadet) =>
         this.getAccumulationInMonthById(
