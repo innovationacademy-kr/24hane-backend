@@ -1,4 +1,4 @@
-import { IdLoginDto } from 'src/tag-log-v1/dto/id-login.dto';
+import { IdLoginDto } from 'src/user/dto/id-login.dto';
 
 export interface IUserInfoRepository {
   /**

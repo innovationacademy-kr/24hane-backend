@@ -6,6 +6,7 @@ import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
+import { UserModule } from './user/user.module';
 //import { UsageModule } from './usage/usage.module';
 //import { WebhookModule } from './webhook/webhook.module';
 
@@ -23,6 +24,7 @@ import { TagLogModule } from './tag-log-v1/tag-log.module';
     //UsageModule, -> deprecated
     AuthModule,
     TagLogModule,
+    UserModule,
   ],
   providers: [SessionMiddleware],
 })

@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { TagLog } from 'src/entities/tag-log.entity';
 import InOut from 'src/enums/inout.enum';
 import { DateCalculator } from 'src/utils/date-calculator.component';
 import { PairInfoDto } from './dto/pair-info.dto';
@@ -7,15 +6,14 @@ import { InOutLogType } from './dto/subType/InOutLog.type';
 import { TagLogDto } from './dto/tag-log.dto';
 import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
-import { IUserInfoRepository } from './repository/interface/user-info-repository.interface';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class TagLogService {
   private logger = new Logger(TagLogService.name);
 
   constructor(
-    @Inject('IUserInfoRepository')
-    private userInfoRepository: IUserInfoRepository,
+    private userService: UserService,
     @Inject('ITagLogRepository')
     private tagLogRepository: ITagLogRepository,
     @Inject('IPairInfoRepository')
@@ -36,7 +34,7 @@ export class TagLogService {
     vaildEnd?: Date,
     vaildStart?: Date,
   ): Promise<string[]> {
-    return this.userInfoRepository.findCardIds(userId, vaildEnd, vaildStart);
+    return this.userService.findCardIds(userId, vaildEnd, vaildStart);
   }
 
   /**
@@ -224,7 +222,7 @@ export class TagLogService {
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const cardIds = await this.userInfoRepository.findCardIds(
+    const cardIds = await this.userService.findCardIds(
       userId,
       cardStart,
       cardEnd,
@@ -263,7 +261,7 @@ export class TagLogService {
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const cardIds = await this.userInfoRepository.findCardIds(
+    const cardIds = await this.userService.findCardIds(
       userId,
       cardStart,
       cardEnd,
@@ -294,7 +292,7 @@ export class TagLogService {
    * @returns InOut 열거형
    */
   async checkClusterById(userId: number): Promise<InOut> {
-    const cardIds = await this.userInfoRepository.findCardIds(
+    const cardIds = await this.userService.findCardIds(
       userId,
       new Date('2019-01-01 00:00:00'),
       new Date('9999-08-05 23:59:59'),
