@@ -7,6 +7,7 @@ import { TagLogDto } from './dto/tag-log.dto';
 import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
 import { UserService } from 'src/user/user.service';
+import { InOutDto } from './dto/inout.dto';
 
 @Injectable()
 export class TagLogService {
@@ -289,9 +290,9 @@ export class TagLogService {
    * 사용자가 클러스터에 체류중인지 확인합니다.
    *
    * @param userId 사용자 ID
-   * @returns InOut 열거형
+   * @returns InOutDto
    */
-  async checkClusterById(userId: number): Promise<InOut> {
+  async checkClusterById(userId: number): Promise<InOutDto> {
     const cardIds = await this.userService.findCardIds(
       userId,
       new Date('2019-01-01 00:00:00'),
@@ -301,10 +302,20 @@ export class TagLogService {
     const inCards = await this.pairInfoRepository.findInGates();
 
     if (last === null) {
-      return InOut.OUT;
+      return {
+        log: null,
+        inout: InOut.OUT,
+      };
     }
-    return inCards.find((card) => card === last.device_id) === undefined
-      ? InOut.OUT
-      : InOut.IN;
+
+    const inout =
+      inCards.find((card) => card === last.device_id) === undefined
+        ? InOut.OUT
+        : InOut.IN;
+
+    return {
+      log: last.tag_at,
+      inout: inout,
+    };
   }
 }

@@ -38,4 +38,10 @@ export class UserInfoType {
     example: 'OUT',
   })
   inoutState: InOut;
+
+  @ApiProperty({
+    description: '가장 최근에 태깅한 기록 (태깅한 기록이 없다면 null)',
+    example: null,
+  })
+  tagAt: Date;
 }

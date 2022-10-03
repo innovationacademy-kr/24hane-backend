@@ -162,7 +162,8 @@ export class TagLogController {
       login: user.login,
       profileImage: user.image_url,
       isAdmin: user.is_staff,
-      inoutState: inoutState,
+      inoutState: inoutState.inout,
+      tagAt: inoutState.log,
     };
     return result;
   }
