@@ -25,18 +25,18 @@ export interface ITagLogRepository {
   findFirstTagLog(cardIDs: string[]): Promise<TagLogDto | null>;
 
   /**
-   * 특정 출입태그 바로 이전 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
+   * 특정 출입태그 시간의 바로 이전 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
    *
-   * @param idx 출입태그 고유 ID
+   * @param date 출입태그 시간
    * @param cardIDs 카드 ID 배열
    */
-  findPrevTagLog(cardIDs: string[], idx: number): Promise<TagLogDto | null>;
+  findPrevTagLog(cardIDs: string[], date: Date): Promise<TagLogDto | null>;
 
   /**
-   * 특정 출입태그 바로 다음 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
+   * 특정 출입태그 시간의 바로 다음 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
    *
-   * @param idx 출입태그 고유 ID
+   * @param date 출입태그 시간
    * @param cardIDs 카드 ID 배열
    */
-  findNextTagLog(cardIDs: string[], idx: number): Promise<TagLogDto | null>;
+  findNextTagLog(cardIDs: string[], date: Date): Promise<TagLogDto | null>;
 }
