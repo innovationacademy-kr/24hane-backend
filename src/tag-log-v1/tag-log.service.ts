@@ -58,7 +58,7 @@ export class TagLogService {
       // 2. 맨 앞의 로그 이전의 로그를 가져옴.
       const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
         cardIDs,
-        firstLog.idx,
+        firstLog.tag_at,
       );
       // NOTE: tag log에 기록된 첫번째 로그가 퇴실인 경우 현재는 짝을 맞추지 않음.
       if (beforeFirstLog !== null) {
@@ -77,7 +77,7 @@ export class TagLogService {
       // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
       const beforelastLog = await this.tagLogRepository.findNextTagLog(
         cardIDs,
-        lastLog.idx,
+        lastLog.tag_at,
       );
       // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
       if (beforelastLog !== null) {
@@ -235,8 +235,12 @@ export class TagLogService {
       tagEnd,
     );
 
+    const sortedTagLogs = tagLogs.sort((a, b) =>
+      a.tag_at > b.tag_at ? 1 : -1,
+    );
+
     const trimmedTagLogs = await this.trimTagLogs(
-      tagLogs,
+      sortedTagLogs,
       cardIds,
       tagStart,
       tagEnd,
@@ -274,8 +278,12 @@ export class TagLogService {
       tagEnd,
     );
 
+    const sortedTagLogs = tagLogs.sort((a, b) =>
+      a.tag_at > b.tag_at ? 1 : -1,
+    );
+
     const trimmedTagLogs = await this.trimTagLogs(
-      tagLogs,
+      sortedTagLogs,
       cardIds,
       tagStart,
       tagEnd,
