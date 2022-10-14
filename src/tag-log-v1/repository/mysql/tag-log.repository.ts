@@ -53,12 +53,12 @@ export class TagLogRepository implements ITagLogRepository {
 
   async findPrevTagLog(
     cardIDs: string[],
-    idx: number,
+    date: Date,
   ): Promise<TagLogDto | null> {
     const result = await this.tagLogRepository.findOne({
       where: {
         card_id: In(cardIDs),
-        idx: LessThan(idx),
+        tag_at: LessThan(date),
       },
       order: {
         idx: 'DESC',
@@ -69,12 +69,12 @@ export class TagLogRepository implements ITagLogRepository {
 
   async findNextTagLog(
     cardIDs: string[],
-    idx: number,
+    date: Date,
   ): Promise<TagLogDto | null> {
     const result = await this.tagLogRepository.findOne({
       where: {
         card_id: In(cardIDs),
-        idx: MoreThan(idx),
+        tag_at: MoreThan(date),
       },
       order: {
         idx: 'ASC',
