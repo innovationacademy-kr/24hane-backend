@@ -5,6 +5,7 @@ import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import { Middleware } from './middleware';
 import { SessionByQuery } from './session-by-query.middleware';
+import { SetRedirectMiddleware } from './set-redirect.middleware';
 
 @Injectable()
 export class SessionMiddleware {
@@ -13,6 +14,7 @@ export class SessionMiddleware {
   passportSession: Middleware;
   cookieParser: Middleware;
   sessionByQuery: Middleware;
+  SetRedirectMiddleware: Middleware;
 
   constructor(private configService: ConfigService) {
     this.expressSession = session({
@@ -28,5 +30,6 @@ export class SessionMiddleware {
     this.passportSession = passport.session();
     this.cookieParser = cookieParser();
     this.sessionByQuery = SessionByQuery;
+    this.SetRedirectMiddleware = SetRedirectMiddleware;
   }
 }
