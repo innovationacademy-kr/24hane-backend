@@ -8,8 +8,6 @@ import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogAdminController } from './tag-log-v1/tag-log-admin.controller';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
 import { UserModule } from './user/user.module';
-//import { UsageModule } from './usage/usage.module';
-//import { WebhookModule } from './webhook/webhook.module';
 
 @Module({
   imports: [
@@ -21,8 +19,6 @@ import { UserModule } from './user/user.module';
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
     }),
-    //WebhookModule, -> deprecated
-    //UsageModule, -> deprecated
     AuthModule,
     TagLogModule,
     UserModule,
