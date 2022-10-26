@@ -43,8 +43,7 @@ export class FtOAuthStrategy extends PassportStrategy(Strategy, '42-oauth2') {
       email: profile.email,
       login: profile.login,
       image_url: profile.image_url,
-      //is_staff: profile.is_staff,
-      is_staff: true,
+      is_staff: profile.is_staff,
     };
     await this.authRepository.addUserIfNotExists(user);
     cb(null, user);
