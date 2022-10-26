@@ -239,8 +239,11 @@ export class TagLogService {
       a.tag_at > b.tag_at ? 1 : -1,
     );
 
+    // FIXME: 임시 조치임
+    const filteredTagLogs = sortedTagLogs.filter((v) => v.device_id !== 35);
+
     const trimmedTagLogs = await this.trimTagLogs(
-      sortedTagLogs,
+      filteredTagLogs,
       cardIds,
       tagStart,
       tagEnd,
@@ -282,8 +285,11 @@ export class TagLogService {
       a.tag_at > b.tag_at ? 1 : -1,
     );
 
+    // FIXME: 임시 조치임
+    const filteredTagLogs = sortedTagLogs.filter((v) => v.device_id !== 35);
+
     const trimmedTagLogs = await this.trimTagLogs(
-      sortedTagLogs,
+      filteredTagLogs,
       cardIds,
       tagStart,
       tagEnd,
