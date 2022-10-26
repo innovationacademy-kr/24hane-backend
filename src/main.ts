@@ -20,7 +20,8 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('체크인 API (version 3) 명세서')
     .setDescription('체크인 API (version 3) 명세입니다.')
-    .setVersion('0.0.1')
+    .setVersion('3.1.0')
+    .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, swaggerDocument);

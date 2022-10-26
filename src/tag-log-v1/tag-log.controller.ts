@@ -6,20 +6,28 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserSessionDto } from 'src/auth/42/user.session.dto';
-import { CheckLogin } from 'src/auth/guard/check-login.guard';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from 'src/auth/user.decorator';
+import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { UserAccumulationType } from './dto/user-accumulation.type';
 import { UserInfoType } from './dto/user-Info.type';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { TagLogService } from './tag-log.service';
+import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 
 @ApiTags('체류 시간 산출')
 @Controller({
   version: '1',
   path: 'tag-log',
 })
+@ApiBearerAuth()
+@UseGuards(UserAuthGuard)
 export class TagLogController {
   private logger = new Logger(TagLogController.name);
 
@@ -62,7 +70,6 @@ export class TagLogController {
     required: true,
   })
   @Get('perday')
-  @UseGuards(CheckLogin)
   async getPerDay(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
@@ -75,7 +82,7 @@ export class TagLogController {
 
     const date = new Date(`${year}-${month}-${day}`);
 
-    const results = await this.tagLogService.getPerDay(user.userId, date);
+    const results = await this.tagLogService.getPerDay(user.user_id, date);
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -115,7 +122,6 @@ export class TagLogController {
     required: true,
   })
   @Get('permonth')
-  @UseGuards(CheckLogin)
   async getPerMonth(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
@@ -127,7 +133,7 @@ export class TagLogController {
 
     const date = new Date(`${year}-${month}`);
 
-    const results = await this.tagLogService.getPerMonth(user.userId, date);
+    const results = await this.tagLogService.getPerMonth(user.user_id, date);
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -154,10 +160,9 @@ export class TagLogController {
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
   @Get('maininfo')
-  @UseGuards(CheckLogin)
   async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
     this.logger.debug(`call getMainInfo request by ${user.login}`);
-    const inoutState = await this.tagLogService.checkClusterById(user.userId);
+    const inoutState = await this.tagLogService.checkClusterById(user.user_id);
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
@@ -186,14 +191,16 @@ export class TagLogController {
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
   @Get('accumulationTimes')
-  @UseGuards(CheckLogin)
   async getAccumulationTimes(
     @User() user: UserSessionDto,
   ): Promise<UserAccumulationType> {
     this.logger.debug(`call getAccumulationTimes request by ${user.login}`);
     const date = new Date();
-    const resultDay = await this.tagLogService.getPerDay(user.userId, date);
-    const resultMonth = await this.tagLogService.getPerMonth(user.userId, date);
+    const resultDay = await this.tagLogService.getPerDay(user.user_id, date);
+    const resultMonth = await this.tagLogService.getPerMonth(
+      user.user_id,
+      date,
+    );
 
     const resultDaySum = resultDay.reduce(
       (prev, result) => result.durationSecond + prev,

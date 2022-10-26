@@ -12,7 +12,10 @@ export default () => ({
     secret: process.env.CLIENT_SECRET,
     callbackuri: process.env.CLIENT_CALLBACK,
   },
-  authkey: process.env.JWT_OR_SESSION_SECRET,
+  jwt: {
+    secret: process.env.JWT_OR_SESSION_SECRET,
+    expiresIn: process.env.JWT_EXPIREIN,
+  },
   log: process.env.LOG_DEBUG === 'true' ? true : false,
   googleApi: {
     email: process.env.GOOGLEAPI_SERVICE_ACCOUNT_EMAIL,

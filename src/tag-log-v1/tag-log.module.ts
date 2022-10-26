@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from 'src/auth/auth.module';
 import { PairInfo } from 'src/entities/pair-info.entity';
 import { TagLog } from 'src/entities/tag-log.entity';
 import { UserModule } from 'src/user/user.module';
@@ -23,6 +24,7 @@ const pairInfoRepo = {
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([TagLog, PairInfo]),
     UtilsModule,
     UserModule,
