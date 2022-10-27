@@ -10,8 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 
 /**
- * (사전에 인증받았다고 가정한) 사용자 정보를 이용해 JWT 토큰을 발급하여 쿠키에 삽입합니다.
- * passport-jwt와는 독립적인 Guard입니다.
+ * 사용자 정보를 이용해 JWT 토큰을 발급하여 쿠키에 삽입하는 가드입니다.
  */
 @Injectable()
 export class JWTSignGuard implements CanActivate {
@@ -34,7 +33,7 @@ export class JWTSignGuard implements CanActivate {
       return false;
     }
     const token = this.jwtService.sign(user);
-    response.cookie('accessToken', token);
+    response.cookie('accessToken', token, { httpOnly: false });
     return true;
   }
 }
