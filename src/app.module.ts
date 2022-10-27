@@ -32,6 +32,6 @@ export class AppModule implements NestModule {
     // 쿼리의 리다이렉트 경로를 쿠키로 설정하는 미들웨어
     consumer
       .apply(this.sessionMiddleware.SetRedirectMiddleware)
-      .forRoutes('*/user/login/42');
+      .forRoutes('/user/login/42');
   }
 }
