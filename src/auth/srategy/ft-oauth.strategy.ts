@@ -34,7 +34,8 @@ export class FtOAuthStrategy extends PassportStrategy(Strategy, '42-oauth2') {
   }
 
   /**
-   * 42 OAuth 이후 이 정보를 서버 내에서 검증할 때 사용되는 함수이지만 현재는 세션에 프로필을 저장하는 데 사용합니다.
+   * 42 OAuth 이후 이 정보를 서버 내에서 검증할 때 사용되는 함수이지만
+   * 별도로 서버 내에 존재하는지 여부는 검사하지 않으며 존재하지 않으면 유저 테이블에 유저를 추가합니다.
    * profile을 전부 콜백함수에 인자로 넘기면 너무 비대하므로 필드를 선택적으로 넘깁니다.
    */
   async validate(req, at, rt, profile, cb) {

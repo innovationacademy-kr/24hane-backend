@@ -65,11 +65,6 @@ export class TagLogAdminController {
     description: '월',
     required: true,
   })
-  @ApiQuery({
-    name: 'session',
-    description: '관리자 인증을 위한 JWT Token',
-    required: true,
-  })
   @Get('permonth')
   async getPerMonth(
     @User() user: UserSessionDto,
@@ -122,11 +117,6 @@ export class TagLogAdminController {
   @ApiQuery({
     name: 'month',
     description: '월',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'session',
-    description: '관리자 인증을 위한 JWT Token',
     required: true,
   })
   @Get('permonth/:login')
@@ -186,11 +176,6 @@ export class TagLogAdminController {
     description: '월',
     required: true,
   })
-  @ApiQuery({
-    name: 'session',
-    description: '관리자 인증을 위한 JWT Token',
-    required: true,
-  })
   @Get('perdays')
   async getPerDays(
     @User() user: UserSessionDto,
@@ -238,11 +223,6 @@ export class TagLogAdminController {
   @ApiQuery({
     name: 'month',
     description: '월',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'session',
-    description: '관리자 인증을 위한 JWT Token',
     required: true,
   })
   @Get('perdays/:login')

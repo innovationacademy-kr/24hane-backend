@@ -48,11 +48,6 @@ export class UserV1Controller {
     status: 500,
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
-  @ApiQuery({
-    name: 'session',
-    description: '관리자 인증을 위한 JWT Token',
-    required: true,
-  })
   @Get('admin/allcadets')
   @ApiBearerAuth()
   @UseGuards(AdminAuthGuard)
