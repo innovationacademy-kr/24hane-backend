@@ -23,4 +23,7 @@ export default () => ({
     spreadsheetId: process.env.GOOGLEAPI_SHEET_ID,
     range: process.env.GOOGLEAPI_SHEET_RANGE,
   },
+  frontend: {
+    uri: process.env.URL_FOR_CORS,
+  },
 });
