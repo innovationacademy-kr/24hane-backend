@@ -38,9 +38,14 @@ export class JWTSignGuard implements CanActivate {
       return false;
     }
     const token = this.jwtService.sign(user);
+    // FIXME: CORS과 쿠키 타겟 uri를 공통으로 묶을 방법을 고안해야 함.
+    const cors = this.configService.get<string>('frontend.uri');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_, ...words] = cors.split('.');
+    const domain = words.join('.');
     const cookieOptions = {
       httpOnly: false,
-      domain: this.configService.get<string>('frontend.uri'),
+      domain,
     };
     response.cookie('accessToken', token, cookieOptions);
     return true;
