@@ -2,12 +2,14 @@ import { Request, Response } from 'express';
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * 사용자 정보를 이용해 JWT 토큰을 발급하여 쿠키에 삽입하는 가드입니다.
@@ -16,7 +18,10 @@ import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 export class JWTSignGuard implements CanActivate {
   private logger = new Logger(JWTSignGuard.name);
 
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    @Inject(ConfigService) private configService: ConfigService,
+    private jwtService: JwtService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
@@ -33,7 +38,11 @@ export class JWTSignGuard implements CanActivate {
       return false;
     }
     const token = this.jwtService.sign(user);
-    response.cookie('accessToken', token, { httpOnly: false });
+    const cookieOptions = {
+      httpOnly: false,
+      domain: this.configService.get<string>('frontend.uri'),
+    };
+    response.cookie('accessToken', token, cookieOptions);
     return true;
   }
 }
