@@ -110,6 +110,11 @@ export class TagLogAdminController {
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
   @ApiQuery({
+    name: 'login',
+    description: '42 로그인 ID',
+    required: true,
+  })
+  @ApiQuery({
     name: 'year',
     description: '년도',
     required: true,
@@ -214,6 +219,11 @@ export class TagLogAdminController {
   @ApiResponse({
     status: 500,
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
+  })
+  @ApiQuery({
+    name: 'login',
+    description: '42 로그인 ID',
+    required: true,
   })
   @ApiQuery({
     name: 'year',
