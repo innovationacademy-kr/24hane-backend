@@ -9,15 +9,23 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserSessionDto } from 'src/auth/42/user.session.dto';
-import { CheckLogin } from 'src/auth/guard/check-login.guard';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from 'src/auth/user.decorator';
+import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { UserAccumulationDayType } from './dto/admin/user-accumulation-day.type';
 import { UserAccumulationMonthType } from './dto/admin/user-accumulation-month.type';
 import { TagLogAdminService } from './tag-log-admin.service';
+import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
 
 @ApiTags('체류 시간 산출 (관리자 전용 API)')
+@ApiBearerAuth()
+@UseGuards(AdminAuthGuard)
 @Controller({
   version: '1',
   path: 'tag-log/admin',
@@ -58,7 +66,6 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('permonth')
-  @UseGuards(CheckLogin)
   async getPerMonth(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
@@ -103,6 +110,11 @@ export class TagLogAdminController {
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
   @ApiQuery({
+    name: 'login',
+    description: '42 로그인 ID',
+    required: true,
+  })
+  @ApiQuery({
     name: 'year',
     description: '년도',
     required: true,
@@ -113,7 +125,6 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('permonth/:login')
-  @UseGuards(CheckLogin)
   async getPerMonthByLogin(
     @User() user: UserSessionDto,
     @Param('login') login: string,
@@ -171,7 +182,6 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('perdays')
-  @UseGuards(CheckLogin)
   async getPerDays(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
@@ -211,6 +221,11 @@ export class TagLogAdminController {
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
   @ApiQuery({
+    name: 'login',
+    description: '42 로그인 ID',
+    required: true,
+  })
+  @ApiQuery({
     name: 'year',
     description: '년도',
     required: true,
@@ -221,7 +236,6 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('perdays/:login')
-  @UseGuards(CheckLogin)
   async getPerDaysByLogin(
     @User() user: UserSessionDto,
     @Param('login') login: string,

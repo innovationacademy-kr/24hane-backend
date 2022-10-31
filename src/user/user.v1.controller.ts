@@ -5,12 +5,18 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserSessionDto } from 'src/auth/42/user.session.dto';
-import { CheckLogin } from 'src/auth/guard/check-login.guard';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from 'src/auth/user.decorator';
+import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { IdLoginDto } from './dto/id-login.dto';
 import { UserService } from './user.service';
+import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
 
 @ApiTags('유저 정보 관련')
 @Controller({
@@ -43,7 +49,8 @@ export class UserV1Controller {
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
   @Get('admin/allcadets')
-  @UseGuards(CheckLogin)
+  @ApiBearerAuth()
+  @UseGuards(AdminAuthGuard)
   async getAllCadets(@User() user: UserSessionDto): Promise<IdLoginDto[]> {
     this.logger.debug(`call getAllCadets request by ${user.login}`);
     if (!user.is_staff) {

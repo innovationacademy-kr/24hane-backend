@@ -7,8 +7,6 @@ import TypeOrmConfigService from './configs/typeorm.config';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
 import { UserModule } from './user/user.module';
-//import { UsageModule } from './usage/usage.module';
-//import { WebhookModule } from './webhook/webhook.module';
 
 @Module({
   imports: [
@@ -20,8 +18,6 @@ import { UserModule } from './user/user.module';
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
     }),
-    //WebhookModule, -> deprecated
-    //UsageModule, -> deprecated
     AuthModule,
     TagLogModule,
     UserModule,
@@ -32,17 +28,10 @@ export class AppModule implements NestModule {
   constructor(public sessionMiddleware: SessionMiddleware) {}
 
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(this.sessionMiddleware.cookieParser).forRoutes('*');
+    // 쿼리의 리다이렉트 경로를 쿠키로 설정하는 미들웨어
     consumer
-      .apply(
-        this.sessionMiddleware.cookieParser,
-        this.sessionMiddleware.expressSession,
-        this.sessionMiddleware.passportInit,
-        this.sessionMiddleware.passportSession,
-      )
-      .forRoutes('*');
-    // 관리자 API에만 세션을 쿼리로 삽입하는 미들웨어 적용
-    consumer
-      .apply(this.sessionMiddleware.sessionByQuery)
-      .forRoutes('*/admin/*');
+      .apply(this.sessionMiddleware.SetRedirectMiddleware)
+      .forRoutes('/user/login/42');
   }
 }

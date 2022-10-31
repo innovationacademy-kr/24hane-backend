@@ -12,12 +12,18 @@ export default () => ({
     secret: process.env.CLIENT_SECRET,
     callbackuri: process.env.CLIENT_CALLBACK,
   },
-  authkey: process.env.JWT_OR_SESSION_SECRET,
+  jwt: {
+    secret: process.env.JWT_OR_SESSION_SECRET,
+    expiresIn: process.env.JWT_EXPIREIN,
+  },
   log: process.env.LOG_DEBUG === 'true' ? true : false,
   googleApi: {
     email: process.env.GOOGLEAPI_SERVICE_ACCOUNT_EMAIL,
     key: process.env.GOOGLEAPI_SERVICE_ACCOUNT_PRIVATE_KEY,
     spreadsheetId: process.env.GOOGLEAPI_SHEET_ID,
     range: process.env.GOOGLEAPI_SHEET_RANGE,
+  },
+  frontend: {
+    uri: process.env.URL_FOR_CORS,
   },
 });
