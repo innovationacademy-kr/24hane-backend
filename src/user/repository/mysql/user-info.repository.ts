@@ -3,6 +3,7 @@ import { UserInfo } from 'src/entities/user-info.entity';
 import { IUserInfoRepository } from '../interface/user-info-repository.interface';
 import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { IdLoginDto } from 'src/user/dto/id-login.dto';
+import { CardDto } from 'src/user/dto/card.dto';
 
 export class UserInfoRepository implements IUserInfoRepository {
   constructor(
@@ -10,29 +11,33 @@ export class UserInfoRepository implements IUserInfoRepository {
     private userInfoRepository: Repository<UserInfo>,
   ) {}
 
-  async findCardIds(
-    userId: number,
-    vaildEnd?: Date,
-    vaildStart?: Date,
-  ): Promise<string[]> {
-    const end = vaildEnd ? MoreThanOrEqual(vaildEnd) : undefined;
-    const start = vaildStart ? LessThanOrEqual(vaildStart) : undefined;
+  async findCardsByUserId(
+    id: number,
+    begin?: Date,
+    end?: Date,
+  ): Promise<CardDto[]> {
+    const end_use = begin ? MoreThanOrEqual(begin) : undefined;
+    const start_use = end ? LessThanOrEqual(end) : undefined;
     const result = await this.userInfoRepository.findOne({
       relations: {
         cardIssuance: true,
       },
       where: {
-        user_id: userId,
+        user_id: id,
         cardIssuance: {
-          end_use: end,
-          start_use: start,
+          end_use,
+          start_use,
         },
       },
     });
     if (!result) {
       return [];
     }
-    return result.cardIssuance.map((c) => c.card_id);
+    return result.cardIssuance.map((card) => ({
+      card_id: card.card_id,
+      begin: card.start_use,
+      end: card.end_use,
+    }));
   }
 
   async findIdByLogin(login: string): Promise<number> {

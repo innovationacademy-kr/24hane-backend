@@ -3,6 +3,7 @@ import { TagLogDto } from 'src/tag-log-v1/dto/tag-log.dto';
 import { ITagLogRepository } from '../interface/tag-log-repository.interface';
 import { Repository, In, Between, LessThan, MoreThan } from 'typeorm';
 import { TagLog } from 'src/entities/tag-log.entity';
+import { CardDto } from 'src/user/dto/card.dto';
 
 export class TagLogRepository implements ITagLogRepository {
   constructor(
@@ -25,6 +26,28 @@ export class TagLogRepository implements ITagLogRepository {
       },
     });
     return result;
+  }
+
+  async findTagLogsByCards(
+    cards: CardDto[],
+    start: Date,
+    end: Date,
+  ): Promise<TagLogDto[]> {
+    const querys = cards.map((card) => {
+      const search_start = start < card.begin ? card.begin : start;
+      const search_end = end < card.end ? end : card.end;
+      return this.tagLogRepository.find({
+        where: {
+          card_id: card.card_id,
+          tag_at: Between(search_start, search_end),
+        },
+        order: {
+          tag_at: 'ASC',
+        },
+      });
+    });
+    const result = await Promise.all(querys);
+    return result.reduce((prev, next) => prev.concat(next), []);
   }
 
   async findLatestTagLog(cardIDs: string[]): Promise<TagLogDto | null> {

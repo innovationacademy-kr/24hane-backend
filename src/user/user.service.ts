@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { CardDto } from './dto/card.dto';
 import { IdLoginDto } from './dto/id-login.dto';
 import { IUserInfoRepository } from './repository/interface/user-info-repository.interface';
 
@@ -13,22 +14,20 @@ export class UserService {
 
   /**
    * 사용자 ID로 사용자에 대한 카드 ID 목록을 반환합니다.
+   * 발급일과 만료일 내의 카드 발급 기록을 가지고 옵니다.
+   * begin <= 카드의_만료_시간 && end >= 카드의_발급_시간 관계를 이용합니다.
    *
-   * @param userId 사용자 아이디
-   * @param vaildEnd 최소 만료기간 (optional)
-   * @param vaildStart 카드 발급한 기간보다 작은 기간 (optional)
+   * @param id 사용자 아이디
+   * @param begin 발급일 (optional)
+   * @param end 만료일 (optional)
    * @returns 카드 ID 목록 (배열)
    */
-  async findCardIds(
-    userId: number,
-    vaildEnd?: Date,
-    vaildStart?: Date,
-  ): Promise<string[]> {
-    return await this.userInfoRepository.findCardIds(
-      userId,
-      vaildEnd,
-      vaildStart,
-    );
+  async findCardsByUserId(
+    id: number,
+    begin?: Date,
+    end?: Date,
+  ): Promise<CardDto[]> {
+    return await this.userInfoRepository.findCardsByUserId(id, begin, end);
   }
 
   /**
