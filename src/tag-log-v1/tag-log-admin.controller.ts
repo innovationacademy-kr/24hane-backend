@@ -12,6 +12,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -109,7 +110,7 @@ export class TagLogAdminController {
     status: 500,
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'login',
     description: '42 로그인 ID',
     required: true,
@@ -220,7 +221,7 @@ export class TagLogAdminController {
     status: 500,
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'login',
     description: '42 로그인 ID',
     required: true,
