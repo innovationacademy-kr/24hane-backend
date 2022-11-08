@@ -212,8 +212,6 @@ export class TagLogService {
       tagEnd,
     );
 
-    const cardIds = cards.map((card) => card.card_id);
-
     const tagLogs = await this.tagLogRepository.findTagLogsByCards(
       cards,
       tagStart,
@@ -256,8 +254,6 @@ export class TagLogService {
       tagStart,
       tagEnd,
     );
-
-    const cardIds = cards.map((card) => card.card_id);
 
     const tagLogs = await this.tagLogRepository.findTagLogsByCards(
       cards,
