@@ -23,32 +23,17 @@ export class TagLogService {
   ) {}
 
   /**
-   * 사용자 ID로 사용자에 대한 카드 ID 목록을 반환합니다.
-   *
-   * @param userId 사용자 아이디
-   * @param vaildEnd 최소 만료기간 (optional)
-   * @param vaildStart 카드 발급한 기간보다 작은 기간 (optional)
-   * @returns 카드 ID 목록 (배열)
-   */
-  async getCardIdsByUserId(
-    userId: number,
-    vaildEnd?: Date,
-    vaildStart?: Date,
-  ): Promise<string[]> {
-    return this.userService.findCardIds(userId, vaildEnd, vaildStart);
-  }
-
-  /**
    * 카드 태그 로그에 대해 로그 맨 앞, 맨 뒤 원소가 잘려 있다면 앞, 뒤에 가상의 입출입 로그를 삽입합니다.
    * 삽입하는 로그는 짝 여부에 관계없이 전후 원소를 삽입합니다.
    * 짝 일치 여부 판단은 다른 로직에서 진행합니다.
+   * version 2: 카드의 짝을 맞추도록 수정하였습니다.
    *
    * @param taglogs TagLogDto[]
    * @return TagLogDto[]
+   * @version 2
    */
   async trimTagLogs(
     taglogs: TagLogDto[],
-    cardIDs: string[],
     start: Date,
     end: Date,
   ): Promise<TagLogDto[]> {
@@ -57,7 +42,7 @@ export class TagLogService {
     if (firstLog) {
       // 2. 맨 앞의 로그 이전의 로그를 가져옴.
       const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
-        cardIDs,
+        [firstLog.card_id],
         firstLog.tag_at,
       );
       // NOTE: tag log에 기록된 첫번째 로그가 퇴실인 경우 현재는 짝을 맞추지 않음.
@@ -76,7 +61,7 @@ export class TagLogService {
     if (lastLog) {
       // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
       const beforelastLog = await this.tagLogRepository.findNextTagLog(
-        cardIDs,
+        [lastLog.card_id],
         lastLog.tag_at,
       );
       // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
@@ -216,21 +201,19 @@ export class TagLogService {
    * @returns InOutLogType[]
    */
   async getPerDay(userId: number, date: Date): Promise<InOutLogType[]> {
-    const cardStart = this.dateCalculator.getStartOfDate(date);
-    const cardEnd = new Date('9999-08-05 23:59:59');
     const tagStart = this.dateCalculator.getStartOfDate(date);
     const tagEnd = this.dateCalculator.getEndOfDate(date);
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const cardIds = await this.userService.findCardIds(
+    const cards = await this.userService.findCardsByUserId(
       userId,
-      cardStart,
-      cardEnd,
+      tagStart,
+      tagEnd,
     );
 
-    const tagLogs = await this.tagLogRepository.findTagLogs(
-      cardIds,
+    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
+      cards,
       tagStart,
       tagEnd,
     );
@@ -244,7 +227,6 @@ export class TagLogService {
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
-      cardIds,
       tagStart,
       tagEnd,
     );
@@ -262,21 +244,19 @@ export class TagLogService {
    * @returns InOutLogType[]
    */
   async getPerMonth(userId: number, date: Date): Promise<InOutLogType[]> {
-    const cardStart = this.dateCalculator.getStartOfMonth(date);
-    const cardEnd = new Date('9999-08-05 23:59:59');
     const tagStart = this.dateCalculator.getStartOfMonth(date);
     const tagEnd = this.dateCalculator.getEndOfMonth(date);
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const cardIds = await this.userService.findCardIds(
+    const cards = await this.userService.findCardsByUserId(
       userId,
-      cardStart,
-      cardEnd,
+      tagStart,
+      tagEnd,
     );
 
-    const tagLogs = await this.tagLogRepository.findTagLogs(
-      cardIds,
+    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
+      cards,
       tagStart,
       tagEnd,
     );
@@ -290,7 +270,6 @@ export class TagLogService {
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
-      cardIds,
       tagStart,
       tagEnd,
     );
@@ -307,11 +286,12 @@ export class TagLogService {
    * @returns InOutDto
    */
   async checkClusterById(userId: number): Promise<InOutDto> {
-    const cardIds = await this.userService.findCardIds(
+    const cards = await this.userService.findCardsByUserId(
       userId,
       new Date('2019-01-01 00:00:00'),
-      new Date('9999-08-05 23:59:59'),
+      new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
     );
+    const cardIds = cards.map((card) => card.card_id);
     const last = await this.tagLogRepository.findLatestTagLog(cardIds);
     const inCards = await this.pairInfoRepository.findInGates();
 

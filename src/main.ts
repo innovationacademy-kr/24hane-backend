@@ -18,9 +18,9 @@ async function bootstrap() {
 
   // for Swagger
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('체크인 API (version 3) 명세서')
-    .setDescription('체크인 API (version 3) 명세입니다.')
-    .setVersion('3.1.0')
+    .setTitle('24Hane API 명세서')
+    .setDescription('24Hane API 명세서입니다. (by joopark)')
+    .setVersion(process.env.npm_package_version)
     .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
