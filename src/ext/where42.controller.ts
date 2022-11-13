@@ -1,4 +1,4 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
+import { Controller, Get, Logger, Param, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -6,13 +6,14 @@ import {
   ApiParam,
   ApiResponse,
 } from '@nestjs/swagger';
+import { ExtAuthGuard } from 'src/auth/guard/ext-auth.guard';
 import { Where42ResponseDto } from './dto/where42.response.dto';
 import { ExtService } from './ext.service';
 
 @ApiTags('Where42 전용 API')
 @Controller('ext/where42')
 @ApiBearerAuth()
-//@UseGuards(UserAuthGuard)
+@UseGuards(ExtAuthGuard)
 export class Where42Controller {
   private logger = new Logger(Where42Controller.name);
 
@@ -37,6 +38,7 @@ export class Where42Controller {
   })
   @ApiResponse({ status: 400, description: 'DB상 존재하지 않는 카뎃' })
   @ApiResponse({ status: 401, description: '접근 권한 없음 (토큰 만료 등)' })
+  @ApiResponse({ status: 403, description: '태그 기록이 존재하지 않는 카뎃' })
   @ApiResponse({ status: 500, description: '서버 내부 에러' })
   @ApiParam({
     name: 'login',

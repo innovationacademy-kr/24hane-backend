@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   Logger,
@@ -37,7 +38,7 @@ export class ExtService {
     const cardIds = cards.map((card) => card.card_id);
     const last = await this.tagLogRepository.findLatestTagLog(cardIds);
     if (last === null) {
-      throw new BadRequestException('태그 기록이 존재하지 않습니다.');
+      throw new ForbiddenException('태그 기록이 존재하지 않습니다.');
     }
     const device = await this.deviceInfoRepository.getDeviceInfo(
       last.device_id,
