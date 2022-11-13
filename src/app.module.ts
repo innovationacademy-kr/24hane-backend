@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
+import { ExtModule } from './ext/ext.module';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
 import { UserModule } from './user/user.module';
@@ -21,6 +22,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     TagLogModule,
     UserModule,
+    ExtModule,
   ],
   providers: [SessionMiddleware],
 })

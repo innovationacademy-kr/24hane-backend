@@ -1,3 +1,5 @@
+import Cluster from 'src/enums/cluster.enum';
+import InOut from 'src/enums/inout.enum';
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 @Entity('DEVICE_INFO')
@@ -13,12 +15,12 @@ export class DeviceInfo {
     type: 'varchar',
     length: 15,
   })
-  campus: string;
+  campus: Cluster;
 
   @Column({
     name: 'IO_TYPE',
     type: 'varchar',
     length: 3,
   })
-  io_type: string;
+  io_type: InOut;
 }
