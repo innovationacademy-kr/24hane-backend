@@ -223,7 +223,9 @@ export class TagLogService {
     );
 
     // FIXME: 임시 조치임
-    const filteredTagLogs = sortedTagLogs.filter((v) => v.device_id !== 35);
+    const filteredTagLogs = sortedTagLogs.filter(
+      (v) => v.device_id !== 35 && v.device_id !== 16,
+    );
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
@@ -266,7 +268,9 @@ export class TagLogService {
     );
 
     // FIXME: 임시 조치임
-    const filteredTagLogs = sortedTagLogs.filter((v) => v.device_id !== 35);
+    const filteredTagLogs = sortedTagLogs.filter(
+      (v) => v.device_id !== 35 && v.device_id !== 16,
+    );
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
