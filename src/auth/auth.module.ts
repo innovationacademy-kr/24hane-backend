@@ -9,6 +9,7 @@ import { Auth42Controller } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './repository/auth.repository';
 import { AuthAdminStrategy } from './srategy/auth.admin.strategy';
+import { AuthExternalStrategy } from './srategy/auth.external.strategy';
 import { AuthStrategy } from './srategy/auth.strategy';
 import { FtOAuthStrategy } from './srategy/ft-oauth.strategy';
 
@@ -37,6 +38,7 @@ const repo = {
     FtOAuthStrategy,
     AuthStrategy,
     AuthAdminStrategy,
+    AuthExternalStrategy,
     AuthService,
     repo,
   ],
