@@ -27,6 +27,7 @@ export class UserService {
     begin?: Date,
     end?: Date,
   ): Promise<CardDto[]> {
+    this.logger.debug(`@findCardsByUserId) ${id}, ${begin}, ${end}`);
     return await this.userInfoRepository.findCardsByUserId(id, begin, end);
   }
 
@@ -37,6 +38,7 @@ export class UserService {
    * @return 42 ID
    */
   async findIdByLogin(login: string): Promise<number> {
+    this.logger.debug(`@findIdByLogin) ${login}`);
     return await this.userInfoRepository.findIdByLogin(login);
   }
 
@@ -46,6 +48,7 @@ export class UserService {
    * @param admin true: 관리자만, false: 카뎃만, undefined: 모두
    */
   async getAllIds(admin?: boolean): Promise<IdLoginDto[]> {
+    this.logger.debug(`@getAllIds) ${admin}`);
     return await this.userInfoRepository.getAllIds(admin);
   }
 }

@@ -76,9 +76,7 @@ export class TagLogController {
     @Query('month', ParseIntPipe) month: number,
     @Query('day', ParseIntPipe) day: number,
   ): Promise<UserInOutLogsType> {
-    this.logger.debug(
-      `call getPerDay request by ${user.login} at ${year}-${month}-${day}`,
-    );
+    this.logger.debug(`@getPerDay) ${year}-${month}-${day} by ${user.login}`);
 
     const date = new Date(`${year}-${month}-${day}`);
 
@@ -127,9 +125,7 @@ export class TagLogController {
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserInOutLogsType> {
-    this.logger.debug(
-      `call getPerDay request by ${user.login} at ${year}-${month}`,
-    );
+    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
 
     const date = new Date(`${year}-${month}`);
 
@@ -161,7 +157,7 @@ export class TagLogController {
   })
   @Get('maininfo')
   async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
-    this.logger.debug(`call getMainInfo request by ${user.login}`);
+    this.logger.debug(`@getMainInfo) by ${user.login}`);
     const inoutState = await this.tagLogService.checkClusterById(user.user_id);
     const result: UserInfoType = {
       login: user.login,
@@ -194,7 +190,7 @@ export class TagLogController {
   async getAccumulationTimes(
     @User() user: UserSessionDto,
   ): Promise<UserAccumulationType> {
-    this.logger.debug(`call getAccumulationTimes request by ${user.login}`);
+    this.logger.debug(`@getAccumulationTimes) by ${user.login}`);
     const date = new Date();
     const resultDay = await this.tagLogService.getPerDay(user.user_id, date);
     const resultMonth = await this.tagLogService.getPerMonth(

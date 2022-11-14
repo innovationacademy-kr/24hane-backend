@@ -72,9 +72,7 @@ export class TagLogAdminController {
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationMonthType[]> {
-    this.logger.debug(
-      `call getPerMonth request at ${year}-${month} by ${user.login}`,
-    );
+    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
@@ -132,7 +130,7 @@ export class TagLogAdminController {
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationMonthType> {
-    this.logger.debug(`call getPerMonth request at ${year}-${month}`);
+    this.logger.debug(`@getPerMonthByLogin) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
@@ -188,7 +186,7 @@ export class TagLogAdminController {
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationDayType[]> {
-    this.logger.debug(`call getPerDays request at ${year}-${month}`);
+    this.logger.debug(`@getPerDays) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
@@ -243,7 +241,7 @@ export class TagLogAdminController {
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationDayType> {
-    this.logger.debug(`call getPerDays request at ${year}-${month}`);
+    this.logger.debug(`@getPerDaysByLogin) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',

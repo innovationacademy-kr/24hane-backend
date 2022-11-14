@@ -51,7 +51,7 @@ export class UserV1Controller {
   @ApiBearerAuth()
   @UseGuards(AdminAuthGuard)
   async getAllCadets(@User() user: UserSessionDto): Promise<IdLoginDto[]> {
-    this.logger.debug(`call getAllCadets request by ${user.login}`);
+    this.logger.debug(`@getAllCadets) by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',

@@ -18,7 +18,6 @@ export class GoogleApi {
     const envKey = this.configService.get<string>('googleApi.key');
     const envSsid = this.configService.get<string>('googleApi.spreadsheetId');
     const envRange = this.configService.get<string>('googleApi.range');
-    this.logger.log(envEmail, envKey, envSsid, envRange);
     try {
       const googleAuth = new auth.JWT({
         email: envEmail,
