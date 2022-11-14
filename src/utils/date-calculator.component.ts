@@ -81,11 +81,7 @@ export class DateCalculator {
    * @param date2 date 객체 2
    */
   checkEqualDay(date1: Date, date2: Date) {
-    this.logger.debug(
-      `checkEqualDay(): date1(ko-KR): ${date1.toLocaleString(
-        'ko-KR',
-      )},  date2(ko-KR): ${date2.toLocaleString('ko-KR')}`,
-    );
+    this.logger.debug(`@checkEqualDay) ${date1}, ${date2}`);
     return (
       date1.getFullYear() === date2.getFullYear() &&
       date1.getMonth() === date2.getMonth() &&
@@ -100,6 +96,7 @@ export class DateCalculator {
    * @return number 타임스탬프
    */
   toTimestamp(date: Date): number {
+    this.logger.debug(`@toTimestamp) ${date}`);
     return Math.floor(date.getTime() / 1000);
   }
 
@@ -111,6 +108,7 @@ export class DateCalculator {
    * @return days 해당 달의 일의 개수
    */
   getDaysInMonth(year: number, month: number): number {
+    this.logger.debug(`@getDaysInMonth) ${year}, ${month}`);
     const date = new Date(year, month, 0);
     return date.getDate();
   }

@@ -29,7 +29,7 @@ export class JWTSignGuard implements CanActivate {
   private generateJWTToken(request: Request, response: Response): boolean {
     const user = request.user as UserSessionDto | undefined;
     if (user === undefined) {
-      this.logger.debug(`can't generate JWTToken`);
+      this.logger.error(`can't generate JWTToken`);
       return false;
     }
     const token = this.jwtService.sign(user);
@@ -41,6 +41,8 @@ export class JWTSignGuard implements CanActivate {
       httpOnly: false,
       domain,
     };
+    this.logger.debug(`token : ${token}`);
+    this.logger.debug(`cookieOptions : ${cookieOptions}`);
     response.cookie('accessToken', token, cookieOptions);
     return true;
   }

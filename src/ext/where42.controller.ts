@@ -47,7 +47,7 @@ export class Where42Controller {
   })
   @Get('where42/:login')
   async where42(@Param('login') login: string): Promise<Where42ResponseDto> {
-    this.logger.debug(`call where42 request (param: ${login})`);
+    this.logger.debug(`@islogin) where42: ${login}`);
     return this.extService.where42(login);
   }
 }

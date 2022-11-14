@@ -63,7 +63,7 @@ export class Auth42Controller {
   @Get('callback/42')
   @UseGuards(FtOAuthGuard, JWTSignGuard)
   async ftcallback(@Req() req, @Res() res, @User() user) {
-    this.logger.log(`login callback : ${user.login}`);
+    this.logger.verbose(`@ftcallback) login callback : ${user.login}`);
     if (req.cookies['redirect']) {
       res.status(302).redirect(req.cookies['redirect']);
     } else {
@@ -95,6 +95,7 @@ export class Auth42Controller {
   @Get('islogin')
   @UseGuards(UserAuthGuard)
   @HttpCode(204)
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async islogin() {}
+  async islogin() {
+    this.logger.debug(`@islogin)`);
+  }
 }
