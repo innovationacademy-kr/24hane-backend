@@ -23,6 +23,7 @@ export class ExtService {
   ) {}
 
   async where42(login: string): Promise<Where42ResponseDto> {
+    this.logger.debug(`@where42) check ${login}`);
     // 존재하는 유저인지 체크
     const user_id = await this.userService.findIdByLogin(login);
 

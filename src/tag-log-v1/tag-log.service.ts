@@ -37,6 +37,7 @@ export class TagLogService {
     start: Date,
     end: Date,
   ): Promise<TagLogDto[]> {
+    this.logger.debug(`@trimTagLogs)`);
     // 1. 맨 앞의 로그를 가져옴.
     const firstLog = taglogs.at(0);
     if (firstLog) {
@@ -90,6 +91,7 @@ export class TagLogService {
     inDevice: number,
     outDevice: number,
   ): boolean {
+    this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
     // TODO: O(N) 보다 더 적게 시간을 소요하도록 리팩터링 필요
     const find = deviceInfos.find(
       (device) =>
@@ -108,6 +110,7 @@ export class TagLogService {
     taglogs: TagLogDto[],
     deviceInfos: PairInfoDto[],
   ): InOutLogType[] {
+    this.logger.debug(`@getPairsByTagLogs)`);
     /**
      * 데이터를 날짜의 내림차순으로 정렬
      */
@@ -201,6 +204,7 @@ export class TagLogService {
    * @returns InOutLogType[]
    */
   async getPerDay(userId: number, date: Date): Promise<InOutLogType[]> {
+    this.logger.debug(`@getPerDay) ${userId}, ${date}`);
     const tagStart = this.dateCalculator.getStartOfDate(date);
     const tagEnd = this.dateCalculator.getEndOfDate(date);
 
@@ -246,6 +250,7 @@ export class TagLogService {
    * @returns InOutLogType[]
    */
   async getPerMonth(userId: number, date: Date): Promise<InOutLogType[]> {
+    this.logger.debug(`@getPerMonth) ${userId}, ${date}`);
     const tagStart = this.dateCalculator.getStartOfMonth(date);
     const tagEnd = this.dateCalculator.getEndOfMonth(date);
 
@@ -290,6 +295,7 @@ export class TagLogService {
    * @returns InOutDto
    */
   async checkClusterById(userId: number): Promise<InOutDto> {
+    this.logger.debug(`@checkClusterById) ${userId}`);
     const cards = await this.userService.findCardsByUserId(
       userId,
       new Date('2019-01-01 00:00:00'),
