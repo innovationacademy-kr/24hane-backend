@@ -1,4 +1,5 @@
 export default () => ({
+  version: process.env.package_version,
   port: parseInt(process.env.PORT, 10),
   database: {
     host: process.env.DATABASE_HOST,
