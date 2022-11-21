@@ -1,4 +1,5 @@
 import { LogLevel } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -12,10 +13,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: log_level,
   });
+  const configService = app.get(ConfigService);
+  const cors_uri = configService.get<string>('frontend.uri');
+  const version = configService.get<string>('version');
   // enable CORS if exists
-  if (process.env.URL_FOR_CORS) {
+  if (cors_uri) {
     app.enableCors({
-      origin: process.env.URL_FOR_CORS,
+      origin: cors_uri,
       credentials: true,
     });
   }
@@ -27,7 +31,7 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('24Hane API 명세서')
     .setDescription('24Hane API 명세서입니다. (by joopark)')
-    .setVersion(process.env.npm_package_version)
+    .setVersion(version)
     .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
