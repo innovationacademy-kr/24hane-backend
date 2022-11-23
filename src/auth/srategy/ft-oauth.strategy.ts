@@ -27,7 +27,7 @@ export class FtOAuthStrategy extends PassportStrategy(Strategy, '42-oauth2') {
         user_id: 'id',
         email: 'email',
         login: 'login',
-        image_url: 'image_url',
+        image_url: 'image.link',
         is_staff: 'staff?',
       },
     });
