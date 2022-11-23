@@ -37,7 +37,10 @@ export class JWTSignGuard implements CanActivate {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, ...words] = host.split('.');
     const domain = words.join('.');
+    // NOTE: JWT token의 만료시간을 직접 가져옴.
+    const expires = new Date(this.jwtService.decode(token)['exp'] * 1000);
     const cookieOptions = {
+      expires,
       httpOnly: false,
       domain,
     };
