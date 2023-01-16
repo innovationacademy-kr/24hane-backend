@@ -50,11 +50,16 @@ export class TagLogRepository implements ITagLogRepository {
     return result.reduce((prev, next) => prev.concat(next), []);
   }
 
-  async findLatestTagLog(cardIDs: string[]): Promise<TagLogDto | null> {
+  async findLatestTagLog(cards: CardDto[]): Promise<TagLogDto | null> {
+    if (cards.length === 0) {
+      return null;
+    }
+    const wheres = cards.map((card) => ({
+      card_id: card.card_id,
+      tag_at: Between(card.begin, card.end),
+    }));
     const result = await this.tagLogRepository.findOne({
-      where: {
-        card_id: In(cardIDs),
-      },
+      where: wheres,
       order: {
         tag_at: 'DESC',
       },
@@ -62,11 +67,16 @@ export class TagLogRepository implements ITagLogRepository {
     return result;
   }
 
-  async findFirstTagLog(cardIDs: string[]): Promise<TagLogDto | null> {
+  async findFirstTagLog(cards: CardDto[]): Promise<TagLogDto | null> {
+    if (cards.length === 0) {
+      return null;
+    }
+    const wheres = cards.map((card) => ({
+      card_id: card.card_id,
+      tag_at: Between(card.begin, card.end),
+    }));
     const result = await this.tagLogRepository.findOne({
-      where: {
-        card_id: In(cardIDs),
-      },
+      where: wheres,
       order: {
         tag_at: 'ASC',
       },
