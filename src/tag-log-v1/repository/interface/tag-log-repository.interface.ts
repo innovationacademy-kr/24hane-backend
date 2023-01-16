@@ -28,16 +28,16 @@ export interface ITagLogRepository {
   /**
    * 특정 card ID들에 대해 가장 최신의 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
    *
-   * @param cardIDs 카드 ID 배열
+   * @param cards 카드 ID 배열
    */
-  findLatestTagLog(cardIDs: string[]): Promise<TagLogDto | null>;
+  findLatestTagLog(cards: CardDto[]): Promise<TagLogDto | null>;
 
   /**
    * 특정 card ID들에 대해 가장 오래된 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
    *
-   * @param cardIDs 카드 ID 배열
+   * @param cards 카드 ID 배열
    */
-  findFirstTagLog(cardIDs: string[]): Promise<TagLogDto | null>;
+  findFirstTagLog(cards: CardDto[]): Promise<TagLogDto | null>;
 
   /**
    * 특정 출입태그 시간의 바로 이전 태그 로그를 가져옵니다. 없다면 null을 반환합니다.
