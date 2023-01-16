@@ -51,6 +51,9 @@ export class TagLogRepository implements ITagLogRepository {
   }
 
   async findLatestTagLog(cards: CardDto[]): Promise<TagLogDto | null> {
+    if (cards.length === 0) {
+      return null;
+    }
     const wheres = cards.map((card) => ({
       card_id: card.card_id,
       tag_at: Between(card.begin, card.end),
@@ -65,6 +68,9 @@ export class TagLogRepository implements ITagLogRepository {
   }
 
   async findFirstTagLog(cards: CardDto[]): Promise<TagLogDto | null> {
+    if (cards.length === 0) {
+      return null;
+    }
     const wheres = cards.map((card) => ({
       card_id: card.card_id,
       tag_at: Between(card.begin, card.end),
