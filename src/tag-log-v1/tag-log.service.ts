@@ -301,8 +301,7 @@ export class TagLogService {
       new Date('2019-01-01 00:00:00'),
       new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
     );
-    const cardIds = cards.map((card) => card.card_id);
-    const last = await this.tagLogRepository.findLatestTagLog(cardIds);
+    const last = await this.tagLogRepository.findLatestTagLog(cards);
     const inCards = await this.pairInfoRepository.findInGates();
 
     if (last === null) {
