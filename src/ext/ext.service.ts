@@ -43,7 +43,7 @@ export class ExtService {
     const device = await this.deviceInfoRepository.getDeviceInfo(
       last.device_id,
     );
-    if (last === null) {
+    if (device === null) {
       throw new ForbiddenException(
         '등록되지 않은 기기에 태그하였습니다. 관리자에게 문의하세요.',
       );
