@@ -8,6 +8,7 @@ import { IPairInfoRepository } from './repository/interface/pair-info-repository
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
 import { UserService } from 'src/user/user.service';
 import { InOutDto } from './dto/inout.dto';
+import { time } from 'console';
 
 @Injectable()
 export class TagLogService {
@@ -113,6 +114,7 @@ export class TagLogService {
     
     let ret: boolean = false;
     
+    //todo: find하기
     deviceInfos.forEach(deviceInfo => {
       if(deviceInfo.in_device === targetDevice) {
         this.logger.debug(`@isInDevice)`);
@@ -250,7 +252,7 @@ export class TagLogService {
     taglogs: TagLogDto[],
     deviceInfos: PairInfoDto[],
   ): InOutLogType[] {
-    this.logger.debug(`@getPairsByTagLogs)`);
+    this.logger.debug(`@getAllPairsByTagLogs)`);
 
     const timeLines = taglogs;
 
@@ -261,9 +263,16 @@ export class TagLogService {
 
     // 타임라인 배열이 빌 때까지 루프를 돌립니다.
     while (timeLines.length > 0) {
-      
-      if (temp === null)
+      if (temp === null) {
         temp = timeLines.pop();
+        if (temp.idx === -1) {
+          temp = timeLines.pop();
+        }
+      }
+
+      if (timeLines.length <= 0) {
+        break;
+      }
 
       // 내부에 있거나 중복 입실태그인 경우
       if (
@@ -281,9 +290,14 @@ export class TagLogService {
         //this.logger.debug(`입실 중복`);
         continue;
       }
-
-      leave = temp;
-      temp = timeLines.pop();
+      
+      if (leave === null) {
+        leave = temp;
+        temp = null;
+      }
+      
+      if (temp === null) 
+        temp = timeLines.pop();
       
       // 중복 퇴실태그인 경우
       if (
@@ -336,12 +350,13 @@ export class TagLogService {
           inTimeStamp: this.dateCalculator.toTimestamp(virtualEnterTime),
           outTimeStamp: this.dateCalculator.toTimestamp(leave.tag_at),
           durationSecond: outTimeStamp - virtualInTimeStamp,
-        });
-        //this.logger.debug(`정상 태그 (다른 날)`);
-      }
-      temp = null;
-      leave = null;
-    }
+            });
+            //this.logger.debug(`정상 태그 (다른 날)`);
+          }
+          temp = null;
+          leave = null;
+        }
+
     return resultPairs;
   }
 
