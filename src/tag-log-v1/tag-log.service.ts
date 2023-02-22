@@ -105,6 +105,8 @@ export class TagLogService {
       );
       // 어제의 마지막 로그가 IN이며, 오늘의 첫 로그가 OUT이면 가상 로그 넣어주기
       if (
+        beforeFirstLog !== null
+        &&
         this.isInDevice(deviceInfo, beforeFirstLog.device_id)
         &&
         this.isOutDevice(deviceInfo, firstLog.device_id)
@@ -128,7 +130,10 @@ export class TagLogService {
       );
       // 오늘의 마지막 로그가 IN이며, 내일의 첫 로그가 OUT이면 가상 로그 넣어주기
       // todo: 반복되는데 삽입되는 요소는 달라서 나눠둠
+      // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
       if (
+        afterLastLog !== null
+        &&
         this.isInDevice(deviceInfo, lastLog.device_id)
         &&
         this.isOutDevice(deviceInfo, afterLastLog.device_id)
@@ -497,7 +502,7 @@ export class TagLogService {
       pairs,
     );
 
-    this.logger.debug(trimmedTagLogs.length);
+    //this.logger.debug(trimmedTagLogs.length);
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
     const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
@@ -547,6 +552,53 @@ export class TagLogService {
     );
 
     const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+
+    return resultPairs;
+  }
+  
+  /**
+   * 인자로 들어가는 사용자 ID와 날짜에 대한 월별 모든 태그를 반환합니다.
+   *
+   * @param userId 사용자 ID
+   * @param date 날짜
+   * @returns InOutLogType[]
+   */
+  async getAllTagPerMonth(userId: number, date: Date): Promise<InOutLogType[]> {
+    this.logger.debug(`@getPerMonth) ${userId}, ${date}`);
+    const tagStart = this.dateCalculator.getStartOfMonth(date);
+    const tagEnd = this.dateCalculator.getEndOfMonth(date);
+
+    const pairs = await this.pairInfoRepository.findAll();
+
+    const cards = await this.userService.findCardsByUserId(
+      userId,
+      tagStart,
+      tagEnd,
+    );
+
+    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
+      cards,
+      tagStart,
+      tagEnd,
+    );
+
+    const sortedTagLogs = tagLogs.sort((a, b) =>
+      a.tag_at > b.tag_at ? 1 : -1,
+    );
+
+    // FIXME: 임시 조치임
+    const filteredTagLogs = sortedTagLogs.filter(
+      (v) => v.device_id !== 35 && v.device_id !== 16,
+    );
+
+    const trimmedTagLogs = await this.checkAndTrimTagLogs(
+      filteredTagLogs,
+      tagStart,
+      tagEnd,
+      pairs,
+    );
+
+    const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
 
     return resultPairs;
   }
