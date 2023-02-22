@@ -88,13 +88,13 @@ export class TagLogService {
    * @param taglogs TagLogDto[]
    * @return TagLogDto[]
    */
-  async testingtrimTagLogs(
+  async checkAndTrimTagLogs(
     taglogs: TagLogDto[], //해당일의 태그로그
     start: Date, //00:00
     end: Date, //23:59
     deviceInfo: PairInfoDto[],
   ): Promise<TagLogDto[]> {
-    this.logger.debug(`@trimTagLogs)`);
+    this.logger.debug(`@checkAndTrimTagLogs)`);
 
     // 가장 앞 로그 확인
     const firstLog = taglogs.at(0); 
@@ -142,6 +142,9 @@ export class TagLogService {
         });
       }
     }
+
+    //this.logger.debug(`taglogs:`, taglogs[0].tag_at, taglogs[1].tag_at, taglogs[2].tag_at, taglogs[3].tag_at);
+
     return taglogs;
   }
 
@@ -222,6 +225,7 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
   ): InOutLogType[] {
     this.logger.debug(`@getPairsByTagLogs)`);
+
     /**
      * 데이터를 날짜의 내림차순으로 정렬
      */
@@ -240,7 +244,7 @@ export class TagLogService {
     while (timeLines.length > 0) {
       // 가장 뒤의 원소(가장 늦은 날짜)를 뽑습니다.
       const val = timeLines.pop();
- 
+
       // 만약 퇴장로그로 가정한 로그가 없다면 뽑은 원소를 넣고 루프를 다시 실행합니다.
       if (leave === null) {
         leave = val;
@@ -332,11 +336,11 @@ export class TagLogService {
         temp = timeLines.pop();
       }
 
-      if (timeLines.length <= 0) {
+      if (timeLines.length < 0) {
         break;
       }
 
-      // this.logger.debug(`temp:`, temp.card_id, temp.device_id, temp.idx, temp.tag_at);
+      // this.logger.debug(`temp1:`, temp.device_id, temp.tag_at);
       
       // 내부에 있거나 중복 입실태그인 경우
       if (
@@ -364,9 +368,11 @@ export class TagLogService {
         temp = timeLines.pop();
       }
       
-      if (timeLines.length <= 0) {
+      if (timeLines.length < 0) {
         break;
       }
+
+      // this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
 
       // 중복 퇴실태그인 경우
       if (
@@ -380,60 +386,24 @@ export class TagLogService {
           outTimeStamp,
           durationSecond,
         });
-        //leave = temp;
-        //temp = null;
         leave = null;
         //this.logger.debug(`퇴실 중복`);
         continue;
       }
 
       // 만약 동일한 날짜에 속한다면 해당 쌍이 짝이 됩니다.
-      //todo: 새로운 trimTagLogs함수때문에 필요없어진 if문
-      if (this.dateCalculator.checkEqualDay(temp.tag_at, leave.tag_at)) {
-        const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
-        const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
-        resultPairs.push({
-          inTimeStamp,
-          outTimeStamp,
-          durationSecond: outTimeStamp - inTimeStamp,
-        });
-        this.logger.debug(`정상 태그 (같은 날)`);
-      } else {
-        // 만약 입장 로그와 퇴장 로그가 짝이 맞지만, 동일한 날짜에 속하지 않으면 일 단위로 자릅니다.
-        // 퇴장 로그의 정시 (00시)를 기준으로 두 날짜의 간격을 자릅니다. 두 날짜는 가상의 입퇴장 짝이 됩니다.
-        const virtualEnterTime = this.dateCalculator.getStartOfDate(
-          leave.tag_at,
-        );
-        const virtualLeaveTime = this.dateCalculator.getEndOfLastDate(
-          temp.tag_at,
-        );
+      const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
+      const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
+      resultPairs.push({
+        inTimeStamp,
+        outTimeStamp,
+        durationSecond: outTimeStamp - inTimeStamp,
+      });
+      //this.logger.debug(`정상 태그 (같은 날)`);
 
-        // 가상 입장/퇴장시간과 짝을 맞춥니다.
-        const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
-        const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
-        const virtualInTimeStamp = this.dateCalculator.toTimestamp(virtualEnterTime);
-        const virtualOutTimeStamp = this.dateCalculator.toTimestamp(virtualLeaveTime);
-        resultPairs.push({
-          inTimeStamp: this.dateCalculator.toTimestamp(temp.tag_at),
-          outTimeStamp: this.dateCalculator.toTimestamp(virtualLeaveTime),
-          durationSecond: virtualOutTimeStamp - inTimeStamp,
-        });
-        resultPairs.push({
-          inTimeStamp: this.dateCalculator.toTimestamp(virtualEnterTime),
-          outTimeStamp: this.dateCalculator.toTimestamp(leave.tag_at),
-          durationSecond: outTimeStamp - virtualInTimeStamp,
-            });
-            this.logger.debug(`정상 태그 (다른 날)`);
-          }
-          temp = null;
-          leave = null;
+      temp = null;
+      leave = null;
     }
-    
-    //resultPairs.push({
-    //  inTimeStamp: null,
-    //  outTimeStamp: null,
-    //  durationSecond: null,
-    //});
 
     return resultPairs;
   }
@@ -520,12 +490,14 @@ export class TagLogService {
       (v) => v.device_id !== 35 && v.device_id !== 16,
     );
 
-    const trimmedTagLogs = await this.testingtrimTagLogs(
+    const trimmedTagLogs = await this.checkAndTrimTagLogs(
       filteredTagLogs,
       tagStart,
       tagEnd,
       pairs,
     );
+
+    this.logger.debug(trimmedTagLogs.length);
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
     const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
