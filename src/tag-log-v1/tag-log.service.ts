@@ -62,18 +62,83 @@ export class TagLogService {
     const lastLog = taglogs.at(-1);
     if (lastLog) {
       // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
-      const beforelastLog = await this.tagLogRepository.findNextTagLog(
+      const afterLastLog = await this.tagLogRepository.findNextTagLog(
         [lastLog.card_id],
         lastLog.tag_at,
       );
       // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
-      if (beforelastLog !== null) {
+      if (afterLastLog !== null) {
         const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
         taglogs.push({
           tag_at: virtualLeaveTime,
-          device_id: beforelastLog.device_id,
+          device_id: afterLastLog.device_id,
           idx: -1,
-          card_id: beforelastLog.card_id,
+          card_id: afterLastLog.card_id,
+        });
+      }
+    }
+    return taglogs;
+  }
+
+  /**
+   * 전 날의 마지막 로그와 해당 일의 첫 로그,
+   * 해당 일의 마지막 로그와 다음 날의 첫 로그를 비교한 후
+   * 짝이 맞는 경우에만 가상출입로그를 넣어 반환해줍니다.
+   *
+   * @param taglogs TagLogDto[]
+   * @return TagLogDto[]
+   */
+  async testingtrimTagLogs(
+    taglogs: TagLogDto[], //해당일의 태그로그
+    start: Date, //00:00
+    end: Date, //23:59
+    deviceInfo: PairInfoDto[],
+  ): Promise<TagLogDto[]> {
+    this.logger.debug(`@trimTagLogs)`);
+
+    // 가장 앞 로그 확인
+    const firstLog = taglogs.at(0); 
+    if (firstLog) {
+      const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
+        [firstLog.card_id],
+        firstLog.tag_at,
+      );
+      // 어제의 마지막 로그가 IN이며, 오늘의 첫 로그가 OUT이면 가상 로그 넣어주기
+      if (
+        this.isInDevice(deviceInfo, beforeFirstLog.device_id)
+        &&
+        this.isOutDevice(deviceInfo, firstLog.device_id)
+      ) {
+        const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
+        taglogs.unshift({
+          tag_at: virtualEnterTime,
+          device_id: beforeFirstLog.device_id,
+          idx: -1,
+          card_id: beforeFirstLog.card_id,
+        });
+      }
+    }
+
+    // 가장 뒤 로그 확인
+    const lastLog = taglogs.at(-1);
+    if (lastLog) {
+      const afterLastLog = await this.tagLogRepository.findNextTagLog(
+        [lastLog.card_id],
+        lastLog.tag_at,
+      );
+      // 오늘의 마지막 로그가 IN이며, 내일의 첫 로그가 OUT이면 가상 로그 넣어주기
+      // todo: 반복되는데 삽입되는 요소는 달라서 나눠둠
+      if (
+        this.isInDevice(deviceInfo, lastLog.device_id)
+        &&
+        this.isOutDevice(deviceInfo, afterLastLog.device_id)
+      ) {
+        const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
+        taglogs.push({
+          tag_at: virtualLeaveTime,
+          device_id: afterLastLog.device_id,
+          idx: -1,
+          card_id: afterLastLog.card_id,
         });
       }
     }
@@ -175,7 +240,7 @@ export class TagLogService {
     while (timeLines.length > 0) {
       // 가장 뒤의 원소(가장 늦은 날짜)를 뽑습니다.
       const val = timeLines.pop();
-
+ 
       // 만약 퇴장로그로 가정한 로그가 없다면 뽑은 원소를 넣고 루프를 다시 실행합니다.
       if (leave === null) {
         leave = val;
@@ -256,41 +321,27 @@ export class TagLogService {
 
     const timeLines = taglogs;
 
-    //  const timeLines = taglogs
-    //.sort((a, b) => (a.tag_at < b.tag_at ? 1 : -1));
-    //.map((v) => ({
-    //  tag_at: v.tag_at,
-    //  device_id: v.device_id,
-    //}));
-
     const resultPairs: InOutLogType[] = [];
     
     let temp: TagLogDto | null = null;
     let leave: TagLogDto | null = null;
 
     // 타임라인 배열이 빌 때까지 루프를 돌립니다.
-    //todo: -1이 적용되지 않은 일반배열 받기
-    //그러면 다음날 짝은 밑에서만 맞춰질텐데, 잘 작동하는지가 의문!
     while (timeLines.length > 0) {
       if (temp === null) {
-        temp = timeLines.pop();
-      }
-
-      if (temp.idx === -1) {
         temp = timeLines.pop();
       }
 
       if (timeLines.length <= 0) {
         break;
       }
-      
-      //this.logger.debug(`temp:`, temp.card_id, temp.device_id, temp.idx, temp.tag_at);
-      //temp = null;
 
+      // this.logger.debug(`temp:`, temp.card_id, temp.device_id, temp.idx, temp.tag_at);
+      
       // 내부에 있거나 중복 입실태그인 경우
       if (
         this.isInDevice(deviceInfos, temp.device_id)
-        ) {
+      ) {
         const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
         const outTimeStamp = null;
         const durationSecond = null;
@@ -309,8 +360,9 @@ export class TagLogService {
         temp = null;
       }
       
-      if (temp === null) 
+      if (temp === null) {
         temp = timeLines.pop();
+      }
       
       if (timeLines.length <= 0) {
         break;
@@ -336,6 +388,7 @@ export class TagLogService {
       }
 
       // 만약 동일한 날짜에 속한다면 해당 쌍이 짝이 됩니다.
+      //todo: 새로운 trimTagLogs함수때문에 필요없어진 if문
       if (this.dateCalculator.checkEqualDay(temp.tag_at, leave.tag_at)) {
         const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
         const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
@@ -344,7 +397,7 @@ export class TagLogService {
           outTimeStamp,
           durationSecond: outTimeStamp - inTimeStamp,
         });
-        //this.logger.debug(`정상 태그 (같은 날)`);
+        this.logger.debug(`정상 태그 (같은 날)`);
       } else {
         // 만약 입장 로그와 퇴장 로그가 짝이 맞지만, 동일한 날짜에 속하지 않으면 일 단위로 자릅니다.
         // 퇴장 로그의 정시 (00시)를 기준으로 두 날짜의 간격을 자릅니다. 두 날짜는 가상의 입퇴장 짝이 됩니다.
@@ -370,7 +423,7 @@ export class TagLogService {
           outTimeStamp: this.dateCalculator.toTimestamp(leave.tag_at),
           durationSecond: outTimeStamp - virtualInTimeStamp,
             });
-            //this.logger.debug(`정상 태그 (다른 날)`);
+            this.logger.debug(`정상 태그 (다른 날)`);
           }
           temp = null;
           leave = null;
@@ -467,10 +520,11 @@ export class TagLogService {
       (v) => v.device_id !== 35 && v.device_id !== 16,
     );
 
-    const trimmedTagLogs = await this.trimTagLogs(
+    const trimmedTagLogs = await this.testingtrimTagLogs(
       filteredTagLogs,
       tagStart,
       tagEnd,
+      pairs,
     );
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
