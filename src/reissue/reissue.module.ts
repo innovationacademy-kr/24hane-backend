@@ -4,6 +4,7 @@ import { ReissueController } from './reissue.controller';
 
 @Module({
   controllers: [ReissueController],
-  providers: [ReissueService]
+  providers: [ReissueService],
+  exports: [ReissueService],
 })
 export class ReissueModule {}
