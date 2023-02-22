@@ -256,28 +256,41 @@ export class TagLogService {
 
     const timeLines = taglogs;
 
+    //  const timeLines = taglogs
+    //.sort((a, b) => (a.tag_at < b.tag_at ? 1 : -1));
+    //.map((v) => ({
+    //  tag_at: v.tag_at,
+    //  device_id: v.device_id,
+    //}));
+
     const resultPairs: InOutLogType[] = [];
     
     let temp: TagLogDto | null = null;
     let leave: TagLogDto | null = null;
 
     // 타임라인 배열이 빌 때까지 루프를 돌립니다.
+    //todo: -1이 적용되지 않은 일반배열 받기
+    //그러면 다음날 짝은 밑에서만 맞춰질텐데, 잘 작동하는지가 의문!
     while (timeLines.length > 0) {
       if (temp === null) {
         temp = timeLines.pop();
-        if (temp.idx === -1) {
-          temp = timeLines.pop();
-        }
+      }
+
+      if (temp.idx === -1) {
+        temp = timeLines.pop();
       }
 
       if (timeLines.length <= 0) {
         break;
       }
+      
+      //this.logger.debug(`temp:`, temp.card_id, temp.device_id, temp.idx, temp.tag_at);
+      //temp = null;
 
       // 내부에 있거나 중복 입실태그인 경우
       if (
         this.isInDevice(deviceInfos, temp.device_id)
-      ) {
+        ) {
         const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
         const outTimeStamp = null;
         const durationSecond = null;
@@ -299,6 +312,10 @@ export class TagLogService {
       if (temp === null) 
         temp = timeLines.pop();
       
+      if (timeLines.length <= 0) {
+        break;
+      }
+
       // 중복 퇴실태그인 경우
       if (
         this.isOutDevice(deviceInfos, temp.device_id)
@@ -311,7 +328,9 @@ export class TagLogService {
           outTimeStamp,
           durationSecond,
         });
-        leave = temp;
+        //leave = temp;
+        //temp = null;
+        leave = null;
         //this.logger.debug(`퇴실 중복`);
         continue;
       }
@@ -355,7 +374,13 @@ export class TagLogService {
           }
           temp = null;
           leave = null;
-        }
+    }
+    
+    //resultPairs.push({
+    //  inTimeStamp: null,
+    //  outTimeStamp: null,
+    //  durationSecond: null,
+    //});
 
     return resultPairs;
   }
