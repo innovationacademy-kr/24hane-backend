@@ -193,6 +193,7 @@ export class TagLogService {
         leave = temp;
       }
     }
+
     return resultPairs;
   }
 
@@ -287,6 +288,57 @@ export class TagLogService {
 
     return resultPairs;
   }
+
+  /**
+   * 입력받은 month 개월수 만큼 총 산정시간 반환
+   *
+   * @param userId 사용자 ID
+   * @param date 날짜
+   * @returns number
+   */
+    async getPerMonthByNum(userId: number, date: Date, month: number): Promise<number> {
+      this.logger.debug(`@getPerMonthByNum) ${userId}, ${date}`);
+      const tagStart = new Date(date.getFullYear(), date.getMonth() - (month-1));
+      const tagEnd =  new Date(date.getFullYear(), date.getMonth() + 1);
+  
+      const pairs = await this.pairInfoRepository.findAll();
+  
+      const cards = await this.userService.findCardsByUserId(
+        userId,
+        tagStart,
+        tagEnd,
+      );
+  
+      const tagLogs = await this.tagLogRepository.findTagLogsByCards(
+        cards,
+        tagStart,
+        tagEnd,
+      );
+  
+      const sortedTagLogs = tagLogs.sort((a, b) =>
+        a.tag_at > b.tag_at ? 1 : -1,
+      );
+  
+      // FIXME: 임시 조치임
+      const filteredTagLogs = sortedTagLogs.filter(
+        (v) => v.device_id !== 35 && v.device_id !== 16,
+      );
+  
+      const trimmedTagLogs = await this.trimTagLogs(
+        filteredTagLogs,
+        tagStart,
+        tagEnd,
+      );
+
+      const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+
+      let totalSecond: number = 0;
+      resultPairs.forEach(element => {
+        totalSecond += element.durationSecond;
+      });
+  
+      return totalSecond;
+    }
 
   /**
    * 사용자가 클러스터에 체류중인지 확인합니다.
