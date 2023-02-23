@@ -190,7 +190,7 @@ export class TagLogService {
     //todo: find하기
     deviceInfos.forEach(deviceInfo => {
       if(deviceInfo.in_device === targetDevice) {
-        this.logger.debug(`@isInDevice)`);
+        this.logger.debug(`@isInDevice) ${targetDevice}`);
         ret = true;
       }
     });
@@ -212,7 +212,7 @@ export class TagLogService {
     
     deviceInfos.forEach(deviceInfo => {
       if(deviceInfo.out_device === targetDevice) {
-        this.logger.debug(`@isOutDevice)`);
+        this.logger.debug(`@isOutDevice) ${targetDevice}`);
         ret = true;
       }
     });
@@ -340,12 +340,12 @@ export class TagLogService {
       if (temp === null) {
         temp = timeLines.pop();
       }
-
+      
       if (timeLines.length < 0) {
         break;
       }
+      //this.logger.debug(`temp1:`, temp.device_id, temp.tag_at);
 
-      // this.logger.debug(`temp1:`, temp.device_id, temp.tag_at);
       
       // 내부에 있거나 중복 입실태그인 경우
       if (
@@ -360,6 +360,7 @@ export class TagLogService {
           durationSecond,
         });
         temp = null;
+        leave = null;
         //this.logger.debug(`입실 중복`);
         continue;
       }
@@ -376,8 +377,8 @@ export class TagLogService {
       if (timeLines.length < 0) {
         break;
       }
+      //this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
 
-      // this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
 
       // 중복 퇴실태그인 경우
       if (
@@ -392,6 +393,7 @@ export class TagLogService {
           durationSecond,
         });
         leave = null;
+        temp = null;
         //this.logger.debug(`퇴실 중복`);
         continue;
       }
@@ -445,7 +447,9 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
     const trimmedTagLogs = await this.trimTagLogs(
@@ -492,7 +496,9 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
     const trimmedTagLogs = await this.checkAndTrimTagLogs(
@@ -542,7 +548,9 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
     const trimmedTagLogs = await this.trimTagLogs(
@@ -588,7 +596,9 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
     const trimmedTagLogs = await this.checkAndTrimTagLogs(

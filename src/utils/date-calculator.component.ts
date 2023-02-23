@@ -96,7 +96,7 @@ export class DateCalculator {
    * @return number 타임스탬프
    */
   toTimestamp(date: Date): number {
-    this.logger.debug(`@toTimestamp) ${date}`);
+    //this.logger.debug(`@toTimestamp) ${date}`);
     return Math.floor(date.getTime() / 1000);
   }
 
