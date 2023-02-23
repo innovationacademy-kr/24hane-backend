@@ -11,10 +11,10 @@ export class ReissueService {
     @Inject(ConfigService)
     private configService: ConfigService,
     @Inject('IUserCardRepository')
-    private UserCardRepository: IUserCardRepository
+    private UserCardRepository: IUserCardRepository,
   ) {}
 
-  async getReissueState(user_id:number): Promise<string> {
+  async getReissueState(user_id: number): Promise<string> {
     const envSsid = this.configService.get<string>(
       'googleCardApi.spreadsheetId',
     );
@@ -34,25 +34,26 @@ export class ReissueService {
         range: 'test',
       });
 
-      const result = readData.data.values
-      const filtered = []
+      const result = readData.data.values;
+      const filtered = [];
       for (const row of result) {
-        if (row.includes(user_id)) {
-          filtered.push(row)
+        if (row[0] == user_id) {
+          filtered.push(row);
         }
       }
+      console.log(filtered);
       const recent = filtered.pop();
-      const isIssued = recent[3]
-      const isPickedUp = recent[4]
-      let state = ''
+      const isIssued = recent[3];
+      const isPickedUp = recent[4];
+      let state = '';
       if (isIssued) {
         if (isPickedUp) {
-          state = 'done'
+          state = 'done';
         } else {
-          state = 'pick up requested'
+          state = 'pick up requested';
         }
       } else {
-        state = 'in_progress'
+        state = 'in_progress';
       }
       return state;
     } catch (e) {
@@ -61,12 +62,14 @@ export class ReissueService {
   }
 
   async reissueRequest(user: UserSessionDto): Promise<void> {
-    const requestedAt = new Date(
-      Date.now())
+    const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
+    const requestedAt = new Date(Date.now() + KR_TIME_DIFF)
       .toISOString()
       .replace(/T/, ' ')
-      .replace(/\..+/, '')
-    const initialCardNo = (await this.UserCardRepository.findInitialCardByUserId(user.user_id)).pop();
+      .replace(/\..+/, '');
+    const initialCardNo = (
+      await this.UserCardRepository.findInitialCardByUserId(user.user_id)
+    ).pop();
 
     const envSsid = this.configService.get<string>(
       'googleCardApi.spreadsheetId',
@@ -81,9 +84,16 @@ export class ReissueService {
         version: 'v4',
         auth: authClientObject,
       });
-      console.log(typeof(initialCardNo));
+      console.log(typeof initialCardNo);
       console.log(initialCardNo);
-      const data = [user.user_id, user.login, requestedAt, '', '', initialCardNo];
+      const data = [
+        user.user_id,
+        user.login,
+        requestedAt,
+        '',
+        '',
+        initialCardNo,
+      ];
       const readData = await googleSheetsInstance.spreadsheets.values.append({
         spreadsheetId: envSsid,
         auth: auth,
@@ -96,17 +106,19 @@ export class ReissueService {
     } catch (e) {
       console.log(e);
     } finally {
-        const data = {
-          login: user.login,
-          initial_card_no: initialCardNo,
-          requested_at: requestedAt,
-        }
-      axios.post('jandi url', data).then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+      const data = {
+        login: user.login,
+        initial_card_no: initialCardNo,
+        requested_at: requestedAt,
+      };
+      axios
+        .post('jandi_url', data)
+        // .then(function (response) {
+        //   console.log(response);
+        // })
+        .catch(function (error) {
+          console.log(error);
+        });
     }
   }
 }

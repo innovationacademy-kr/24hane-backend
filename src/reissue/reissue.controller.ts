@@ -25,16 +25,12 @@ export class ReissueController {
   constructor(private reissueService: ReissueService) {}
 
   @Get()
-  async getReissueState(
-    @User() user:UserSessionDto,
-  ): Promise<string> {
+  async getReissueState(@User() user: UserSessionDto): Promise<string> {
     const result = await this.reissueService.getReissueState(user.user_id);
     return result;
   }
   @Post('request')
-  async reissueRequest(
-    @User() user:UserSessionDto,
-    ): Promise<void> {
+  async reissueRequest(@User() user: UserSessionDto): Promise<void> {
     const result = await this.reissueService.reissueRequest(user);
     console.log(result);
   }
