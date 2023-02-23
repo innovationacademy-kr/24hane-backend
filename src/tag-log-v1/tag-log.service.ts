@@ -341,7 +341,7 @@ export class TagLogService {
         temp = timeLines.pop();
       }
       
-      if (timeLines.length < 0) {
+      if (timeLines.length <= 0) {
         break;
       }
       //this.logger.debug(`temp1:`, temp.device_id, temp.tag_at);
@@ -374,7 +374,7 @@ export class TagLogService {
         temp = timeLines.pop();
       }
       
-      if (timeLines.length < 0) {
+      if (timeLines.length <= 0) {
         break;
       }
       //this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
