@@ -360,7 +360,7 @@ export class TagLogService {
           durationSecond,
         });
         temp = null;
-        leave = null;
+        //leave = null;
         //this.logger.debug(`입실 중복`);
         continue;
       }
@@ -393,7 +393,7 @@ export class TagLogService {
           durationSecond,
         });
         leave = null;
-        temp = null;
+        //temp = null;
         //this.logger.debug(`퇴실 중복`);
         continue;
       }
