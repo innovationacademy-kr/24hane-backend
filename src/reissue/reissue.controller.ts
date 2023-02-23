@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { ReissueRequest } from './dto/reissue-request.dto';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
@@ -25,14 +24,18 @@ import { ReissueService } from './reissue.service';
 export class ReissueController {
   constructor(private reissueService: ReissueService) {}
 
-  @Get('')
-  async getReissueState(): Promise<boolean> {
-    const result = await this.reissueService.getReissueState();
-    console.log(result);
-    return true;
+  @Get()
+  async getReissueState(
+    @User() user:UserSessionDto,
+  ): Promise<string> {
+    const result = await this.reissueService.getReissueState(user.user_id);
+    return result;
   }
-  @Post()
-  async reissueRequest(@Body() dto: ReissueRequest): Promise<void> {
-    console.log(dto);
+  @Post('request')
+  async reissueRequest(
+    @User() user:UserSessionDto,
+    ): Promise<void> {
+    const result = await this.reissueService.reissueRequest(user);
+    console.log(result);
   }
 }
