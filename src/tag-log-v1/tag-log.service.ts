@@ -8,7 +8,6 @@ import { IPairInfoRepository } from './repository/interface/pair-info-repository
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
 import { UserService } from 'src/user/user.service';
 import { InOutDto } from './dto/inout.dto';
-import { time } from 'console';
 
 @Injectable()
 export class TagLogService {
@@ -148,8 +147,6 @@ export class TagLogService {
       }
     }
 
-    //this.logger.debug(`taglogs:`, taglogs[0].tag_at, taglogs[1].tag_at, taglogs[2].tag_at, taglogs[3].tag_at);
-
     return taglogs;
   }
 
@@ -184,9 +181,8 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    
     let ret: boolean = false;
-    
+
     //todo: find하기
     deviceInfos.forEach(deviceInfo => {
       if(deviceInfo.in_device === targetDevice) {
@@ -194,6 +190,7 @@ export class TagLogService {
         ret = true;
       }
     });
+
     return ret;
   }
 
@@ -207,15 +204,15 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    
     let ret: boolean = false;
-    
+
     deviceInfos.forEach(deviceInfo => {
       if(deviceInfo.out_device === targetDevice) {
         this.logger.debug(`@isOutDevice) ${targetDevice}`);
         ret = true;
       }
     });
+
     return ret;
   }
 
@@ -329,9 +326,8 @@ export class TagLogService {
     this.logger.debug(`@getAllPairsByTagLogs)`);
 
     const timeLines = taglogs;
-
     const resultPairs: InOutLogType[] = [];
-    
+
     let temp: TagLogDto | null = null;
     let leave: TagLogDto | null = null;
 
@@ -340,13 +336,11 @@ export class TagLogService {
       if (temp === null) {
         temp = timeLines.pop();
       }
-      
+
       if (timeLines.length <= 0) {
         break;
       }
-      //this.logger.debug(`temp1:`, temp.device_id, temp.tag_at);
 
-      
       // 내부에 있거나 중복 입실태그인 경우
       if (
         this.isInDevice(deviceInfos, temp.device_id)
@@ -360,25 +354,23 @@ export class TagLogService {
           durationSecond,
         });
         temp = null;
-        //leave = null;
         //this.logger.debug(`입실 중복`);
         continue;
       }
-      
+
       if (leave === null) {
         leave = temp;
         temp = null;
       }
-      
+
       if (temp === null) {
         temp = timeLines.pop();
       }
-      
+
       if (timeLines.length <= 0) {
         break;
       }
       //this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
-
 
       // 중복 퇴실태그인 경우
       if (
@@ -393,7 +385,6 @@ export class TagLogService {
           durationSecond,
         });
         leave = null;
-        //temp = null;
         //this.logger.debug(`퇴실 중복`);
         continue;
       }
@@ -507,8 +498,6 @@ export class TagLogService {
       tagEnd,
       pairs,
     );
-
-    //this.logger.debug(trimmedTagLogs.length);
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
     const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
