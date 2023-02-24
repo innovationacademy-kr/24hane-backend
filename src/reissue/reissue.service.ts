@@ -7,7 +7,7 @@ import { GoogleSpreadSheetApi } from './googleAuth.component';
 
 @Injectable()
 export class ReissueService {
-  private logger = new Logger();
+  private logger = new Logger(ReissueService.name);
 
   constructor(
     private gsApi: GoogleSpreadSheetApi,
@@ -27,36 +27,40 @@ export class ReissueService {
    * @param user_id number
    * @returns 출입카드 재신청 상태 string
    */
-  async getReissueState(user_id: number): Promise<string> {
-      const gs = await this.gsApi.getGoogleSheetInstance()
-      const allCardReissues = await gs.spreadsheets.values.get({
-        auth: this.gsApi.auth,
-        spreadsheetId: this.gsApi.gsId,
-        range: this.gsApi.gsRange,
-      });
+  async getReissueState(
+    user_id: number
+  ): Promise<string> {
+    this.logger.debug(`@getReissueState) ${user_id}`);
+    const gs = await this.gsApi.getGoogleSheetInstance()
+    const allCardReissues = await gs.spreadsheets.values.get({
+      auth: this.gsApi.auth,
+      spreadsheetId: this.gsApi.gsId,
+      range: this.gsApi.gsRange,
+    });
 
-      const result = allCardReissues.data.values;
-      const filtered = [];
-      for (const row of result) {
-        if (row[0] == user_id) {
-          filtered.push(row);
-        }
+    const result = allCardReissues.data.values;
+    const filtered = [];
+    for (const row of result) {
+      if (row[0] == user_id) {
+        filtered.push(row);
       }
-      const recent = filtered.pop();
-      const isIssued = recent[3];
-      const isPickedUp = recent[4];
-      let state = '';
-      if (isIssued) {
-        if (isPickedUp) {
-          state = 'done';
-        } else {
-          state = 'pick up requested';
-        }
+    }
+    const recent = filtered.pop();
+    const isIssued = recent[3];
+    const isPickedUp = recent[4];
+    let state = '';
+    if (isIssued) {
+      if (isPickedUp) {
+        state = 'done';
       } else {
-        state = 'in_progress';
+        state = 'pick up requested';
       }
-      return state;
+    } else {
+      state = 'in_progress';
+    }
+    return state;
   }
+
   /**
    * 출입카드 재신청
    * 구글 스프레드시트에 user_id, 인트라, 신청 날짜/시간, 기존 카드번호 row 추가
