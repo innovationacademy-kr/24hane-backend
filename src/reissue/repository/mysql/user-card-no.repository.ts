@@ -2,7 +2,6 @@ import { IUserCardRepository } from '../interface/user-card-no.repository.interf
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
 import { Repository } from 'typeorm/repository/Repository';
-import { CardIssuance } from '../../../entities/card-issuance.entity';
 
 
 export class UserCardRepository implements IUserCardRepository {

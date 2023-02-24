@@ -4,6 +4,7 @@ import { ReissueController } from './reissue.controller';
 import { UserCardRepository } from './repository/mysql/user-card-no.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
+import { GoogleSpreadSheetApi } from './googleAuth.component';
 
 const userCardRepo = {
   provide: 'IUserCardRepository',
@@ -14,6 +15,6 @@ const userCardRepo = {
   imports: [TypeOrmModule.forFeature([UserInfo])],
   exports: [ReissueService],
   controllers: [ReissueController],
-  providers: [userCardRepo, ReissueService],
+  providers: [userCardRepo, ReissueService, GoogleSpreadSheetApi],
 })
 export class ReissueModule {}

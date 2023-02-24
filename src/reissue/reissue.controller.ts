@@ -1,14 +1,15 @@
 import {
-  Body,
   Controller,
   Get,
-  ParseIntPipe,
   Post,
-  Query,
-  Param,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
