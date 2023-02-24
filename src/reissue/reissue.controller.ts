@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -13,7 +8,9 @@ import {
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
-import { CardReissueType } from './dto/reissue.type';
+import { reissueRequestDto } from './dto/reissueRequest.dto';
+import { ReissueRequestType } from './dto/reissueRequest.type';
+import { reissueSateDto } from './dto/reissueState.dto';
 import { ReissueService } from './reissue.service';
 
 @ApiTags('카드 재발급 관련')
@@ -29,29 +26,54 @@ export class ReissueController {
   @Get()
   @ApiOperation({
     summary: '카드 재발급 신청 현황 조회',
-    description: '사용자의 카드 재발급 신청 중 가장 최신 신청 건에 대한 신청 현황을 조회합니다.'
+    description:
+      '사용자의 카드 재발급 신청 중 가장 최신 신청 건에 대한 신청 현황을 조회합니다.',
   })
   @ApiResponse({
     status: 200,
-    type: CardReissueType,
-    description: '조회 성공'
+    description: '조회 성공',
+    content: {
+      'application/json': {
+        examples: {
+          '신청완료/카드제작중': {
+            value: { state: 'in_progress' },
+            description: '카드 재발급 신청 후 제작 진행중인 상태',
+          },
+          제작완료: {
+            value: { state: 'pick_up_requested' },
+            description:
+              '인포에서 재발급 카드 수령 후, 권한 부여, 24hane에 반영까지 완료된 상태',
+          },
+          수령완료: {
+            value: { state: 'picked_up' },
+            description: '사용자가 수령완료한 상태',
+          },
+        },
+      },
+    },
   })
-  async getReissueState(@User() user: UserSessionDto): Promise<string> {
+  @ApiResponse({ status: 404, description: '사용자의 신청내역을 찾을 수 없음' })
+  async getReissueState(@User() user: UserSessionDto): Promise<reissueSateDto> {
     const result = await this.reissueService.getReissueState(user.user_id);
     return result;
   }
+
   @Post('request')
   @ApiOperation({
     summary: '카드 재발급 신청',
-    description: '카드 재발급 신청'
+    description: '카드 재발급 신청',
   })
   @ApiResponse({
     status: 200,
-    type: CardReissueType,
-    description: '신청 성공'
+    type: ReissueRequestType,
+    description: '신청 성공',
   })
-  async reissueRequest(@User() user: UserSessionDto): Promise<void> {
+  @ApiResponse({ status: 404, description: '사용자의 기존 카드번호 없음' })
+  @ApiResponse({ status: 503, description: '구글스프레드시트/잔디알림 실패' })
+  async reissueRequest(
+    @User() user: UserSessionDto,
+  ): Promise<reissueRequestDto> {
     const result = await this.reissueService.reissueRequest(user);
-    console.log(result);
+    return result;
   }
 }
