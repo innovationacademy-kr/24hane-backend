@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -8,6 +8,7 @@ import {
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
+import { reissueFinishedDto } from './dto/reissueFinished.dto';
 import { reissueRequestDto } from './dto/reissueRequest.dto';
 import { ReissueRequestType } from './dto/reissueRequest.type';
 import { reissueSateDto } from './dto/reissueState.dto';
@@ -74,6 +75,28 @@ export class ReissueController {
     @User() user: UserSessionDto,
   ): Promise<reissueRequestDto> {
     const result = await this.reissueService.reissueRequest(user);
+    return result;
+  }
+
+  @Patch('finish')
+  @ApiOperation({
+    summary: '재발급 카드 수령 완료',
+    description: '재발급 카드 수령 완료',
+  })
+  @ApiResponse({
+    status: 200,
+    type: ReissueRequestType,
+    description: '재발급 카드 수령완료',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자의 카드 재발급 신청내역 없음',
+  })
+  @ApiResponse({ status: 503, description: '구글스프레드시트/잔디알림 실패' })
+  async patchReissueState(
+    @User() user: UserSessionDto,
+  ): Promise<reissueFinishedDto> {
+    const result = await this.reissueService.patchReissueState(user);
     return result;
   }
 }

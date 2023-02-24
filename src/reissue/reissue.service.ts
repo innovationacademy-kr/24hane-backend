@@ -12,11 +12,10 @@ import { IUserCardRepository } from './repository/interface/user-card-no.reposit
 import { GoogleSpreadSheetApi } from './googleAuth.component';
 import { reissueSateDto } from './dto/reissueState.dto';
 import { reissueRequestDto } from './dto/reissueRequest.dto';
+import { reissueFinishedDto } from './dto/reissueFinished.dto';
 
 @Injectable()
 export class ReissueService {
-  public logger = new Logger(ReissueService.name);
-
   constructor(
     private gsApi: GoogleSpreadSheetApi,
     @Inject(ConfigService)
@@ -24,8 +23,18 @@ export class ReissueService {
     @Inject('IUserCardRepository')
     private UserCardRepository: IUserCardRepository,
   ) {}
-
+  private logger = new Logger(ReissueService.name);
+  private gs = this.gsApi.getGoogleSheetInstance();
   private jandiWebhook = this.configService.get<string>('jandi.webhook');
+
+  getTimeNowKST(): string {
+    const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
+    const requestedAt = new Date(Date.now() + KR_TIME_DIFF)
+      .toISOString()
+      .replace(/T/, ' ')
+      .replace(/\..+/, '');
+    return requestedAt;
+  }
   /**
    * 사용자의 출입카드 재신청에 대한 상태를 string으로 반환합니다.
    * 상태는 총 3단계 (in_progress, pick up requested, done)
@@ -39,14 +48,7 @@ export class ReissueService {
     this.logger.debug(
       `@getReissueState) reissue state requested from user_id: ${user_id}`,
     );
-    const gs = await this.gsApi.getGoogleSheetInstance();
-    const allCardReissues = await gs.spreadsheets.values.get({
-      auth: this.gsApi.auth,
-      spreadsheetId: this.gsApi.gsId,
-      range: this.gsApi.gsRange,
-    });
-
-    const result = allCardReissues.data.values;
+    const result = await this.gsApi.getAllValues();
     const filtered = [];
     for (const row of result) {
       if (row[0] == user_id) {
@@ -73,19 +75,13 @@ export class ReissueService {
   }
 
   /**
-   * 출입카드 재신청
-   * 구글 스프레드시트에 user_id, 인트라, 신청 날짜/시간, 기존 카드번호 row 추가
    * @param user 사용자
    */
   async reissueRequest(user: UserSessionDto): Promise<reissueRequestDto> {
     this.logger.debug(
       `@reissueRequest) ${user.login} requested for card reissuance.`,
     );
-    const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
-    const requestedAt = new Date(Date.now() + KR_TIME_DIFF)
-      .toISOString()
-      .replace(/T/, ' ')
-      .replace(/\..+/, '');
+    const requestedAt = this.getTimeNowKST();
     const initialCardNo = (
       await this.UserCardRepository.findInitialCardByUserId(user.user_id)
     ).pop();
@@ -94,10 +90,9 @@ export class ReissueService {
       throw new NotFoundException('기존 카드번호 없음');
     }
 
-    const gs = await this.gsApi.getGoogleSheetInstance();
     const data = [user.user_id, user.login, requestedAt, '', '', initialCardNo];
     try {
-      await gs.spreadsheets.values.append({
+      (await this.gs).spreadsheets.values.append({
         spreadsheetId: this.gsApi.gsId,
         auth: this.gsApi.auth,
         range: this.gsApi.gsRange,
@@ -134,8 +129,62 @@ export class ReissueService {
     }
     return {
       login: user.login,
-      initial_card_no: initialCardNo,
       requested_at: requestedAt,
+    };
+  }
+  /**
+   * 최신 재발급 신청내역에 대하여 구글스프레드 시트 수령완료 행 업데이트
+   * @param user 사용자
+   */
+  async patchReissueState(user: UserSessionDto): Promise<reissueFinishedDto> {
+    this.logger.debug(
+      `@patchReissueState) ${user.login} requested for card reissuance.`,
+    );
+    const result = await this.gsApi.getAllValues();
+    const filtered = [];
+    result.forEach((row, index) => {
+      if (row[0] == user.user_id) {
+        filtered.push({ index: index, row: row });
+      }
+    });
+    if (!filtered.length) {
+      throw new NotFoundException('신청내역 없음');
+    }
+    const recent = filtered.pop();
+    const rowNum = recent['index'] + 1;
+    (await this.gs).spreadsheets.values.update({
+      spreadsheetId: this.gsApi.gsId,
+      range: this.gsApi.gsRange + `!E${rowNum}`,
+      requestBody: {
+        values: [['O']],
+      },
+      valueInputOption: 'USER_ENTERED',
+    });
+    const initialCardNo = recent['row'][5];
+    const newCardNo = recent['row'][6];
+    const pickedUpAt = this.getTimeNowKST();
+    try {
+      const jandiData = {
+        login: user.login,
+        initial_card_no: initialCardNo,
+        new_card_no: newCardNo,
+        picked_up_at: pickedUpAt,
+      };
+      await axios.post(this.jandiWebhook, jandiData);
+      this.logger.debug(
+        `@reissueRequest) send jandi alarm for ${user.login}'s card reissuance request`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `@reissueRequest) failed to alarm jandi for new card issuance for ${user.login}: ${error.message}`,
+      );
+      throw new ServiceUnavailableException(
+        `재발급 카드 수령완료 잔디알림 실패: ${error.message}`,
+      );
+    }
+    return {
+      login: user.login,
+      picked_up_at: pickedUpAt,
     };
   }
 }

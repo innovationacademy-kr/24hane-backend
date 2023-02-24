@@ -45,4 +45,15 @@ export class GoogleSpreadSheetApi {
     });
     return googleSheetsInstance;
   }
+
+  async getAllValues() {
+    const gs = await this.getGoogleSheetInstance();
+    const allCardReissues = await gs.spreadsheets.values.get({
+      auth: this.auth,
+      spreadsheetId: this.gsId,
+      range: this.gsRange,
+    });
+    const result = allCardReissues.data.values;
+    return result;
+  }
 }
