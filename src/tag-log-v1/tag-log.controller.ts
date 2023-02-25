@@ -20,6 +20,7 @@ import { UserInfoType } from './dto/user-Info.type';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { TagLogService } from './tag-log.service';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
+import { DateCalculator } from 'src/utils/date-calculator.component';
 
 @ApiTags('체류 시간 산출')
 @Controller({
@@ -31,7 +32,10 @@ import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 export class TagLogController {
   private logger = new Logger(TagLogController.name);
 
-  constructor(private tagLogService: TagLogService) {}
+  constructor(
+    private tagLogService: TagLogService,
+    private dateCalculator: DateCalculator,
+  ) {}
 
   /**
    * 특정 일에 대해 체류했던 시간을 조회합니다.
@@ -87,6 +91,54 @@ export class TagLogController {
       inOutLogs: results,
     };
   }
+
+  /**
+   * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
+   *
+   * @param user 로그인한 사용자 세션
+   * @returns number
+   */
+    @ApiOperation({
+      summary: '주차별 체류시간 조회',
+      description: '주차별 체류시간을 조회합니다.',
+    })
+    @ApiResponse({
+      status: 200,
+      type: UserInOutLogsType,
+      description: '조회 성공',
+    })
+    @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
+    @ApiResponse({ status: 401, description: '접근 권한 없음' })
+    @ApiResponse({
+      status: 500,
+      description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
+    })
+    @ApiQuery({
+      name: 'year',
+      description: '년도',
+      required: true,
+    })
+    @ApiQuery({
+      name: 'week',
+      description: '주차',
+      required: true,
+    })
+    @Get('oneweek')
+    async getOneWeek(
+      @User() user: UserSessionDto,
+      @Query('year', ParseIntPipe) year: number,
+      @Query('week', ParseIntPipe) week: number,
+    ): Promise<number> {
+      this.logger.debug(`@getPerWeek) ${year}-${week} by ${user.login}`);
+  
+      const date = this.dateCalculator.getDateOfWeek(year, week-1);
+
+      this.logger.debug(`date:`, date);
+  
+      const totalSecond = await this.tagLogService.getPerWeek(user.user_id, date);
+  
+      return totalSecond;
+    }
 
   /**
    * 특정 월에 대해 체류했던 시간을 조회합니다.

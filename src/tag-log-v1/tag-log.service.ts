@@ -91,7 +91,7 @@ export class TagLogService {
     inDevice: number,
     outDevice: number,
   ): boolean {
-    this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
+    //this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
     // TODO: O(N) 보다 더 적게 시간을 소요하도록 리팩터링 필요
     const find = deviceInfos.find(
       (device) =>
@@ -240,6 +240,60 @@ export class TagLogService {
     const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
 
     return resultPairs;
+  }
+
+  /**
+   * 인자로 들어가는 사용자 ID와 날짜에 대한 주별 누적시간을 반환합니다.
+   *
+   * @param userId 사용자 ID
+   * @param date 날짜
+   * @returns InOutLogType[]
+   */
+  //todo: name
+  async getPerWeek(userId: number, date: Date): Promise<number> {
+    this.logger.debug(`@getPerWeek) ${userId}, ${date}`);
+    const tagStart = this.dateCalculator.getStartOfDate(date);
+    const tagEnd = this.dateCalculator.getEndOfWeek(date);
+
+    //this.logger.debug(`start and end: ${tagStart}, ${tagEnd}`);
+
+    const pairs = await this.pairInfoRepository.findAll();
+
+    const cards = await this.userService.findCardsByUserId(
+      userId,
+      tagStart,
+      tagEnd,
+    );
+
+    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
+      cards,
+      tagStart,
+      tagEnd,
+    );
+
+    const sortedTagLogs = tagLogs.sort((a, b) =>
+      a.tag_at > b.tag_at ? 1 : -1,
+    );
+
+    // FIXME: 임시 조치임
+    const filteredTagLogs = sortedTagLogs.filter(
+      (v) => v.device_id !== 35 && v.device_id !== 16,
+    );
+
+    const trimmedTagLogs = await this.trimTagLogs(
+      filteredTagLogs,
+      tagStart,
+      tagEnd,
+    );
+
+    const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+
+    let totalSecond: number = 0;
+    resultPairs.forEach(element => {
+      totalSecond += element.durationSecond;
+    });
+
+    return totalSecond;
   }
 
   /**
