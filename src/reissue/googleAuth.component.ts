@@ -57,7 +57,7 @@ export class GoogleSpreadSheetApi {
 
   async appendValues(data: (String | Number)[]): Promise<void> {
     const gs = await this.getGoogleSheetInstance();
-    const append = await gs.spreadsheets.values.append({
+    await gs.spreadsheets.values.append({
       auth: this.auth,
       spreadsheetId: this.gsId,
       range: this.gsRange,
