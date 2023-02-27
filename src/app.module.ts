@@ -8,8 +8,6 @@ import { ExtModule } from './ext/ext.module';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
 import { UserModule } from './user/user.module';
-//import { UsageModule } from './usage/usage.module';
-//import { WebhookModule } from './webhook/webhook.module';
 import { ReissueModule } from './reissue/reissue.module';
 
 @Module({
@@ -29,7 +27,6 @@ import { ReissueModule } from './reissue/reissue.module';
     ReissueModule,
   ],
   providers: [SessionMiddleware],
-  // controllers: [ReissueController],
 })
 export class AppModule implements NestModule {
   constructor(public sessionMiddleware: SessionMiddleware) {}
