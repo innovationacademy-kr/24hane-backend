@@ -62,7 +62,7 @@ export class ReissueController {
   @Post('request')
   @ApiOperation({
     summary: '카드 재발급 신청',
-    description: '카드 재발급 신청',
+    description: '사용자의 카드 재발급 신청을 요청합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -81,12 +81,12 @@ export class ReissueController {
   @Patch('finish')
   @ApiOperation({
     summary: '재발급 카드 수령 완료',
-    description: '재발급 카드 수령 완료',
+    description: '사용자의 카드 재발급 신청 상태를 수령완료/완료로 변경합니다.',
   })
   @ApiResponse({
     status: 200,
     type: ReissueRequestType,
-    description: '재발급 카드 수령완료',
+    description: '카드 재발급 신청 상태 수령완료로 변경',
   })
   @ApiResponse({
     status: 404,

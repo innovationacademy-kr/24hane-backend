@@ -23,8 +23,8 @@ export class ReissueService {
     @Inject('IUserCardRepository')
     private UserCardRepository: IUserCardRepository,
   ) {}
+
   private logger = new Logger(ReissueService.name);
-  private gs = this.gsApi.getGoogleSheetInstance();
   private jandiWebhook = this.configService.get<string>('jandi.webhook');
 
   getTimeNowKST(): string {
@@ -35,8 +35,9 @@ export class ReissueService {
       .replace(/\..+/, '');
     return requestedAt;
   }
+
   /**
-   * 사용자의 출입카드 재신청에 대한 상태를 string으로 반환합니다.
+   * 사용자의 출입카드 재신청에 대한 상태를 반환합니다.
    * 상태는 총 3단계 (in_progress, pick up requested, done)
    * in_progress: 재발급 신청 후 제작 중
    * pick_up_requested: 인포에서 재발급 카드 권한 부여를 마친 경우
@@ -75,7 +76,9 @@ export class ReissueService {
   }
 
   /**
+   * 사용자의 카드 재발급 신청을 구글스프레드시트에 추가합니다.
    * @param user 사용자
+   * @returns 출입카드 재신청 reissueRequestDto
    */
   async reissueRequest(user: UserSessionDto): Promise<reissueRequestDto> {
     this.logger.debug(
@@ -92,15 +95,7 @@ export class ReissueService {
 
     const data = [user.user_id, user.login, requestedAt, '', '', initialCardNo];
     try {
-      (await this.gs).spreadsheets.values.append({
-        spreadsheetId: this.gsApi.gsId,
-        auth: this.gsApi.auth,
-        range: this.gsApi.gsRange,
-        valueInputOption: 'RAW',
-        requestBody: {
-          values: [data],
-        },
-      });
+      await this.gsApi.appendValues(data);
     } catch (error) {
       this.logger.error(
         `@reissueRequest) failed to request for new card issuance for ${user.login}: ${error.message}`,
@@ -111,6 +106,7 @@ export class ReissueService {
     }
     try {
       const jandiData = {
+        request: 'request',
         login: user.login,
         initial_card_no: initialCardNo,
         requested_at: requestedAt,
@@ -133,8 +129,9 @@ export class ReissueService {
     };
   }
   /**
-   * 최신 재발급 신청내역에 대하여 구글스프레드 시트 수령완료 행 업데이트
+   * 최신 재발급 신청내역에 대하여 구글스프레드 시트의 수령완료 행을 업데이트합니다.
    * @param user 사용자
+   * @returns 출입카드 재신청 상태 reissueFinishedDto
    */
   async patchReissueState(user: UserSessionDto): Promise<reissueFinishedDto> {
     this.logger.debug(
@@ -152,19 +149,23 @@ export class ReissueService {
     }
     const recent = filtered.pop();
     const rowNum = recent['index'] + 1;
-    (await this.gs).spreadsheets.values.update({
-      spreadsheetId: this.gsApi.gsId,
-      range: this.gsApi.gsRange + `!E${rowNum}`,
-      requestBody: {
-        values: [['O']],
-      },
-      valueInputOption: 'USER_ENTERED',
-    });
+    try {
+      await this.gsApi.updateValues(rowNum, 'O');
+    } catch (error) {
+      this.logger.error(
+        `@patchReissueState) failed to change state for ${user.login} in google sheet: ${error.message}`,
+      );
+      throw new ServiceUnavailableException(
+        `수령완료 행 구글스프레드 시트에 업데이트 실패: ${error.message}`,
+      );
+    }
+
     const initialCardNo = recent['row'][5];
     const newCardNo = recent['row'][6];
     const pickedUpAt = this.getTimeNowKST();
     try {
       const jandiData = {
+        request: 'finish',
         login: user.login,
         initial_card_no: initialCardNo,
         new_card_no: newCardNo,
@@ -172,11 +173,11 @@ export class ReissueService {
       };
       await axios.post(this.jandiWebhook, jandiData);
       this.logger.debug(
-        `@reissueRequest) send jandi alarm for ${user.login}'s card reissuance request`,
+        `@patchReissueState) send jandi alarm for closing ${user.login}'s card reissuance request`,
       );
     } catch (error) {
       this.logger.error(
-        `@reissueRequest) failed to alarm jandi for new card issuance for ${user.login}: ${error.message}`,
+        `@patchReissueState) failed to alarm jandi for new card issuance for ${user.login}: ${error.message}`,
       );
       throw new ServiceUnavailableException(
         `재발급 카드 수령완료 잔디알림 실패: ${error.message}`,
