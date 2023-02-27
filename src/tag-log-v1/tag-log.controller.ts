@@ -93,6 +93,7 @@ export class TagLogController {
   }
 
   /**
+<<<<<<< HEAD
    * 특정 일에 대한 모든 로그를 조회합니다.
    *
    * @param user 로그인한 사용자 세션
@@ -148,6 +149,8 @@ export class TagLogController {
   }
 
   /*
+=======
+>>>>>>> c7cc8d48525898ff869f58ae769b3a7475fe4940
    * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
    *
    * @param user 로그인한 사용자 세션
