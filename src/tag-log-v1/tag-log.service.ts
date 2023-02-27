@@ -61,21 +61,92 @@ export class TagLogService {
     const lastLog = taglogs.at(-1);
     if (lastLog) {
       // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
-      const beforelastLog = await this.tagLogRepository.findNextTagLog(
+      const afterLastLog = await this.tagLogRepository.findNextTagLog(
         [lastLog.card_id],
         lastLog.tag_at,
       );
       // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
-      if (beforelastLog !== null) {
+      if (afterLastLog !== null) {
         const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
         taglogs.push({
           tag_at: virtualLeaveTime,
-          device_id: beforelastLog.device_id,
+          device_id: afterLastLog.device_id,
           idx: -1,
-          card_id: beforelastLog.card_id,
+          card_id: afterLastLog.card_id,
         });
       }
     }
+    return taglogs;
+  }
+
+  /**
+   * 전 날의 마지막 로그와 해당 일의 첫 로그,
+   * 해당 일의 마지막 로그와 다음 날의 첫 로그를 비교한 후
+   * 짝이 맞는 경우에만 가상출입로그를 넣어 반환해줍니다.
+   *
+   * @param taglogs TagLogDto[]
+   * @return TagLogDto[]
+   */
+  async checkAndTrimTagLogs(
+    taglogs: TagLogDto[], //해당일의 태그로그
+    start: Date, //00:00
+    end: Date, //23:59
+    deviceInfo: PairInfoDto[],
+  ): Promise<TagLogDto[]> {
+    this.logger.debug(`@checkAndTrimTagLogs)`);
+
+    // 가장 앞 로그 확인
+    const firstLog = taglogs.at(0); 
+    if (firstLog) {
+      const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
+        [firstLog.card_id],
+        firstLog.tag_at,
+      );
+      // 어제의 마지막 로그가 IN이며, 오늘의 첫 로그가 OUT이면 가상 로그 넣어주기
+      if (
+        beforeFirstLog !== null
+        &&
+        this.isInDevice(deviceInfo, beforeFirstLog.device_id)
+        &&
+        this.isOutDevice(deviceInfo, firstLog.device_id)
+      ) {
+        const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
+        taglogs.unshift({
+          tag_at: virtualEnterTime,
+          device_id: beforeFirstLog.device_id,
+          idx: -1,
+          card_id: beforeFirstLog.card_id,
+        });
+      }
+    }
+
+    // 가장 뒤 로그 확인
+    const lastLog = taglogs.at(-1);
+    if (lastLog) {
+      const afterLastLog = await this.tagLogRepository.findNextTagLog(
+        [lastLog.card_id],
+        lastLog.tag_at,
+      );
+      // 오늘의 마지막 로그가 IN이며, 내일의 첫 로그가 OUT이면 가상 로그 넣어주기
+      // todo: 반복되는데 삽입되는 요소는 달라서 나눠둠
+      // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
+      if (
+        afterLastLog !== null
+        &&
+        this.isInDevice(deviceInfo, lastLog.device_id)
+        &&
+        this.isOutDevice(deviceInfo, afterLastLog.device_id)
+      ) {
+        const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
+        taglogs.push({
+          tag_at: virtualLeaveTime,
+          device_id: afterLastLog.device_id,
+          idx: -1,
+          card_id: afterLastLog.card_id,
+        });
+      }
+    }
+
     return taglogs;
   }
 
@@ -110,15 +181,16 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    
     let ret: boolean = false;
-    
+
+    //todo: find하기
     deviceInfos.forEach(deviceInfo => {
       if(deviceInfo.in_device === targetDevice) {
-        this.logger.debug(`@isInDevice)`);
+        this.logger.debug(`@isInDevice) ${targetDevice}`);
         ret = true;
       }
     });
+
     return ret;
   }
 
@@ -132,15 +204,15 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    
     let ret: boolean = false;
-    
+
     deviceInfos.forEach(deviceInfo => {
       if(deviceInfo.out_device === targetDevice) {
-        this.logger.debug(`@isOutDevice)`);
+        this.logger.debug(`@isOutDevice) ${targetDevice}`);
         ret = true;
       }
     });
+
     return ret;
   }
 
@@ -155,6 +227,7 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
   ): InOutLogType[] {
     this.logger.debug(`@getPairsByTagLogs)`);
+
     /**
      * 데이터를 날짜의 내림차순으로 정렬
      */
@@ -250,20 +323,23 @@ export class TagLogService {
     taglogs: TagLogDto[],
     deviceInfos: PairInfoDto[],
   ): InOutLogType[] {
-    this.logger.debug(`@getPairsByTagLogs)`);
+    this.logger.debug(`@getAllPairsByTagLogs)`);
 
     const timeLines = taglogs;
-
     const resultPairs: InOutLogType[] = [];
-    
+
     let temp: TagLogDto | null = null;
     let leave: TagLogDto | null = null;
 
     // 타임라인 배열이 빌 때까지 루프를 돌립니다.
     while (timeLines.length > 0) {
-      
-      if (temp === null)
+      if (temp === null) {
         temp = timeLines.pop();
+      }
+
+      if (timeLines.length <= 0) {
+        break;
+      }
 
       // 내부에 있거나 중복 입실태그인 경우
       if (
@@ -282,9 +358,20 @@ export class TagLogService {
         continue;
       }
 
-      leave = temp;
-      temp = timeLines.pop();
-      
+      if (leave === null) {
+        leave = temp;
+        temp = null;
+      }
+
+      if (temp === null) {
+        temp = timeLines.pop();
+      }
+
+      if (timeLines.length <= 0) {
+        break;
+      }
+      //this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
+
       // 중복 퇴실태그인 경우
       if (
         this.isOutDevice(deviceInfos, temp.device_id)
@@ -297,51 +384,25 @@ export class TagLogService {
           outTimeStamp,
           durationSecond,
         });
-        leave = temp;
+        leave = null;
         //this.logger.debug(`퇴실 중복`);
         continue;
       }
 
       // 만약 동일한 날짜에 속한다면 해당 쌍이 짝이 됩니다.
-      if (this.dateCalculator.checkEqualDay(temp.tag_at, leave.tag_at)) {
-        const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
-        const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
-        resultPairs.push({
-          inTimeStamp,
-          outTimeStamp,
-          durationSecond: outTimeStamp - inTimeStamp,
-        });
-        //this.logger.debug(`정상 태그 (같은 날)`);
-      } else {
-        // 만약 입장 로그와 퇴장 로그가 짝이 맞지만, 동일한 날짜에 속하지 않으면 일 단위로 자릅니다.
-        // 퇴장 로그의 정시 (00시)를 기준으로 두 날짜의 간격을 자릅니다. 두 날짜는 가상의 입퇴장 짝이 됩니다.
-        const virtualEnterTime = this.dateCalculator.getStartOfDate(
-          leave.tag_at,
-        );
-        const virtualLeaveTime = this.dateCalculator.getEndOfLastDate(
-          temp.tag_at,
-        );
+      const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
+      const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
+      resultPairs.push({
+        inTimeStamp,
+        outTimeStamp,
+        durationSecond: outTimeStamp - inTimeStamp,
+      });
+      //this.logger.debug(`정상 태그 (같은 날)`);
 
-        // 가상 입장/퇴장시간과 짝을 맞춥니다.
-        const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
-        const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
-        const virtualInTimeStamp = this.dateCalculator.toTimestamp(virtualEnterTime);
-        const virtualOutTimeStamp = this.dateCalculator.toTimestamp(virtualLeaveTime);
-        resultPairs.push({
-          inTimeStamp: this.dateCalculator.toTimestamp(temp.tag_at),
-          outTimeStamp: this.dateCalculator.toTimestamp(virtualLeaveTime),
-          durationSecond: virtualOutTimeStamp - inTimeStamp,
-        });
-        resultPairs.push({
-          inTimeStamp: this.dateCalculator.toTimestamp(virtualEnterTime),
-          outTimeStamp: this.dateCalculator.toTimestamp(leave.tag_at),
-          durationSecond: outTimeStamp - virtualInTimeStamp,
-        });
-        //this.logger.debug(`정상 태그 (다른 날)`);
-      }
       temp = null;
       leave = null;
     }
+
     return resultPairs;
   }
 
@@ -377,7 +438,9 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
     const trimmedTagLogs = await this.trimTagLogs(
@@ -424,13 +487,16 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
-    const trimmedTagLogs = await this.trimTagLogs(
+    const trimmedTagLogs = await this.checkAndTrimTagLogs(
       filteredTagLogs,
       tagStart,
       tagEnd,
+      pairs,
     );
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
@@ -471,7 +537,9 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
     const trimmedTagLogs = await this.trimTagLogs(
@@ -481,6 +549,55 @@ export class TagLogService {
     );
 
     const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+
+    return resultPairs;
+  }
+  
+  /**
+   * 인자로 들어가는 사용자 ID와 날짜에 대한 월별 모든 태그를 반환합니다.
+   *
+   * @param userId 사용자 ID
+   * @param date 날짜
+   * @returns InOutLogType[]
+   */
+  async getAllTagPerMonth(userId: number, date: Date): Promise<InOutLogType[]> {
+    this.logger.debug(`@getPerMonth) ${userId}, ${date}`);
+    const tagStart = this.dateCalculator.getStartOfMonth(date);
+    const tagEnd = this.dateCalculator.getEndOfMonth(date);
+
+    const pairs = await this.pairInfoRepository.findAll();
+
+    const cards = await this.userService.findCardsByUserId(
+      userId,
+      tagStart,
+      tagEnd,
+    );
+
+    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
+      cards,
+      tagStart,
+      tagEnd,
+    );
+
+    const sortedTagLogs = tagLogs.sort((a, b) =>
+      a.tag_at > b.tag_at ? 1 : -1,
+    );
+
+    // FIXME: 임시 조치임
+    const filteredTagLogs = sortedTagLogs.filter(
+      (v) => v.device_id !== 35 && v.device_id !== 16 
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
+    );
+
+    const trimmedTagLogs = await this.checkAndTrimTagLogs(
+      filteredTagLogs,
+      tagStart,
+      tagEnd,
+      pairs,
+    );
+
+    const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
 
     return resultPairs;
   }
