@@ -31,6 +31,15 @@ export class DateCalculator {
     return rtn;
   }
 
+  getEndOfWeek(date: Date): Date {
+    const y = date.getFullYear();
+    const m = date.getMonth();
+    const d = date.getDate();
+    const rtn = new Date(y, m, d + 7, 0, 0, 0, 0);
+    rtn.setTime(rtn.getTime() - 1);
+    return rtn;
+  }
+
   /**
    * 인자로 주어진 일에 대해 바로 전날의 가장 늦은 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
@@ -81,7 +90,7 @@ export class DateCalculator {
    * @param date2 date 객체 2
    */
   checkEqualDay(date1: Date, date2: Date) {
-    this.logger.debug(`@checkEqualDay) ${date1}, ${date2}`);
+    //this.logger.debug(`@checkEqualDay) ${date1}, ${date2}`);
     return (
       date1.getFullYear() === date2.getFullYear() &&
       date1.getMonth() === date2.getMonth() &&
@@ -102,14 +111,30 @@ export class DateCalculator {
 
   /**
    * 주어진 년, 월에 대해 일의 개수를 구합니다.
-   *
-   * @param year 년
-   * @param month 월
-   * @return days 해당 달의 일의 개수
-   */
+  *
+  * @param year 년
+  * @param month 월
+  * @return days 해당 달의 일의 개수
+  */
   getDaysInMonth(year: number, month: number): number {
     this.logger.debug(`@getDaysInMonth) ${year}, ${month}`);
     const date = new Date(year, month, 0);
     return date.getDate();
+  }
+
+  /**
+   * 주어진 년도와 주차에 대해 날짜 범위를 구합니다.
+   * 
+   * @param year 년
+   * @param week 주차
+   * @returns 
+  */
+  getDateOfWeek(year: number, week: number): Date {
+    const januaryFirst = new Date(year, 0, 1);
+    const dayOfWeek = januaryFirst.getDay();
+    const daysToAdd = 7 - dayOfWeek;
+    const secondSundayOfYear = new Date(year, 0, daysToAdd + 1);
+    const rtn = new Date(secondSundayOfYear.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+    return rtn;
   }
 }
