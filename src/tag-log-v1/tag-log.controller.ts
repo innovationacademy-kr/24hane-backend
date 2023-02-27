@@ -242,6 +242,52 @@ export class TagLogController {
     }
 
   /**
+   * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
+   *
+   * @param user 로그인한 사용자 세션
+   * @returns number
+   */
+  @ApiOperation({
+    summary: '6개월 체류시간 조회',
+    description: '6개월간의 체류시간을 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: UserInOutLogsType,
+    description: '조회 성공',
+  })
+  @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
+  @ApiResponse({ status: 401, description: '접근 권한 없음' })
+  @ApiResponse({
+    status: 500,
+    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
+  })
+  @ApiQuery({
+    name: 'year',
+    description: '년도',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'month',
+    description: '월',
+    required: true,
+  })
+  @Get('sixmonth')
+  async getSixMonth(
+    @User() user: UserSessionDto,
+    @Query('year', ParseIntPipe) year: number,
+    @Query('month', ParseIntPipe) month: number,
+  ): Promise<number> {
+    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
+
+    const date = new Date(`${year}-${month}`);
+
+    const totalSecond = await this.tagLogService.getPerMonthByNum(user.user_id, date, 6);
+
+    return totalSecond;
+  }
+
+  /**
    * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.
    */
   @ApiOperation({
