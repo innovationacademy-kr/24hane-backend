@@ -99,8 +99,8 @@ export class TagLogController {
    * @returns number
    */
     @ApiOperation({
-      summary: '주차별 체류시간 조회',
-      description: '주차별 체류시간을 조회합니다.',
+      summary: '주차별 체류시간 조회',  
+      description: '주차별 체류시간을 조회합니다. (일~토)',
     })
     @ApiResponse({
       status: 200,
