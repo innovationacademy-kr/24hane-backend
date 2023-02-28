@@ -25,7 +25,8 @@ export default () => ({
     range: process.env.GOOGLEAPI_SHEET_RANGE,
   },
   googleCardApi: {
-    keyFile: process.env.GOOGLEAPI_CARD_KEY_FILE_PATH,
+    email: process.env.GOOGLEAPI_CARD_ACCOUNT_EMAIL,
+    key: process.env.GOOGLEAPI_CARD_ACCOUNT_PRIVATE_KEY,
     spreadsheetId: process.env.GOOGLEAPI_CARD_SHEET_ID,
     range: process.env.GOOGLEAPI_CARD_SHEET_RANGE,
   },
