@@ -9,15 +9,15 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
 import { IUserCardRepository } from './repository/interface/user-card-no.repository.interface';
-import { GoogleSpreadSheetApi } from './googleAuth.component';
 import { reissueSateDto } from './dto/reissueState.dto';
 import { reissueRequestDto } from './dto/reissueRequest.dto';
 import { reissueFinishedDto } from './dto/reissueFinished.dto';
+import { GoogleApi } from 'src/utils/google-api.component';
 
 @Injectable()
 export class ReissueService {
   constructor(
-    private gsApi: GoogleSpreadSheetApi,
+    private googleApi: GoogleApi,
     @Inject(ConfigService)
     private configService: ConfigService,
     @Inject('IUserCardRepository')
@@ -49,7 +49,7 @@ export class ReissueService {
     this.logger.debug(
       `@getReissueState) reissue state requested from user_id: ${user_id}`,
     );
-    const result = await this.gsApi.getAllValues();
+    const result = await this.googleApi.getAllValues();
     const filtered = [];
     for (const row of result) {
       if (row[0] == user_id) {
@@ -95,7 +95,7 @@ export class ReissueService {
 
     const data = [user.user_id, user.login, requestedAt, '', '', initialCardNo];
     try {
-      await this.gsApi.appendValues(data);
+      await this.googleApi.appendValues(data);
     } catch (error) {
       this.logger.error(
         `@reissueRequest) failed to request for new card issuance for ${user.login}: ${error.message}`,
@@ -137,7 +137,7 @@ export class ReissueService {
     this.logger.debug(
       `@patchReissueState) ${user.login} requested for card reissuance.`,
     );
-    const result = await this.gsApi.getAllValues();
+    const result = await this.googleApi.getAllValues();
     const filtered = [];
     result.forEach((row, index) => {
       if (row[0] == user.user_id) {
@@ -150,7 +150,7 @@ export class ReissueService {
     const recent = filtered.pop();
     const rowNum = recent['index'] + 1;
     try {
-      await this.gsApi.updateValues(rowNum, 'O');
+      await this.googleApi.updateValues(rowNum, 'O');
     } catch (error) {
       this.logger.error(
         `@patchReissueState) failed to change state for ${user.login} in google sheet: ${error.message}`,
