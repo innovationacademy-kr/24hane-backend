@@ -12,6 +12,7 @@ const statisticsRepo = {
 
 @Module({
   imports: [TypeOrmModule.forFeature([TagLog])],
+  exports: [StatisticsService],
   controllers: [StatisticsController],
   providers: [statisticsRepo, StatisticsService],
 })
