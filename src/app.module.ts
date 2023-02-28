@@ -8,6 +8,7 @@ import { ExtModule } from './ext/ext.module';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
 import { UserModule } from './user/user.module';
+import { ReissueModule } from './reissue/reissue.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserModule } from './user/user.module';
     TagLogModule,
     UserModule,
     ExtModule,
+    ReissueModule,
   ],
   providers: [SessionMiddleware],
 })
