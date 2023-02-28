@@ -9,7 +9,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
 import { IUserCardRepository } from './repository/interface/user-card-no.repository.interface';
-import { GoogleSpreadSheetApi } from './googleAuth.component';
 import { reissueSateDto } from './dto/reissueState.dto';
 import { reissueRequestDto } from './dto/reissueRequest.dto';
 import { reissueFinishedDto } from './dto/reissueFinished.dto';
