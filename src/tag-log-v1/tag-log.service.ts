@@ -217,7 +217,7 @@ export class TagLogService {
   }
 
   /**
-   * 기기 쌍 정보와 태깅한 로그들을 이용하여 출입 로그를 반환합니다.
+   * 기기 쌍 정보와 태깅한 로그들을 이용하여 짝이 맞는 출입 로그를 반환합니다.
    *
    * @param taglogs 입출입 로그
    * @param deviceInfos 기기 짝 정보
@@ -315,6 +315,7 @@ export class TagLogService {
   }
 
 /**
+ * 기기 쌍 정보와 태깅한 로그들을 이용하여
  * 짝이 맞지 않는 출입로그도 null과 함께 반환합니다.
  * 
  * @param taglogs 입출입 로그
@@ -414,8 +415,8 @@ export class TagLogService {
    * @param date 날짜
    * @returns InOutLogType[]
    */
-  async getPerDay(userId: number, date: Date): Promise<InOutLogType[]> {
-    this.logger.debug(`@getPerDay) ${userId}, ${date}`);
+  async getTagPerDay(userId: number, date: Date): Promise<InOutLogType[]> {
+    this.logger.debug(`@getTagPerDay) ${userId}, ${date}`);
     const tagStart = this.dateCalculator.getStartOfDate(date);
     const tagEnd = this.dateCalculator.getEndOfDate(date);
 
@@ -507,32 +508,30 @@ export class TagLogService {
   }
 
   /**
-   * 인자로 들어가는 사용자 ID와 날짜에 대한 주별 누적시간을 반환합니다.
+   * 인자로 들어가는 사용자 ID와 날짜에 대한 주별 누적시간을 배열로 반환합니다.
+   * 배열의 첫 인자가 현 주차의 누적시간입니다.
    *
    * @param userId 사용자 ID
-   * @param date 날짜
-   * @returns InOutLogType[]
+   * @param date 현재 날짜
+   * @returns number[]
    */
-  //todo: name
-  async getPerWeek(userId: number, date: Date): Promise<number> {
-    this.logger.debug(`@getPerWeek) ${userId}, ${date}`);
-    const tagStart = this.dateCalculator.getStartOfDate(date);
-    const tagEnd = this.dateCalculator.getEndOfWeek(date);
-
-    //this.logger.debug(`start and end: ${tagStart}, ${tagEnd}`);
+  async getTimePerWeek(userId: number, date: Date): Promise<number[]> {
+    const today = new Date();
+    const beforeOneWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 10); // todo: fix to 6
+    this.logger.debug(`@getTimePerWeek) ${today}-${beforeOneWeek}`); // todo: erase me
 
     const pairs = await this.pairInfoRepository.findAll();
 
     const cards = await this.userService.findCardsByUserId(
       userId,
-      tagStart,
-      tagEnd,
+      beforeOneWeek,
+      today,
     );
 
     const tagLogs = await this.tagLogRepository.findTagLogsByCards(
       cards,
-      tagStart,
-      tagEnd,
+      beforeOneWeek,
+      today,
     );
 
     const sortedTagLogs = tagLogs.sort((a, b) =>
@@ -541,23 +540,36 @@ export class TagLogService {
 
     // FIXME: 임시 조치임
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16,
+      (v) => v.device_id !== 35 && v.device_id !== 16
+      && v.device_id !== 48 && v.device_id !== 49
+      && v.device_id !== 43 && v.device_id !== 44,
     );
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
-      tagStart,
-      tagEnd,
+      beforeOneWeek,
+      today,
     );
 
     const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
 
-    let totalSecond: number = 0;
-    resultPairs.forEach(element => {
-      totalSecond += element.durationSecond;
+    const ret = {};
+
+    {
+      const tempDate = new Date(beforeOneWeek);
+
+      for (let i = 0; i < 7; i++) {
+        ret[tempDate.getDate()] = 0;
+        tempDate.setDate(tempDate.getDate() + 1);
+      }
+    }
+    
+    resultPairs.forEach((curr) => {
+      const date = new Date(curr.inTimeStamp * 1000).getDate();
+      ret[date] += curr.durationSecond;
     });
 
-    return totalSecond;
+    return Object.values(ret);
   }
 
   /**
@@ -567,8 +579,8 @@ export class TagLogService {
    * @param date 날짜
    * @returns InOutLogType[]
    */
-  async getPerMonth(userId: number, date: Date): Promise<InOutLogType[]> {
-    this.logger.debug(`@getPerMonth) ${userId}, ${date}`);
+  async getTagPerMonth(userId: number, date: Date): Promise<InOutLogType[]> {
+    this.logger.debug(`@getTagPerMonth) ${userId}, ${date}`);
     const tagStart = this.dateCalculator.getStartOfMonth(date);
     const tagEnd = this.dateCalculator.getEndOfMonth(date);
 
@@ -616,7 +628,7 @@ export class TagLogService {
    * @returns InOutLogType[]
    */
   async getAllTagPerMonth(userId: number, date: Date): Promise<InOutLogType[]> {
-    this.logger.debug(`@getPerMonth) ${userId}, ${date}`);
+    this.logger.debug(`@getTagPerMonth) ${userId}, ${date}`);
     const tagStart = this.dateCalculator.getStartOfMonth(date);
     const tagEnd = this.dateCalculator.getEndOfMonth(date);
 
@@ -659,13 +671,14 @@ export class TagLogService {
 
   /**
    * 입력받은 month 개월수 만큼 총 산정시간 반환
+   * 짝이 맞는 로그만 반환합니다.
    *
    * @param userId 사용자 ID
    * @param date 날짜
    * @returns number
    */
-    async getPerMonthByNum(userId: number, date: Date, month: number): Promise<number> {
-      this.logger.debug(`@getPerMonthByNum) ${userId}, ${date}`);
+    async getTimePerMonthByNum(userId: number, date: Date, month: number): Promise<number> {
+      this.logger.debug(`@getTagPerMonthByNum) ${userId}, ${date}`);
       const tagStart = new Date(date.getFullYear(), date.getMonth() - (month-1));
       const tagEnd =  new Date(date.getFullYear(), date.getMonth() + 1);
   
@@ -689,7 +702,9 @@ export class TagLogService {
   
       // FIXME: 임시 조치임
       const filteredTagLogs = sortedTagLogs.filter(
-        (v) => v.device_id !== 35 && v.device_id !== 16,
+        (v) => v.device_id !== 35 && v.device_id !== 16
+        && v.device_id !== 48 && v.device_id !== 49
+        && v.device_id !== 43 && v.device_id !== 44,
       );
   
       const trimmedTagLogs = await this.trimTagLogs(
