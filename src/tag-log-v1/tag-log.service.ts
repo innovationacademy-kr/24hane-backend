@@ -510,27 +510,33 @@ export class TagLogService {
   /**
    * 인자로 들어가는 사용자 ID와 날짜에 대한 주별 누적시간을 배열로 반환합니다.
    * 배열의 첫 인자가 현 주차의 누적시간입니다.
+   * 한 주의 기준은 월요일~일요일 입니다.
    *
    * @param userId 사용자 ID
    * @param date 현재 날짜
    * @returns number[]
    */
-  async getTimePerWeek(userId: number, date: Date): Promise<number[]> {
+  async getTimeSixWeek(userId: number): Promise<number[]> {
     const today = new Date();
-    const beforeOneWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 10); // todo: fix to 6
-    this.logger.debug(`@getTimePerWeek) ${today}-${beforeOneWeek}`); // todo: erase me
+    //today.setDate(today.getDate()-3); //일요일 테스트
+    const endOfSixWeek = this.dateCalculator.getEndOfWeek(today);
+    const beforeSixWeek = this.dateCalculator.getStartOfWeek(new Date(today.getFullYear(), today.getMonth(), today.getDate()-(5*7)));
+
+    const endOfWeek = this.dateCalculator.getEndOfWeek(beforeSixWeek);
+
+    this.logger.debug(`@getTimeSixWeek) ${today}-${beforeSixWeek}`);
 
     const pairs = await this.pairInfoRepository.findAll();
 
     const cards = await this.userService.findCardsByUserId(
       userId,
-      beforeOneWeek,
+      beforeSixWeek,
       today,
     );
 
     const tagLogs = await this.tagLogRepository.findTagLogsByCards(
       cards,
-      beforeOneWeek,
+      beforeSixWeek,
       today,
     );
 
@@ -547,29 +553,78 @@ export class TagLogService {
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
-      beforeOneWeek,
+      beforeSixWeek,
       today,
     );
 
     const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
 
-    const ret = {};
+    const ret: number[] = [];
 
-    {
-      const tempDate = new Date(beforeOneWeek);
+    while(endOfWeek <= endOfSixWeek) {
+      let totalSecond = 0;
 
-      for (let i = 0; i < 7; i++) {
-        ret[tempDate.getDate()] = 0;
-        tempDate.setDate(tempDate.getDate() + 1);
-      }
+      const weekPairs = resultPairs.filter(resultPair => 
+        beforeSixWeek <= new Date(resultPair.inTimeStamp * 1000) 
+        && 
+        new Date(resultPair.inTimeStamp * 1000) <= endOfWeek
+      );
+
+      weekPairs.forEach(weekPair => totalSecond += weekPair.durationSecond);
+      
+      ret.push(totalSecond);
+
+      beforeSixWeek.setDate(beforeSixWeek.getDate() + 7);
+      endOfWeek.setDate(endOfWeek.getDate() + 7);
     }
-    
-    resultPairs.forEach((curr) => {
-      const date = new Date(curr.inTimeStamp * 1000).getDate();
-      ret[date] += curr.durationSecond;
-    });
 
-    return Object.values(ret);
+    return ret.reverse();
+
+  //****************************************************** */
+
+    //Object.keys(resultPairs.reduce((acc, curr) => {
+    //  const currDay = new Date(curr.inTimeStamp * 1000);
+
+    //  if (!acc[new Date(curr.inTimeStamp * 1000).getTime()]) {
+    //    acc[new Date(curr.inTimeStamp * 1000).getTime()] = 0;
+    //  }
+
+    //  acc[new Date(curr.inTimeStamp * 1000).getTime()] += curr.durationSecond;
+    //  return acc;
+    //}, new Map<number, number>)).forEach((curr) => console.log(curr));
+
+
+    //return Object.values(resultPairs.reduce((acc, curr) => {
+    //  if (!acc[new Date(curr.inTimeStamp * 1000).getTime()]) {
+    //    acc[new Date(curr.inTimeStamp * 1000).getTime()] = 0;
+    //  }
+
+    //  acc[new Date(curr.inTimeStamp * 1000).getTime()] += curr.durationSecond;
+    //  return acc;
+    //}, new Map<number, number>));
+
+    //****************************************************** */
+
+      //const ret = [0, 0, 0, 0, 0, 0];
+      //let i = 5;
+      ////let j = 0;
+      //resultPairs.forEach((curr) => {
+      //  const date = new Date(curr.inTimeStamp * 1000);
+
+      //  if (date.getDay() == 0) {
+      //    //console.log(j);
+      //    i--;
+      //  }
+      //  //j++;
+      //  console.log(`getday: ${date.getDay()}, getdate: ${date.getDate()}, ${curr.durationSecond}`);
+      //  ret[i] += curr.durationSecond;
+
+      //  //date.setDate(date.getDate() - 1);
+      //});
+
+      //return ret;
+
+    //return Object.values(ret);
   }
 
   /**

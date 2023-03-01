@@ -169,13 +169,13 @@ export class TagLogController {
       status: 500,
       description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
     })
-    @Get('getOneWeek')
+    @Get('getTimeSixWeek')
     async getOneWeek(
       @User() user: UserSessionDto,
     ): Promise<number[]> {
-      this.logger.debug(`@getTimePerWeek) by ${user.login}`);
+      this.logger.debug(`@getTimeSixWeek) by ${user.login}`);
 
-      const totalSeconds = await this.tagLogService.getTimePerWeek(user.user_id, new Date());
+      const totalSeconds = await this.tagLogService.getTimeSixWeek(user.user_id);
 
       return totalSeconds;
     }
