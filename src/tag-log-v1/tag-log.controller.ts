@@ -20,7 +20,6 @@ import { UserInfoType } from './dto/user-Info.type';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { TagLogService } from './tag-log.service';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
-import { DateCalculator } from 'src/utils/date-calculator.component';
 
 @ApiTags('체류 시간 산출')
 @Controller({
@@ -32,10 +31,7 @@ import { DateCalculator } from 'src/utils/date-calculator.component';
 export class TagLogController {
   private logger = new Logger(TagLogController.name);
 
-  constructor(
-    private tagLogService: TagLogService,
-    private dateCalculator: DateCalculator,
-  ) {}
+  constructor(private tagLogService: TagLogService) {}
 
   /**
    * 특정 일에 대해 태깅했던 로그를 조회합니다.
@@ -202,80 +198,48 @@ export class TagLogController {
    * @param user 로그인한 사용자 세션
    * @returns UsageResponseDto
    */
-    @ApiOperation({
-      summary: '월별 모든 태그로그 조회',
-      description: '월별 모든 태그로그를 조회합니다.',
-    })
-    @ApiResponse({
-      status: 200,
-      type: UserInOutLogsType,
-      description: '조회 성공',
-    })
-    @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-    @ApiResponse({ status: 401, description: '접근 권한 없음' })
-    @ApiResponse({
-      status: 500,
-      description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-    })
-    @ApiQuery({
-      name: 'year',
-      description: '년도',
-      required: true,
-    })
-    @ApiQuery({
-      name: 'month',
-      description: '월',
-      required: true,
-    })
-    @Get('getAllTagPerMonth')
-    async getAllTagPerMonth(
-      @User() user: UserSessionDto,
-      @Query('year', ParseIntPipe) year: number,
-      @Query('month', ParseIntPipe) month: number,
-    ): Promise<UserInOutLogsType> {
-      this.logger.debug(`@getTagPerMonth) ${year}-${month} by ${user.login}`);
-  
-      const date = new Date(`${year}-${month}`);
-  
-      const results = await this.tagLogService.getAllTagPerMonth(user.user_id, date);
-      return {
-        login: user.login,
-        profileImage: user.image_url,
-        inOutLogs: results,
-      };
-    }
+  @ApiOperation({
+    summary: '월별 모든 태그로그 조회',
+    description: '월별 모든 태그로그를 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: UserInOutLogsType,
+    description: '조회 성공',
+  })
+  @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
+  @ApiResponse({ status: 401, description: '접근 권한 없음' })
+  @ApiResponse({
+    status: 500,
+    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
+  })
+  @ApiQuery({
+    name: 'year',
+    description: '년도',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'month',
+    description: '월',
+    required: true,
+  })
+  @Get('getAllTagPerMonth')
+  async getAllTagPerMonth(
+    @User() user: UserSessionDto,
+    @Query('year', ParseIntPipe) year: number,
+    @Query('month', ParseIntPipe) month: number,
+  ): Promise<UserInOutLogsType> {
+    this.logger.debug(`@getTagPerMonth) ${year}-${month} by ${user.login}`);
 
-  ///**
-  // * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
-  // *
-  // * @param user 로그인한 사용자 세션
-  // * @returns number[]
-  // */
-  //@ApiOperation({
-  //  summary: '최근 6개월간의 체류시간 조회',
-  //  description: '최근 6개월간의 체류시간을 조회합니다.',
-  //})
-  //@ApiResponse({
-  //  status: 200,
-  //  type: Array,
-  //  description: '조회 성공',
-  //})
-  //@ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-  //@ApiResponse({ status: 401, description: '접근 권한 없음' })
-  //@ApiResponse({
-  //  status: 500,
-  //  description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-  //})
-  //@Get('getTimeSixMonth')
-  //async getTimeSixMonth(
-  //  @User() user: UserSessionDto,
-  //): Promise<number[]> {
-  //  this.logger.debug(`@getTimeSixMonth) by ${user.login}`);
+    const date = new Date(`${year}-${month}`);
 
-  //  const monthPairs = this.tagLogService.getTimeSixMonth(user.user_id);
-
-  //  return monthPairs;
-  //}
+    const results = await this.tagLogService.getAllTagPerMonth(user.user_id, date);
+    return {
+      login: user.login,
+      profileImage: user.image_url,
+      inOutLogs: results,
+    };
+  }
 
   /**
    * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.

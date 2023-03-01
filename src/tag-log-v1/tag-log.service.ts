@@ -1,13 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import InOut from 'src/enums/inout.enum';
+import { UserService } from 'src/user/user.service';
 import { DateCalculator } from 'src/utils/date-calculator.component';
+import { InOutDto } from './dto/inout.dto';
+import { TagLogDto } from './dto/tag-log.dto';
 import { PairInfoDto } from './dto/pair-info.dto';
 import { InOutLogType } from './dto/subType/InOutLog.type';
-import { TagLogDto } from './dto/tag-log.dto';
-import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
-import { UserService } from 'src/user/user.service';
-import { InOutDto } from './dto/inout.dto';
+import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 
 @Injectable()
 export class TagLogService {
@@ -80,77 +80,6 @@ export class TagLogService {
   }
 
   /**
-   * 전 날의 마지막 로그와 해당 일의 첫 로그,
-   * 해당 일의 마지막 로그와 다음 날의 첫 로그를 비교한 후
-   * 짝이 맞는 경우에만 가상출입로그를 넣어 반환해줍니다.
-   *
-   * @param taglogs TagLogDto[]
-   * @return TagLogDto[]
-   */
-  async checkAndTrimTagLogs(
-    taglogs: TagLogDto[], //해당일의 태그로그
-    start: Date, //00:00
-    end: Date, //23:59
-    deviceInfo: PairInfoDto[],
-  ): Promise<TagLogDto[]> {
-    this.logger.debug(`@checkAndTrimTagLogs)`);
-
-    // 가장 앞 로그 확인
-    const firstLog = taglogs.at(0); 
-    if (firstLog) {
-      const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
-        [firstLog.card_id],
-        firstLog.tag_at,
-      );
-      // 어제의 마지막 로그가 IN이며, 오늘의 첫 로그가 OUT이면 가상 로그 넣어주기
-      if (
-        beforeFirstLog !== null
-        &&
-        this.isInDevice(deviceInfo, beforeFirstLog.device_id)
-        &&
-        this.isOutDevice(deviceInfo, firstLog.device_id)
-      ) {
-        const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
-        taglogs.unshift({
-          tag_at: virtualEnterTime,
-          device_id: beforeFirstLog.device_id,
-          idx: -1,
-          card_id: beforeFirstLog.card_id,
-        });
-      }
-    }
-
-    // 가장 뒤 로그 확인
-    const lastLog = taglogs.at(-1);
-    if (lastLog) {
-      const afterLastLog = await this.tagLogRepository.findNextTagLog(
-        [lastLog.card_id],
-        lastLog.tag_at,
-      );
-      // 오늘의 마지막 로그가 IN이며, 내일의 첫 로그가 OUT이면 가상 로그 넣어주기
-      // todo: 반복되는데 삽입되는 요소는 달라서 나눠둠
-      // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
-      if (
-        afterLastLog !== null
-        &&
-        this.isInDevice(deviceInfo, lastLog.device_id)
-        &&
-        this.isOutDevice(deviceInfo, afterLastLog.device_id)
-      ) {
-        const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
-        taglogs.push({
-          tag_at: virtualLeaveTime,
-          device_id: afterLastLog.device_id,
-          idx: -1,
-          card_id: afterLastLog.card_id,
-        });
-      }
-    }
-
-    return taglogs;
-  }
-
-  /**
    * 인자로 들어간 디바이스가 쌍이 맞는지 확인하는 함수입니다.
    *
    * @param deviceInfo
@@ -181,17 +110,9 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    let ret: boolean = false;
+    const inDevice = deviceInfos.find(deviceInfo => deviceInfo.in_device === targetDevice);
 
-    //todo: find하기
-    deviceInfos.forEach(deviceInfo => {
-      if(deviceInfo.in_device === targetDevice) {
-        this.logger.debug(`@isInDevice) ${targetDevice}`);
-        ret = true;
-      }
-    });
-
-    return ret;
+    return !!inDevice;
   }
 
   /**
@@ -199,21 +120,14 @@ export class TagLogService {
    * 
    * @param deviceInfos 
    * @param targetDevice 
-   */
+  */
   isOutDevice(
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    let ret: boolean = false;
+    const outDevice = deviceInfos.find(deviceInfo => deviceInfo.out_device === targetDevice);
 
-    deviceInfos.forEach(deviceInfo => {
-      if(deviceInfo.out_device === targetDevice) {
-        this.logger.debug(`@isOutDevice) ${targetDevice}`);
-        ret = true;
-      }
-    });
-
-    return ret;
+    return !!outDevice;
   }
 
   /**
@@ -409,19 +323,15 @@ export class TagLogService {
   }
 
   /**
-   * 인자로 들어가는 사용자 ID와 날짜에 대한 일별 누적시간을 반환합니다.
-   *
-   * @param userId 사용자 ID
-   * @param date 날짜
-   * @returns InOutLogType[]
+   * tagStart에서 tagEnd의 기간 내에 userId의 태그로그를 전부 반환합니다.
+   * 24시를 기준으로 가상 태그로그가 포함되어 있습니다.
+   * 
+   * @param userId number
+   * @param tagStart Date
+   * @param tagEnd Date
+   * @returns TagLogDto[]
    */
-  async getTagPerDay(userId: number, date: Date): Promise<InOutLogType[]> {
-    this.logger.debug(`@getTagPerDay) ${userId}, ${date}`);
-    const tagStart = this.dateCalculator.getStartOfDate(date);
-    const tagEnd = this.dateCalculator.getEndOfDate(date);
-
-    const pairs = await this.pairInfoRepository.findAll();
-
+  async getAllTagLogsByPeriod(userId: number, tagStart: Date, tagEnd: Date): Promise<TagLogDto[]> {
     const cards = await this.userService.findCardsByUserId(
       userId,
       tagStart,
@@ -438,20 +348,39 @@ export class TagLogService {
       a.tag_at > b.tag_at ? 1 : -1,
     );
 
-    // FIXME: 임시 조치임
+    const devicePairs = await this.pairInfoRepository.findAll()
+
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16 
-      && v.device_id !== 48 && v.device_id !== 49
-      && v.device_id !== 43 && v.device_id !== 44,
+      taglog => !!(devicePairs.find(temp => temp.in_device === taglog.device_id || temp.out_device === taglog.device_id))
     );
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
       tagStart,
       tagEnd,
-    );
+      );
 
-    const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+    return trimmedTagLogs;
+  }
+
+  /**
+   * 인자로 들어가는 사용자 ID와 날짜에 대한 일별 누적시간을 반환합니다.
+   *
+   * @param userId 사용자 ID
+   * @param date 날짜
+   * @returns InOutLogType[]
+   */
+  async getTagPerDay(userId: number, date: Date): Promise<InOutLogType[]> {
+    this.logger.debug(`@getTagPerDay) ${userId}, ${date}`);
+
+    const pairs = await this.pairInfoRepository.findAll();
+
+    const tagStart = this.dateCalculator.getStartOfDate(date);
+    const tagEnd = this.dateCalculator.getEndOfDate(date);
+
+    const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
+
+    const resultPairs = this.getPairsByTagLogs(taglogs, pairs);
 
     return resultPairs;
   }
@@ -466,42 +395,15 @@ export class TagLogService {
   async getAllTagPerDay(userId: number, date: Date): Promise<InOutLogType[]> {
     this.logger.debug(`@getAllTagPerDay) ${userId}, ${date}`);
 
+    const pairs = await this.pairInfoRepository.findAll();
+    
     const tagStart = this.dateCalculator.getStartOfDate(date);
     const tagEnd = this.dateCalculator.getEndOfDate(date);
-
-    const pairs = await this.pairInfoRepository.findAll();
-
-    const cards = await this.userService.findCardsByUserId(
-      userId,
-      tagStart,
-      tagEnd,
-    );
-
-    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
-      cards,
-      tagStart,
-      tagEnd,
-    );
-
-    const sortedTagLogs = tagLogs.sort((a, b) =>
-      a.tag_at > b.tag_at ? 1 : -1,
-    );
-
-    // FIXME: 임시 조치임
-    const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16 
-      && v.device_id !== 48 && v.device_id !== 49
-      && v.device_id !== 43 && v.device_id !== 44,
-    );
-
-    const trimmedTagLogs = await this.trimTagLogs(
-      filteredTagLogs,
-      tagStart,
-      tagEnd,
-    );
+    
+    const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
-    const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
+    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
     return resultPairs;
   }
@@ -519,43 +421,15 @@ export class TagLogService {
     //today.setDate(today.getDate()-3); //일요일 테스트
     const endOfSixWeek = this.dateCalculator.getEndOfWeek(today);
     const beforeSixWeek = this.dateCalculator.getStartOfWeek(new Date(today.getFullYear(), today.getMonth(), today.getDate()-(5*7)));
-
     const endOfWeek = this.dateCalculator.getEndOfWeek(beforeSixWeek);
 
     this.logger.debug(`@getTimeSixWeek) ${today}-${beforeSixWeek}`);
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const cards = await this.userService.findCardsByUserId(
-      userId,
-      beforeSixWeek,
-      today,
-    );
+    const taglogs = await this.getAllTagLogsByPeriod(userId, beforeSixWeek, today);
 
-    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
-      cards,
-      beforeSixWeek,
-      today,
-    );
-
-    const sortedTagLogs = tagLogs.sort((a, b) =>
-      a.tag_at > b.tag_at ? 1 : -1,
-    );
-
-    // FIXME: 임시 조치임
-    const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16
-      && v.device_id !== 48 && v.device_id !== 49
-      && v.device_id !== 43 && v.device_id !== 44,
-    );
-
-    const trimmedTagLogs = await this.trimTagLogs(
-      filteredTagLogs,
-      beforeSixWeek,
-      today,
-    );
-
-    const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+    const resultPairs = this.getPairsByTagLogs(taglogs, pairs);
 
     const ret: number[] = [];
 
@@ -593,36 +467,9 @@ export class TagLogService {
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const cards = await this.userService.findCardsByUserId(
-      userId,
-      tagStart,
-      tagEnd,
-    );
+    const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
-    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
-      cards,
-      tagStart,
-      tagEnd,
-    );
-
-    const sortedTagLogs = tagLogs.sort((a, b) =>
-      a.tag_at > b.tag_at ? 1 : -1,
-    );
-
-    // FIXME: 임시 조치임
-    const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16 
-      && v.device_id !== 48 && v.device_id !== 49
-      && v.device_id !== 43 && v.device_id !== 44,
-    );
-
-    const trimmedTagLogs = await this.trimTagLogs(
-      filteredTagLogs,
-      tagStart,
-      tagEnd,
-    );
-
-    const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+    const resultPairs = this.getPairsByTagLogs(taglogs, pairs);
 
     return resultPairs;
   }
@@ -641,37 +488,9 @@ export class TagLogService {
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const cards = await this.userService.findCardsByUserId(
-      userId,
-      tagStart,
-      tagEnd,
-    );
+    const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
-    const tagLogs = await this.tagLogRepository.findTagLogsByCards(
-      cards,
-      tagStart,
-      tagEnd,
-    );
-
-    const sortedTagLogs = tagLogs.sort((a, b) =>
-      a.tag_at > b.tag_at ? 1 : -1,
-    );
-
-    // FIXME: 임시 조치임
-    const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16 
-      && v.device_id !== 48 && v.device_id !== 49
-      && v.device_id !== 43 && v.device_id !== 44,
-    );
-
-    const trimmedTagLogs = await this.checkAndTrimTagLogs(
-      filteredTagLogs,
-      tagStart,
-      tagEnd,
-      pairs,
-    );
-
-    const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
+    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
     return resultPairs;
   }
@@ -690,37 +509,10 @@ export class TagLogService {
       const endOfMonth = this.dateCalculator.getEndOfMonth(beforeSixMonth);
 
       const pairs = await this.pairInfoRepository.findAll();
-  
-      const cards = await this.userService.findCardsByUserId(
-        userId,
-        beforeSixMonth,
-        today,
-      );
-  
-      const tagLogs = await this.tagLogRepository.findTagLogsByCards(
-        cards,
-        beforeSixMonth,
-        today,
-      );
-  
-      const sortedTagLogs = tagLogs.sort((a, b) =>
-        a.tag_at > b.tag_at ? 1 : -1,
-      );
-  
-      // FIXME: 임시 조치임
-      const filteredTagLogs = sortedTagLogs.filter(
-        (v) => v.device_id !== 35 && v.device_id !== 16
-        && v.device_id !== 48 && v.device_id !== 49
-        && v.device_id !== 43 && v.device_id !== 44,
-      );
-  
-      const trimmedTagLogs = await this.trimTagLogs(
-        filteredTagLogs,
-        beforeSixMonth,
-        today,
-      );
+      
+      const taglogs = await this.getAllTagLogsByPeriod(userId, beforeSixMonth, today);
 
-      const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
+      const resultPairs = this.getPairsByTagLogs(taglogs, pairs);
   
       const ret: number[] = [];
 
