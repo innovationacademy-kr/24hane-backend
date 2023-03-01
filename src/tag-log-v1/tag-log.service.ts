@@ -1,13 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import InOut from 'src/enums/inout.enum';
+import { UserService } from 'src/user/user.service';
 import { DateCalculator } from 'src/utils/date-calculator.component';
+import { InOutDto } from './dto/inout.dto';
+import { TagLogDto } from './dto/tag-log.dto';
 import { PairInfoDto } from './dto/pair-info.dto';
 import { InOutLogType } from './dto/subType/InOutLog.type';
-import { TagLogDto } from './dto/tag-log.dto';
-import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
-import { UserService } from 'src/user/user.service';
-import { InOutDto } from './dto/inout.dto';
+import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 
 @Injectable()
 export class TagLogService {
@@ -80,77 +80,6 @@ export class TagLogService {
   }
 
   /**
-   * 전 날의 마지막 로그와 해당 일의 첫 로그,
-   * 해당 일의 마지막 로그와 다음 날의 첫 로그를 비교한 후
-   * 짝이 맞는 경우에만 가상출입로그를 넣어 반환해줍니다.
-   *
-   * @param taglogs TagLogDto[]
-   * @return TagLogDto[]
-   */
-  async checkAndTrimTagLogs(
-    taglogs: TagLogDto[], //해당일의 태그로그
-    start: Date, //00:00
-    end: Date, //23:59
-    deviceInfo: PairInfoDto[],
-  ): Promise<TagLogDto[]> {
-    this.logger.debug(`@checkAndTrimTagLogs)`);
-
-    // 가장 앞 로그 확인
-    const firstLog = taglogs.at(0); 
-    if (firstLog) {
-      const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
-        [firstLog.card_id],
-        firstLog.tag_at,
-      );
-      // 어제의 마지막 로그가 IN이며, 오늘의 첫 로그가 OUT이면 가상 로그 넣어주기
-      if (
-        beforeFirstLog !== null
-        &&
-        this.isInDevice(deviceInfo, beforeFirstLog.device_id)
-        &&
-        this.isOutDevice(deviceInfo, firstLog.device_id)
-      ) {
-        const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
-        taglogs.unshift({
-          tag_at: virtualEnterTime,
-          device_id: beforeFirstLog.device_id,
-          idx: -1,
-          card_id: beforeFirstLog.card_id,
-        });
-      }
-    }
-
-    // 가장 뒤 로그 확인
-    const lastLog = taglogs.at(-1);
-    if (lastLog) {
-      const afterLastLog = await this.tagLogRepository.findNextTagLog(
-        [lastLog.card_id],
-        lastLog.tag_at,
-      );
-      // 오늘의 마지막 로그가 IN이며, 내일의 첫 로그가 OUT이면 가상 로그 넣어주기
-      // todo: 반복되는데 삽입되는 요소는 달라서 나눠둠
-      // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
-      if (
-        afterLastLog !== null
-        &&
-        this.isInDevice(deviceInfo, lastLog.device_id)
-        &&
-        this.isOutDevice(deviceInfo, afterLastLog.device_id)
-      ) {
-        const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
-        taglogs.push({
-          tag_at: virtualLeaveTime,
-          device_id: afterLastLog.device_id,
-          idx: -1,
-          card_id: afterLastLog.card_id,
-        });
-      }
-    }
-
-    return taglogs;
-  }
-
-  /**
    * 인자로 들어간 디바이스가 쌍이 맞는지 확인하는 함수입니다.
    *
    * @param deviceInfo
@@ -162,7 +91,7 @@ export class TagLogService {
     inDevice: number,
     outDevice: number,
   ): boolean {
-    //this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
+    this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
     // TODO: O(N) 보다 더 적게 시간을 소요하도록 리팩터링 필요
     const find = deviceInfos.find(
       (device) =>
@@ -181,17 +110,14 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    let ret: boolean = false;
+    const inDevice = deviceInfos.find(deviceInfo => deviceInfo.in_device === targetDevice);
 
-    //todo: find하기
-    deviceInfos.forEach(deviceInfo => {
-      if(deviceInfo.in_device === targetDevice) {
-        this.logger.debug(`@isInDevice) ${targetDevice}`);
-        ret = true;
-      }
-    });
+    if (inDevice) {
+      this.logger.debug(`@isInDevice) ${targetDevice}`);
+      return true;
+    }
 
-    return ret;
+    return false;
   }
 
   /**
@@ -199,21 +125,19 @@ export class TagLogService {
    * 
    * @param deviceInfos 
    * @param targetDevice 
-   */
+  */
   isOutDevice(
     deviceInfos: PairInfoDto[],
     targetDevice: number,
   ): boolean {
-    let ret: boolean = false;
+    const outDevice = deviceInfos.find(deviceInfo => deviceInfo.out_device === targetDevice);
 
-    deviceInfos.forEach(deviceInfo => {
-      if(deviceInfo.out_device === targetDevice) {
-        this.logger.debug(`@isOutDevice) ${targetDevice}`);
-        ret = true;
-      }
-    });
+    if (outDevice) {
+      this.logger.debug(`@isOutDevice) ${targetDevice}`);
+      return true;
+    }
 
-    return ret;
+    return false;
   }
 
   /**
@@ -664,11 +588,10 @@ export class TagLogService {
       && v.device_id !== 43 && v.device_id !== 44,
     );
 
-    const trimmedTagLogs = await this.checkAndTrimTagLogs(
+    const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
       tagStart,
       tagEnd,
-      pairs,
     );
 
     const resultPairs = this.getAllPairsByTagLogs(trimmedTagLogs, pairs);
