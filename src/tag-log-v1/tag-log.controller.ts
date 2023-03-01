@@ -175,9 +175,9 @@ export class TagLogController {
     ): Promise<number[]> {
       this.logger.debug(`@getTimeSixWeek) by ${user.login}`);
 
-      const totalSeconds = await this.tagLogService.getTimeSixWeek(user.user_id);
+      const weekPairs = await this.tagLogService.getTimeSixWeek(user.user_id);
 
-      return totalSeconds;
+      return weekPairs;
     }
 
   /**
@@ -299,26 +299,15 @@ export class TagLogController {
     status: 500,
     description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
   })
-  @ApiQuery({
-    name: 'year',
-    description: '년도',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'month',
-    description: '월',
-    required: true,
-  })
   @Get('getTimeSixMonth')
   async getTimeSixMonth(
     @User() user: UserSessionDto,
-  ): Promise<number> {
-    //todo: make year and month by today
+  ): Promise<number[]> {
+    this.logger.debug(`@getTimeSixMonth) by ${user.login}`);
 
-    //const totalSecond = await this.tagLogService.getTimePerMonthByNum(user.user_id, date, 6);
+    const monthPairs = this.tagLogService.getTimeSixMonth(user.user_id);
 
-    //return totalSecond;
-    return 0;
+    return monthPairs;
   }
 
   /**
@@ -391,9 +380,14 @@ export class TagLogController {
       0,
     );
 
+    const resultSixWeekArray = await this.tagLogService.getTimeSixWeek(user.user_id);
+    const resultSixMonthArray = await this.tagLogService.getTimeSixMonth(user.user_id);
+
     const result: UserAccumulationType = {
-      todayAccumationTime: resultDaySum,
-      monthAccumationTime: resultMonthSum,
+      todayAccumulationTime: resultDaySum,
+      monthAccumulationTime: resultMonthSum,
+      sixWeekAccumulationTime: resultSixWeekArray,
+      sixMonthAccumulationTime: resultSixMonthArray,
     };
     return result;
   }

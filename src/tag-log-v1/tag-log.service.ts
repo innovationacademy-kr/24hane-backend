@@ -512,7 +512,6 @@ export class TagLogService {
    * 한 주의 기준은 월요일~일요일 입니다.
    *
    * @param userId 사용자 ID
-   * @param date 현재 날짜
    * @returns number[]
    */
   async getTimeSixWeek(userId: number): Promise<number[]> {
@@ -678,30 +677,30 @@ export class TagLogService {
   }
 
   /**
-   * 입력받은 month 개월수 만큼 총 산정시간 반환
-   * 짝이 맞는 로그만 반환합니다.
+   * 인자로 들어가는 사용자 ID와 날짜에 대한 월별 누적시간을 배열로 반환합니다.
+   * 배열의 첫 인자가 현재 달의 누적시간입니다.
    *
    * @param userId 사용자 ID
-   * @param date 날짜
-   * @returns number
+   * @returns number[] 
    */
-    async getTimePerMonthByNum(userId: number, date: Date, month: number): Promise<number> {
-      this.logger.debug(`@getTagPerMonthByNum) ${userId}, ${date}`);
-      const tagStart = new Date(date.getFullYear(), date.getMonth() - (month-1));
-      const tagEnd =  new Date(date.getFullYear(), date.getMonth() + 1);
-  
+    async getTimeSixMonth(userId: number): Promise<number[]> {
+      this.logger.debug(`@getTagPerMonth) by ${userId}`);
+      const today = new Date();
+      const beforeSixMonth = new Date(today.getFullYear(), today.getMonth() - 5); //todo: check 5
+      const endOfMonth = this.dateCalculator.getEndOfMonth(beforeSixMonth);
+
       const pairs = await this.pairInfoRepository.findAll();
   
       const cards = await this.userService.findCardsByUserId(
         userId,
-        tagStart,
-        tagEnd,
+        beforeSixMonth,
+        today,
       );
   
       const tagLogs = await this.tagLogRepository.findTagLogsByCards(
         cards,
-        tagStart,
-        tagEnd,
+        beforeSixMonth,
+        today,
       );
   
       const sortedTagLogs = tagLogs.sort((a, b) =>
@@ -717,18 +716,32 @@ export class TagLogService {
   
       const trimmedTagLogs = await this.trimTagLogs(
         filteredTagLogs,
-        tagStart,
-        tagEnd,
+        beforeSixMonth,
+        today,
       );
 
       const resultPairs = this.getPairsByTagLogs(trimmedTagLogs, pairs);
-
-      let totalSecond: number = 0;
-      resultPairs.forEach(element => {
-        totalSecond += element.durationSecond;
-      });
   
-      return totalSecond;
+      const ret: number[] = [];
+
+      while(beforeSixMonth <= today) {
+        let totalSecond = 0;
+  
+        const monthPairs = resultPairs.filter(resultPair => 
+          beforeSixMonth <= new Date(resultPair.inTimeStamp * 1000) 
+          && 
+          new Date(resultPair.inTimeStamp * 1000) <= endOfMonth
+        );
+  
+        monthPairs.forEach(monthPairs => totalSecond += monthPairs.durationSecond);
+        
+        ret.push(totalSecond);
+  
+        beforeSixMonth.setMonth(beforeSixMonth.getMonth() + 1);
+        endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+      }
+  
+      return ret.reverse();
     }
 
   /**
