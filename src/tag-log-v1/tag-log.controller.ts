@@ -1,8 +1,6 @@
 import {
-  CACHE_MANAGER,
   Controller,
   Get,
-  Inject,
   Logger,
   ParseIntPipe,
   Query,
@@ -23,9 +21,6 @@ import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { TagLogService } from './tag-log.service';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { DateCalculator } from 'src/utils/date-calculator.component';
-import { StatisticsService } from 'src/statistics/statictics.service';
-import { Cache } from 'cache-manager';
-import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 
 @ApiTags('체류 시간 산출')
 @Controller({
@@ -40,19 +35,17 @@ export class TagLogController {
   constructor(
     private tagLogService: TagLogService,
     private dateCalculator: DateCalculator,
-    private statisticsService: StatisticsService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   /**
-   * 특정 일에 대해 체류했던 시간을 조회합니다.
+   * 특정 일에 대해 태깅했던 로그를 조회합니다.
    *
    * @param user 로그인한 사용자 세션
    * @returns UserInOutLogsType
    */
   @ApiOperation({
-    summary: '일별 체류시간 조회',
-    description: '일별 체류시간을 조회합니다.',
+    summary: '일별 태그로그 조회',
+    description: '일별 짝이 맞는 태그로그를 조회합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -80,18 +73,18 @@ export class TagLogController {
     description: '일',
     required: true,
   })
-  @Get('perday')
-  async getPerDay(
+  @Get('getTagPerDay')
+  async getTagPerDay(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
     @Query('day', ParseIntPipe) day: number,
   ): Promise<UserInOutLogsType> {
-    this.logger.debug(`@getPerDay) ${year}-${month}-${day} by ${user.login}`);
+    this.logger.debug(`@getTagPerDay) ${year}-${month}-${day} by ${user.login}`);
 
     const date = new Date(`${year}-${month}-${day}`);
 
-    const results = await this.tagLogService.getPerDay(user.user_id, date);
+    const results = await this.tagLogService.getTagPerDay(user.user_id, date);
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -100,7 +93,7 @@ export class TagLogController {
   }
 
   /**
-   * 특정 일에 대한 모든 로그를 조회합니다.
+   * 특정 일에 대한 모든 태그로그를 조회합니다.
    *
    * @param user 로그인한 사용자 세션
    * @returns UserInOutLogsType
@@ -135,21 +128,18 @@ export class TagLogController {
     description: '일',
     required: true,
   })
-  @Get('alltagperday')
+  @Get('getAllTagPerDay')
   async getAllTagPerDay(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
     @Query('day', ParseIntPipe) day: number,
   ): Promise<UserInOutLogsType> {
-    this.logger.debug(`@getPerDay) ${year}-${month}-${day} by ${user.login}`);
+    this.logger.debug(`@getAllTagPerDay) ${year}-${month}-${day} by ${user.login}`);
 
     const date = new Date(`${year}-${month}-${day}`);
 
-    const results = await this.tagLogService.getAllTagPerDay(
-      user.user_id,
-      date,
-    );
+    const results = await this.tagLogService.getAllTagPerDay(user.user_id, date);
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -157,61 +147,15 @@ export class TagLogController {
     };
   }
 
-  /*
-   * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
-   *
-   * @param user 로그인한 사용자 세션
-   * @returns number
-   */
-  @ApiOperation({
-    summary: '주차별 체류시간 조회',
-    description: '주차별 체류시간을 조회합니다. (일~토)',
-  })
-  @ApiResponse({
-    status: 200,
-    type: UserInOutLogsType,
-    description: '조회 성공',
-  })
-  @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-  @ApiResponse({ status: 401, description: '접근 권한 없음' })
-  @ApiResponse({
-    status: 500,
-    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-  })
-  @ApiQuery({
-    name: 'year',
-    description: '년도',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'week',
-    description: '주차',
-    required: true,
-  })
-  @Get('oneweek')
-  async getOneWeek(
-    @User() user: UserSessionDto,
-    @Query('year', ParseIntPipe) year: number,
-    @Query('week', ParseIntPipe) week: number,
-  ): Promise<number> {
-    this.logger.debug(`@getPerWeek) ${year}-${week} by ${user.login}`);
-
-    const date = this.dateCalculator.getDateOfWeek(year, week - 1);
-    //this.logger.debug(`date:`, date);
-    const totalSecond = await this.tagLogService.getPerWeek(user.user_id, date);
-
-    return totalSecond;
-  }
-
   /**
-   * 특정 월에 대해 체류했던 시간을 조회합니다.
+   * 특정 월에 대해 태깅했던 로그를 조회합니다.
    *
    * @param user 로그인한 사용자 세션
    * @returns UsageResponseDto
    */
   @ApiOperation({
-    summary: '월별 체류시간 조회',
-    description: '월별 체류시간을 조회합니다.',
+    summary: '월별 태그로그 조회',
+    description: '월별 짝이 맞는 태그로그를 조회합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -234,17 +178,17 @@ export class TagLogController {
     description: '월',
     required: true,
   })
-  @Get('permonth')
-  async getPerMonth(
+  @Get('getTagPerMonth')
+  async getTagPerMonth(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserInOutLogsType> {
-    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
+    this.logger.debug(`@getTagPerMonth) ${year}-${month} by ${user.login}`);
 
     const date = new Date(`${year}-${month}`);
 
-    const results = await this.tagLogService.getPerMonth(user.user_id, date);
+    const results = await this.tagLogService.getTagPerMonth(user.user_id, date);
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -253,106 +197,85 @@ export class TagLogController {
   }
 
   /**
-   * 특정 월에 대한 모든 로그를 조회합니다.
+   * 특정 월에 대한 모든 태그로그를 조회합니다.
    *
    * @param user 로그인한 사용자 세션
    * @returns UsageResponseDto
    */
-  @ApiOperation({
-    summary: '월별 모든 태그로그 조회',
-    description: '월별 모든 태그로그를 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    type: UserInOutLogsType,
-    description: '조회 성공',
-  })
-  @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-  @ApiResponse({ status: 401, description: '접근 권한 없음' })
-  @ApiResponse({
-    status: 500,
-    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-  })
-  @ApiQuery({
-    name: 'year',
-    description: '년도',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'month',
-    description: '월',
-    required: true,
-  })
-  @Get('alltagpermonth')
-  async getAllTagPerMonth(
-    @User() user: UserSessionDto,
-    @Query('year', ParseIntPipe) year: number,
-    @Query('month', ParseIntPipe) month: number,
-  ): Promise<UserInOutLogsType> {
-    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
+    @ApiOperation({
+      summary: '월별 모든 태그로그 조회',
+      description: '월별 모든 태그로그를 조회합니다.',
+    })
+    @ApiResponse({
+      status: 200,
+      type: UserInOutLogsType,
+      description: '조회 성공',
+    })
+    @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
+    @ApiResponse({ status: 401, description: '접근 권한 없음' })
+    @ApiResponse({
+      status: 500,
+      description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
+    })
+    @ApiQuery({
+      name: 'year',
+      description: '년도',
+      required: true,
+    })
+    @ApiQuery({
+      name: 'month',
+      description: '월',
+      required: true,
+    })
+    @Get('getAllTagPerMonth')
+    async getAllTagPerMonth(
+      @User() user: UserSessionDto,
+      @Query('year', ParseIntPipe) year: number,
+      @Query('month', ParseIntPipe) month: number,
+    ): Promise<UserInOutLogsType> {
+      this.logger.debug(`@getTagPerMonth) ${year}-${month} by ${user.login}`);
+  
+      const date = new Date(`${year}-${month}`);
+  
+      const results = await this.tagLogService.getAllTagPerMonth(user.user_id, date);
+      return {
+        login: user.login,
+        profileImage: user.image_url,
+        inOutLogs: results,
+      };
+    }
 
-    const date = new Date(`${year}-${month}`);
+  ///**
+  // * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
+  // *
+  // * @param user 로그인한 사용자 세션
+  // * @returns number[]
+  // */
+  //@ApiOperation({
+  //  summary: '최근 6개월간의 체류시간 조회',
+  //  description: '최근 6개월간의 체류시간을 조회합니다.',
+  //})
+  //@ApiResponse({
+  //  status: 200,
+  //  type: Array,
+  //  description: '조회 성공',
+  //})
+  //@ApiResponse({ status: 400, description: '쿼리 타입 에러' })
+  //@ApiResponse({ status: 401, description: '접근 권한 없음' })
+  //@ApiResponse({
+  //  status: 500,
+  //  description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
+  //})
+  //@Get('getTimeSixMonth')
+  //async getTimeSixMonth(
+  //  @User() user: UserSessionDto,
+  //): Promise<number[]> {
+  //  this.logger.debug(`@getTimeSixMonth) by ${user.login}`);
 
-    const results = await this.tagLogService.getAllTagPerMonth(
-      user.user_id,
-      date,
-    );
-    return {
-      login: user.login,
-      profileImage: user.image_url,
-      inOutLogs: results,
-    };
-  }
+  //  const monthPairs = this.tagLogService.getTimeSixMonth(user.user_id);
 
-  /**
-   * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
-   *
-   * @param user 로그인한 사용자 세션
-   * @returns number
-   */
-  @ApiOperation({
-    summary: '6개월 체류시간 조회',
-    description: '6개월간의 체류시간을 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    type: UserInOutLogsType,
-    description: '조회 성공',
-  })
-  @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-  @ApiResponse({ status: 401, description: '접근 권한 없음' })
-  @ApiResponse({
-    status: 500,
-    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-  })
-  @ApiQuery({
-    name: 'year',
-    description: '년도',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'month',
-    description: '월',
-    required: true,
-  })
-  @Get('sixmonth')
-  async getSixMonth(
-    @User() user: UserSessionDto,
-    @Query('year', ParseIntPipe) year: number,
-    @Query('month', ParseIntPipe) month: number,
-  ): Promise<number> {
-    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
-
-    const date = new Date(`${year}-${month}`);
-
-    const totalSecond = await this.tagLogService.getPerMonthByNum(
-      user.user_id,
-      date,
-      6,
-    );
-
-    return totalSecond;
-  }
+  //  return monthPairs;
+  //}
 
   /**
    * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.
@@ -376,21 +299,12 @@ export class TagLogController {
   async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
     this.logger.debug(`@getMainInfo) by ${user.login}`);
     const inoutState = await this.tagLogService.checkClusterById(user.user_id);
-    // FIXME: 추후에 캐시 관련 리팩터링 필요
-    let cadetPerCluster: undefined | CadetPerClusterDto[] =
-      await this.cacheManager.get('getCadetPerCluster');
-    if (cadetPerCluster === undefined) {
-      cadetPerCluster = await this.statisticsService.getCadetPerCluster(2);
-      await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60);
-    }
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
       isAdmin: user.is_staff,
       inoutState: inoutState.inout,
       tagAt: inoutState.log,
-      gaepo: cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet,
-      seocho: cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet,
     };
     return result;
   }
@@ -400,7 +314,7 @@ export class TagLogController {
    */
   @ApiOperation({
     summary: '로그인한 유저의 일별/월별 누적 체류시간',
-    description: '로그인한 유저의 일별/월별 누적 체류시간을 조회합니다.',
+    description: '로그인한 유저의 일별/월별 누적 체류시간을 조s회합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -418,8 +332,8 @@ export class TagLogController {
   ): Promise<UserAccumulationType> {
     this.logger.debug(`@getAccumulationTimes) by ${user.login}`);
     const date = new Date();
-    const resultDay = await this.tagLogService.getPerDay(user.user_id, date);
-    const resultMonth = await this.tagLogService.getPerMonth(
+    const resultDay = await this.tagLogService.getTagPerDay(user.user_id, date);
+    const resultMonth = await this.tagLogService.getTagPerMonth(
       user.user_id,
       date,
     );
@@ -433,9 +347,14 @@ export class TagLogController {
       0,
     );
 
+    const resultSixWeekArray = await this.tagLogService.getTimeSixWeek(user.user_id);
+    const resultSixMonthArray = await this.tagLogService.getTimeSixMonth(user.user_id);
+
     const result: UserAccumulationType = {
-      todayAccumationTime: resultDaySum,
-      monthAccumationTime: resultMonthSum,
+      todayAccumulationTime: resultDaySum,
+      monthAccumulationTime: resultMonthSum,
+      sixWeekAccumulationTime: resultSixWeekArray,
+      sixMonthAccumulationTime: resultSixMonthArray,
     };
     return result;
   }

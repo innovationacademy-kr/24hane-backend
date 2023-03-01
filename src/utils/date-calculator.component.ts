@@ -31,15 +31,6 @@ export class DateCalculator {
     return rtn;
   }
 
-  getEndOfWeek(date: Date): Date {
-    const y = date.getFullYear();
-    const m = date.getMonth();
-    const d = date.getDate();
-    const rtn = new Date(y, m, d + 7, 0, 0, 0, 0);
-    rtn.setTime(rtn.getTime() - 1);
-    return rtn;
-  }
-
   /**
    * 인자로 주어진 일에 대해 바로 전날의 가장 늦은 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
@@ -54,6 +45,29 @@ export class DateCalculator {
       0,
       0,
     );
+    rtn.setTime(rtn.getTime() - 1);
+    return rtn;
+  }
+
+  /**
+   * 인자로 주어진 일에 대해 그 주의 첫 날짜(월요일)의 가장 빠른 시간을 반환합니다.
+   * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   */
+  getStartOfWeek(date: Date): Date {
+    const dayOfWeek = date.getDay() - 1;
+    const diff = dayOfWeek === -1 ? 6 : dayOfWeek;
+    const rtn = new Date(date.getFullYear(), date.getMonth(), date.getDate() - diff);
+    return rtn;
+  }
+
+  /**
+   * 인자로 주어진 일에 대해 그 주의 마지막 날짜(일요일)와 가장 늦은 시간을 반환합니다.
+   * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   */
+  getEndOfWeek(date: Date): Date {
+    const startOfWeek = this.getStartOfWeek(date);
+    const rtn = new Date(startOfWeek);
+    rtn.setDate(startOfWeek.getDate() + 7);
     rtn.setTime(rtn.getTime() - 1);
     return rtn;
   }
