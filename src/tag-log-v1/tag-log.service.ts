@@ -494,11 +494,10 @@ export class TagLogService {
       && v.device_id !== 43 && v.device_id !== 44,
     );
 
-    const trimmedTagLogs = await this.checkAndTrimTagLogs(
+    const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
       tagStart,
       tagEnd,
-      pairs,
     );
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.

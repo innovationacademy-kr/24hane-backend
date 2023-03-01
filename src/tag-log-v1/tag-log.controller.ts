@@ -135,7 +135,7 @@ export class TagLogController {
     @Query('month', ParseIntPipe) month: number,
     @Query('day', ParseIntPipe) day: number,
   ): Promise<UserInOutLogsType> {
-    this.logger.debug(`@getTagPerDay) ${year}-${month}-${day} by ${user.login}`);
+    this.logger.debug(`@getAllTagPerDay) ${year}-${month}-${day} by ${user.login}`);
 
     const date = new Date(`${year}-${month}-${day}`);
 
