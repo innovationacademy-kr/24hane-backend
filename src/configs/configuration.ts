@@ -24,6 +24,15 @@ export default () => ({
     spreadsheetId: process.env.GOOGLEAPI_SHEET_ID,
     range: process.env.GOOGLEAPI_SHEET_RANGE,
   },
+  googleCardApi: {
+    email: process.env.GOOGLEAPI_CARD_ACCOUNT_EMAIL,
+    key: process.env.GOOGLEAPI_CARD_ACCOUNT_PRIVATE_KEY,
+    spreadsheetId: process.env.GOOGLEAPI_CARD_SHEET_ID,
+    range: process.env.GOOGLEAPI_CARD_SHEET_RANGE,
+  },
+  jandi: {
+    webhook: process.env.JANDI_WEBHOOK_URL,
+  },
   frontend: {
     uri: process.env.URL_FOR_CORS,
   },

@@ -11,6 +11,7 @@ import { TagLogAdminController } from './tag-log-admin.controller';
 import { TagLogAdminService } from './tag-log-admin.service';
 import { TagLogController } from './tag-log.controller';
 import { TagLogService } from './tag-log.service';
+import { StatisticsModule } from 'src/statistics/statictics.module';
 
 const tagLogRepo = {
   provide: 'ITagLogRepository',
@@ -28,6 +29,7 @@ const pairInfoRepo = {
     TypeOrmModule.forFeature([TagLog, PairInfo]),
     UtilsModule,
     UserModule,
+    StatisticsModule,
   ],
   exports: [TypeOrmModule],
   controllers: [TagLogController, TagLogAdminController],
