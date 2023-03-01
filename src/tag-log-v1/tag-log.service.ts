@@ -358,13 +358,6 @@ export class TagLogService {
       a.tag_at > b.tag_at ? 1 : -1,
     );
 
-    // FIXME: 임시 조치임
-    //const filteredTagLogs = sortedTagLogs.filter(
-    //  (v) => v.device_id === 35 || v.device_id === 16 
-    //  || v.device_id === 48 || v.device_id === 49
-    //  || v.device_id === 43 || v.device_id === 44,
-    //);
-
     const devicePairs = await this.pairInfoRepository.findAll()
 
     const filteredTagLogs = sortedTagLogs.filter(
