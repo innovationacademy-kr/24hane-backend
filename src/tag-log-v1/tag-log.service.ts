@@ -113,7 +113,7 @@ export class TagLogService {
     const inDevice = deviceInfos.find(deviceInfo => deviceInfo.in_device === targetDevice);
 
     if (inDevice) {
-      this.logger.debug(`@isInDevice) ${targetDevice}`);
+      //this.logger.debug(`@isInDevice) ${targetDevice}`);
       return true;
     }
 
@@ -133,7 +133,7 @@ export class TagLogService {
     const outDevice = deviceInfos.find(deviceInfo => deviceInfo.out_device === targetDevice);
 
     if (outDevice) {
-      this.logger.debug(`@isOutDevice) ${targetDevice}`);
+      //this.logger.debug(`@isOutDevice) ${targetDevice}`);
       return true;
     }
 
@@ -359,17 +359,25 @@ export class TagLogService {
     );
 
     // FIXME: 임시 조치임
+    //const filteredTagLogs = sortedTagLogs.filter(
+    //  (v) => v.device_id === 35 || v.device_id === 16 
+    //  || v.device_id === 48 || v.device_id === 49
+    //  || v.device_id === 43 || v.device_id === 44,
+    //);
+
+    const devicePairs = await this.pairInfoRepository.findAll()
+
     const filteredTagLogs = sortedTagLogs.filter(
-      (v) => v.device_id !== 35 && v.device_id !== 16 
-      && v.device_id !== 48 && v.device_id !== 49
-      && v.device_id !== 43 && v.device_id !== 44,
+      taglog => !!(devicePairs.find(temp => temp.in_device === taglog.device_id || temp.out_device === taglog.device_id))
     );
+
+    console.log(filteredTagLogs);
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
       tagStart,
       tagEnd,
-    );
+      );
 
     return trimmedTagLogs;
   }
