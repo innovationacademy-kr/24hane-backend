@@ -112,12 +112,7 @@ export class TagLogService {
   ): boolean {
     const inDevice = deviceInfos.find(deviceInfo => deviceInfo.in_device === targetDevice);
 
-    if (inDevice) {
-      //this.logger.debug(`@isInDevice) ${targetDevice}`);
-      return true;
-    }
-
-    return false;
+    return !!inDevice;
   }
 
   /**
@@ -132,12 +127,7 @@ export class TagLogService {
   ): boolean {
     const outDevice = deviceInfos.find(deviceInfo => deviceInfo.out_device === targetDevice);
 
-    if (outDevice) {
-      //this.logger.debug(`@isOutDevice) ${targetDevice}`);
-      return true;
-    }
-
-    return false;
+    return !!outDevice;
   }
 
   /**
@@ -363,8 +353,6 @@ export class TagLogService {
     const filteredTagLogs = sortedTagLogs.filter(
       taglog => !!(devicePairs.find(temp => temp.in_device === taglog.device_id || temp.out_device === taglog.device_id))
     );
-
-    console.log(filteredTagLogs);
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
