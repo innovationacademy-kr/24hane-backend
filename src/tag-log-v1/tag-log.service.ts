@@ -579,52 +579,6 @@ export class TagLogService {
     }
 
     return ret.reverse();
-
-  //****************************************************** */
-
-    //Object.keys(resultPairs.reduce((acc, curr) => {
-    //  const currDay = new Date(curr.inTimeStamp * 1000);
-
-    //  if (!acc[new Date(curr.inTimeStamp * 1000).getTime()]) {
-    //    acc[new Date(curr.inTimeStamp * 1000).getTime()] = 0;
-    //  }
-
-    //  acc[new Date(curr.inTimeStamp * 1000).getTime()] += curr.durationSecond;
-    //  return acc;
-    //}, new Map<number, number>)).forEach((curr) => console.log(curr));
-
-
-    //return Object.values(resultPairs.reduce((acc, curr) => {
-    //  if (!acc[new Date(curr.inTimeStamp * 1000).getTime()]) {
-    //    acc[new Date(curr.inTimeStamp * 1000).getTime()] = 0;
-    //  }
-
-    //  acc[new Date(curr.inTimeStamp * 1000).getTime()] += curr.durationSecond;
-    //  return acc;
-    //}, new Map<number, number>));
-
-    //****************************************************** */
-
-      //const ret = [0, 0, 0, 0, 0, 0];
-      //let i = 5;
-      ////let j = 0;
-      //resultPairs.forEach((curr) => {
-      //  const date = new Date(curr.inTimeStamp * 1000);
-
-      //  if (date.getDay() == 0) {
-      //    //console.log(j);
-      //    i--;
-      //  }
-      //  //j++;
-      //  console.log(`getday: ${date.getDay()}, getdate: ${date.getDate()}, ${curr.durationSecond}`);
-      //  ret[i] += curr.durationSecond;
-
-      //  //date.setDate(date.getDate() - 1);
-      //});
-
-      //return ret;
-
-    //return Object.values(ret);
   }
 
   /**
