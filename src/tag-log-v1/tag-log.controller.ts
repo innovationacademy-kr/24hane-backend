@@ -148,39 +148,6 @@ export class TagLogController {
   }
 
   /**
-   * 현 시간으로부터 최근 6주간의 체류시간을 조회합니다.
-   * 첫 배열에 이번 주차의 체류시간이 들어갑니다.
-   *
-   * @param user 로그인한 사용자 세션
-   * @returns number[]
-   */
-    @ApiOperation({
-      summary: '최근 6주간의 체류시간 조회',
-      description: '최근 6주간의 체류시간을 조회합니다. (일~토)',
-    })
-    @ApiResponse({
-      status: 200,
-      type: Array,
-      description: '조회 성공',
-    })
-    @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-    @ApiResponse({ status: 401, description: '접근 권한 없음' })
-    @ApiResponse({
-      status: 500,
-      description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-    })
-    @Get('getTimeSixWeek')
-    async getOneWeek(
-      @User() user: UserSessionDto,
-    ): Promise<number[]> {
-      this.logger.debug(`@getTimeSixWeek) by ${user.login}`);
-
-      const weekPairs = await this.tagLogService.getTimeSixWeek(user.user_id);
-
-      return weekPairs;
-    }
-
-  /**
    * 특정 월에 대해 태깅했던 로그를 조회합니다.
    *
    * @param user 로그인한 사용자 세션
@@ -278,37 +245,37 @@ export class TagLogController {
       };
     }
 
-  /**
-   * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
-   *
-   * @param user 로그인한 사용자 세션
-   * @returns number[]
-   */
-  @ApiOperation({
-    summary: '최근 6개월간의 체류시간 조회',
-    description: '최근 6개월간의 체류시간을 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    type: Array,
-    description: '조회 성공',
-  })
-  @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-  @ApiResponse({ status: 401, description: '접근 권한 없음' })
-  @ApiResponse({
-    status: 500,
-    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-  })
-  @Get('getTimeSixMonth')
-  async getTimeSixMonth(
-    @User() user: UserSessionDto,
-  ): Promise<number[]> {
-    this.logger.debug(`@getTimeSixMonth) by ${user.login}`);
+  ///**
+  // * 입력 월을 포함한 6개월간의 체류했던 시간을 조회합니다.
+  // *
+  // * @param user 로그인한 사용자 세션
+  // * @returns number[]
+  // */
+  //@ApiOperation({
+  //  summary: '최근 6개월간의 체류시간 조회',
+  //  description: '최근 6개월간의 체류시간을 조회합니다.',
+  //})
+  //@ApiResponse({
+  //  status: 200,
+  //  type: Array,
+  //  description: '조회 성공',
+  //})
+  //@ApiResponse({ status: 400, description: '쿼리 타입 에러' })
+  //@ApiResponse({ status: 401, description: '접근 권한 없음' })
+  //@ApiResponse({
+  //  status: 500,
+  //  description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
+  //})
+  //@Get('getTimeSixMonth')
+  //async getTimeSixMonth(
+  //  @User() user: UserSessionDto,
+  //): Promise<number[]> {
+  //  this.logger.debug(`@getTimeSixMonth) by ${user.login}`);
 
-    const monthPairs = this.tagLogService.getTimeSixMonth(user.user_id);
+  //  const monthPairs = this.tagLogService.getTimeSixMonth(user.user_id);
 
-    return monthPairs;
-  }
+  //  return monthPairs;
+  //}
 
   /**
    * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.
