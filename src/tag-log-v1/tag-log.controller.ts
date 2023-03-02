@@ -1,6 +1,8 @@
 import {
+  CACHE_MANAGER,
   Controller,
   Get,
+  Inject,
   Logger,
   ParseIntPipe,
   Query,
@@ -20,6 +22,9 @@ import { UserInfoType } from './dto/user-Info.type';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { TagLogService } from './tag-log.service';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
+import { Cache } from 'cache-manager';
+import { StatisticsService } from 'src/statistics/statictics.service';
+import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 
 @ApiTags('체류 시간 산출')
 @Controller({
@@ -31,7 +36,11 @@ import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 export class TagLogController {
   private logger = new Logger(TagLogController.name);
 
-  constructor(private tagLogService: TagLogService) {}
+  constructor(
+    private tagLogService: TagLogService,
+    private statisticsService: StatisticsService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   /**
    * 특정 일에 대해 태깅했던 로그를 조회합니다.
@@ -263,12 +272,21 @@ export class TagLogController {
   async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
     this.logger.debug(`@getMainInfo) by ${user.login}`);
     const inoutState = await this.tagLogService.checkClusterById(user.user_id);
+    // FIXME: 추후에 캐시 관련 리팩터링 필요
+    let cadetPerCluster: undefined | CadetPerClusterDto[] =
+      await this.cacheManager.get('getCadetPerCluster');
+    if (cadetPerCluster === undefined) {
+      cadetPerCluster = await this.statisticsService.getCadetPerCluster(2);
+      await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60);
+    }
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
       isAdmin: user.is_staff,
       inoutState: inoutState.inout,
       tagAt: inoutState.log,
+      gaepo: cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet,
+      seocho: cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet,
     };
     return result;
   }
