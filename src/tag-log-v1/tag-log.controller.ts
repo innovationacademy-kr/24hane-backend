@@ -279,14 +279,16 @@ export class TagLogController {
       cadetPerCluster = await this.statisticsService.getCadetPerCluster(2);
       await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60);
     }
+    const gaepo = +cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
+    const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
       isAdmin: user.is_staff,
       inoutState: inoutState.inout,
       tagAt: inoutState.log,
-      gaepo: cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet,
-      seocho: cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet,
+      gaepo: gaepo ? gaepo : 0,
+      seocho: seocho ? seocho : 0,
     };
     return result;
   }
