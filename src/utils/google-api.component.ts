@@ -9,7 +9,7 @@ import { sheets, auth } from '@googleapis/sheets';
 export class GoogleApi {
   private logger = new Logger(GoogleApi.name);
   private _envEmail = this.configService.get<string>('googleCardApi.email');
-  private _keyFile = this.configService.get<string>('googleCardApi.key');
+  private _key = this.configService.get<string>('googleCardApi.key');
   private _gsId = this.configService.get<string>('googleCardApi.spreadsheetId');
   private _gsRange = this.configService.get<string>('googleCardApi.range');
   private _scope = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -54,7 +54,7 @@ export class GoogleApi {
   authorize(): any {
     const googleAuth = new auth.JWT({
       email: this._envEmail,
-      key: this._keyFile,
+      key: this._key,
       scopes: this._scope,
     });
     return googleAuth;
@@ -77,11 +77,11 @@ export class GoogleApi {
     return result;
   }
 
-  async appendValues(data: (String | Number)[]): Promise<void> {
+  async appendValues(data: (string | number)[]): Promise<void> {
     const auth = this.authorize();
     try {
       const sheet = sheets('v4');
-      const allCardReissues = await sheet.spreadsheets.values.append({
+      await sheet.spreadsheets.values.append({
         auth: auth,
         spreadsheetId: this.gsId,
         range: this.gsRange,
@@ -95,14 +95,14 @@ export class GoogleApi {
     }
   }
 
-  async updateValues(rowNum: Number, data: String): Promise<void> {
+  async updateValues(rowNum: number, data: string): Promise<void> {
     const auth = this.authorize();
     try {
       const sheet = sheets('v4');
       await sheet.spreadsheets.values.update({
         auth: auth,
         spreadsheetId: this.gsId,
-        range: this.gsRange + `!E${rowNum}`,
+        range: this.gsRange + `!F${rowNum}`,
         requestBody: {
           values: [[data]],
         },

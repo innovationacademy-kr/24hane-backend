@@ -11,5 +11,5 @@ export class reissueFinishedType {
     description: '재발급 카드 수령 날짜/시간',
     example: '2042-04-02 04:02:42',
   })
-  requested_at: Date;
+  picked_up_at: Date;
 }

@@ -51,26 +51,31 @@ export class ReissueService {
     );
     const result = await this.googleApi.getAllValues();
     const filtered = [];
+    let state = '';
     for (const row of result) {
       if (row[0] == user_id) {
         filtered.push(row);
       }
     }
     if (!filtered.length) {
-      throw new NotFoundException('신청내역 없음');
+      return { state: 'none' };
     }
     const recent = filtered.pop();
-    const isIssued = recent[3];
-    const isPickedUp = recent[4];
-    let state = '';
+    const isRequested = recent[3];
+    const isIssued = recent[4];
+    const isPickedUp = recent[5];
     if (isIssued) {
       if (isPickedUp) {
         state = 'done';
       } else {
-        state = 'pick up requested';
+        state = 'pick_up_requested';
       }
     } else {
-      state = 'in_progress';
+      if (isRequested) {
+        state = 'in_progress';
+      } else {
+        state = 'apply';
+      }
     }
     return { state: state };
   }
@@ -93,7 +98,15 @@ export class ReissueService {
       throw new NotFoundException('기존 카드번호 없음');
     }
 
-    const data = [user.user_id, user.login, requestedAt, '', '', initialCardNo];
+    const data = [
+      user.user_id,
+      user.login,
+      requestedAt,
+      '',
+      '',
+      '',
+      initialCardNo,
+    ];
     try {
       await this.googleApi.appendValues(data);
     } catch (error) {
@@ -160,8 +173,8 @@ export class ReissueService {
       );
     }
 
-    const initialCardNo = recent['row'][5];
-    const newCardNo = recent['row'][6];
+    const initialCardNo = recent['row'][6];
+    const newCardNo = recent['row'][7];
     const pickedUpAt = this.getTimeNowKST();
     try {
       const jandiData = {

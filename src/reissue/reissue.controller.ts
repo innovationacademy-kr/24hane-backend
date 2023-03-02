@@ -36,9 +36,17 @@ export class ReissueController {
     content: {
       'application/json': {
         examples: {
-          '신청완료/카드제작중': {
+          '신청내역 없음': {
+            value: { state: 'none' },
+            description: '카드 재발급 신청내역 없음',
+          },
+          신청: {
+            value: { state: 'apply' },
+            description: '카드 재발급 신청',
+          },
+          카드제작중: {
             value: { state: 'in_progress' },
-            description: '카드 재발급 신청 후 제작 진행중인 상태',
+            description: '카드 재발급 신청 확인 후 제작 진행중인 상태',
           },
           제작완료: {
             value: { state: 'pick_up_requested' },
@@ -46,14 +54,13 @@ export class ReissueController {
               '인포에서 재발급 카드 수령 후, 권한 부여, 24hane에 반영까지 완료된 상태',
           },
           수령완료: {
-            value: { state: 'picked_up' },
+            value: { state: 'done' },
             description: '사용자가 수령완료한 상태',
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 404, description: '사용자의 신청내역을 찾을 수 없음' })
   async getReissueState(@User() user: UserSessionDto): Promise<reissueSateDto> {
     const result = await this.reissueService.getReissueState(user.user_id);
     return result;
@@ -65,7 +72,7 @@ export class ReissueController {
     description: '사용자의 카드 재발급 신청을 요청합니다.',
   })
   @ApiResponse({
-    status: 200,
+    status: 201,
     type: ReissueRequestType,
     description: '신청 성공',
   })
