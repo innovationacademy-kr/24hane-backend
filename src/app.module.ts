@@ -16,6 +16,7 @@ import { TagLogModule2 } from './tag-log-v2/tag-log-v2.module';
 import { UserModule } from './user/user.module';
 import { ReissueModule } from './reissue/reissue.module';
 import { StatisticsModule } from './statistics/statictics.module';
+import { RedirectModule } from './redirect/redirect.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { StatisticsModule } from './statistics/statictics.module';
       useClass: TypeOrmConfigService,
     }),
     StatisticsModule,
+    RedirectModule,
     AuthModule,
     TagLogModule,
     TagLogModule2,

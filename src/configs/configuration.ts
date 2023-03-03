@@ -36,4 +36,10 @@ export default () => ({
   frontend: {
     uri: process.env.URL_FOR_CORS,
   },
+  redirect: {
+    money_guidelines: process.env.URI_MONEY_GUIDELINE,
+    question: process.env.URI_QUESTION,
+    usage: process.env.URI_USAGE,
+    feedback: process.env.URI_FEEDBACK,
+  },
 });
