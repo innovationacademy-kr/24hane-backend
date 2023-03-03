@@ -505,8 +505,8 @@ export class TagLogService {
     async getTimeSixMonth(userId: number): Promise<number[]> {
       this.logger.debug(`@getTagPerMonth) by ${userId}`);
       const today = new Date();
-      const beforeSixMonth = new Date(today.getFullYear(), today.getMonth() - 5); //todo: change to start of month
-      const endOfMonth = this.dateCalculator.getEndOfMonth(beforeSixMonth);
+      const beforeSixMonth = new Date(today.getFullYear(), today.getMonth() - 5);
+      let endOfMonth = this.dateCalculator.getEndOfMonth(beforeSixMonth);
 
       const pairs = await this.pairInfoRepository.findAll();
       
@@ -530,8 +530,7 @@ export class TagLogService {
         ret.push(totalSecond);
         
         beforeSixMonth.setMonth(beforeSixMonth.getMonth() + 1);
-        endOfMonth.setMonth(endOfMonth.getMonth() + 1);
-        endOfMonth.setDate(endOfMonth.getDate() - 1);
+        endOfMonth = this.dateCalculator.getEndOfMonth(beforeSixMonth);
       }
   
       return ret.reverse();
