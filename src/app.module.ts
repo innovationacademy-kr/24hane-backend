@@ -12,6 +12,7 @@ import TypeOrmConfigService from './configs/typeorm.config';
 import { ExtModule } from './ext/ext.module';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
+import { TagLogModule2 } from './tag-log-v2/tag-log-v2.module';
 import { UserModule } from './user/user.module';
 import { ReissueModule } from './reissue/reissue.module';
 import { StatisticsModule } from './statistics/statictics.module';
@@ -30,6 +31,7 @@ import { StatisticsModule } from './statistics/statictics.module';
     StatisticsModule,
     AuthModule,
     TagLogModule,
+    TagLogModule2,
     UserModule,
     ExtModule,
     ReissueModule,

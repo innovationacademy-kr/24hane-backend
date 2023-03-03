@@ -7,10 +7,9 @@ import { UserModule } from 'src/user/user.module';
 import { UtilsModule } from 'src/utils/utils.module';
 import { PairInfoRepository } from './repository/mysql/pair-info.repository';
 import { TagLogRepository } from './repository/mysql/tag-log.repository';
-import { TagLogAdminController } from './tag-log-admin.controller';
-import { TagLogAdminService } from './tag-log-admin.service';
-import { TagLogController } from './tag-log.controller';
-import { TagLogService } from './tag-log.service';
+import { TagLogController } from './tag-log-v2.controller';
+import { TagLogService } from './tag-log-v2.service';
+import { StatisticsModule } from 'src/statistics/statictics.module';
 
 const tagLogRepo = {
   provide: 'ITagLogRepository',
@@ -28,9 +27,10 @@ const pairInfoRepo = {
     TypeOrmModule.forFeature([TagLog, PairInfo]),
     UtilsModule,
     UserModule,
+    StatisticsModule,
   ],
   exports: [TypeOrmModule],
-  controllers: [TagLogController, TagLogAdminController],
-  providers: [tagLogRepo, pairInfoRepo, TagLogService, TagLogAdminService],
+  controllers: [TagLogController],
+  providers: [tagLogRepo, pairInfoRepo, TagLogService],
 })
-export class TagLogModule {}
+export class TagLogModule2 {}

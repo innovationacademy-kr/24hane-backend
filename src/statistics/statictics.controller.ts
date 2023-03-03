@@ -6,7 +6,7 @@ import { Cache } from 'cache-manager';
 
 @ApiTags('통계 관련 API')
 @Controller({
-  version: '1',
+  version: '2',
   path: 'statistics',
 })
 export class StatisticsController {
