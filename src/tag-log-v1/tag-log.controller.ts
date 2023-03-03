@@ -208,8 +208,8 @@ export class TagLogController {
     );
 
     const result: UserAccumulationType = {
-      todayAccumulationTime: resultDaySum,
-      monthAccumulationTime: resultMonthSum,
+      todayAccumationTime: resultDaySum,
+      monthAccumationTime: resultMonthSum,
     };
     return result;
   }
