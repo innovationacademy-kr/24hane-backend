@@ -67,12 +67,12 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('permonth')
-  async getTagPerMonth(
+  async getPerMonth(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationMonthType[]> {
-    this.logger.debug(`@getTagPerMonth) ${year}-${month} by ${user.login}`);
+    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
@@ -124,13 +124,13 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('permonth/:login')
-  async getTagPerMonthByLogin(
+  async getPerMonthByLogin(
     @User() user: UserSessionDto,
     @Param('login') login: string,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationMonthType> {
-    this.logger.debug(`@getTagPerMonthByLogin) ${year}-${month} by ${user.login}`);
+    this.logger.debug(`@getPerMonthByLogin) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
@@ -181,18 +181,18 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('perdays')
-  async getTagPerDays(
+  async getPerDays(
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationDayType[]> {
-    this.logger.debug(`@getTagPerDays) ${year}-${month} by ${user.login}`);
+    this.logger.debug(`@getPerDays) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
       });
     }
-    const results = await this.tagLogAdminService.getTagPerDaysByAll(year, month);
+    const results = await this.tagLogAdminService.getPerDaysByAll(year, month);
     return results;
   }
 
@@ -235,13 +235,13 @@ export class TagLogAdminController {
     required: true,
   })
   @Get('perdays/:login')
-  async getTagPerDaysByLogin(
+  async getPerDaysByLogin(
     @User() user: UserSessionDto,
     @Param('login') login: string,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationDayType> {
-    this.logger.debug(`@getTagPerDaysByLogin) ${year}-${month} by ${user.login}`);
+    this.logger.debug(`@getPerDaysByLogin) ${year}-${month} by ${user.login}`);
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
@@ -253,7 +253,7 @@ export class TagLogAdminController {
         message: '서버상에 존재하지 않는 login ID입니다.',
       });
     }
-    const result = this.tagLogAdminService.getTagPerDaysById(
+    const result = this.tagLogAdminService.getPerDaysById(
       id,
       login,
       year,
