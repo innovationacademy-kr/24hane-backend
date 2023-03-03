@@ -16,7 +16,7 @@ import { ReissueService } from './reissue.service';
 
 @ApiTags('카드 재발급 관련')
 @Controller({
-  version: '1',
+  version: '2',
   path: 'reissue',
 })
 @ApiBearerAuth()
