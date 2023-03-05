@@ -102,4 +102,48 @@ export class RedirectController {
     }
     return { url };
   }
+
+  /**
+   * 이용 약관으로 리다이렉트 합니다.
+   */
+  @ApiOperation({
+    summary: '이용 약관 페이지',
+    description: '.env의 URI_TERMS으로 리다이렉트합니다.',
+  })
+  @ApiResponse({
+    status: 302,
+    description: '리다이렉트 성공',
+  })
+  @ApiResponse({ status: 404, description: '리다이렉트할 페이지 없음' })
+  @Get('terms')
+  @Redirect()
+  async terms() {
+    const url = await this.redirectService.terms();
+    if (!url) {
+      throw new NotFoundException();
+    }
+    return { url };
+  }
+
+  /**
+   * 카드 재발급 가이드 페이지로 리다이렉트 합니다.
+   */
+  @ApiOperation({
+    summary: '카드 재발급 가이드 페이지',
+    description: '.env의 URI_REISSUANCE_GUIDELINE으로 리다이렉트합니다.',
+  })
+  @ApiResponse({
+    status: 302,
+    description: '리다이렉트 성공',
+  })
+  @ApiResponse({ status: 404, description: '리다이렉트할 페이지 없음' })
+  @Get('reissuance_guidelines')
+  @Redirect()
+  async reissuance_guidelines() {
+    const url = await this.redirectService.reissuance_guidelines();
+    if (!url) {
+      throw new NotFoundException();
+    }
+    return { url };
+  }
 }

@@ -41,5 +41,7 @@ export default () => ({
     question: process.env.URI_QUESTION,
     usage: process.env.URI_USAGE,
     feedback: process.env.URI_FEEDBACK,
+    terms: process.env.URI_TERMS,
+    reissuance_guidelines: process.env.URI_REISSUANCE_GUIDELINE,
   },
 });

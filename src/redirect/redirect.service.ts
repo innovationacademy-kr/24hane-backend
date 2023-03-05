@@ -22,4 +22,12 @@ export class RedirectService {
   async feedback(): Promise<string> {
     return this.configService.get<string>('redirect.feedback');
   }
+
+  async terms(): Promise<string> {
+    return this.configService.get<string>('redirect.terms');
+  }
+
+  async reissuance_guidelines(): Promise<string> {
+    return this.configService.get<string>('redirect.reissuance_guidelines');
+  }
 }
