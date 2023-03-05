@@ -99,7 +99,7 @@ export class ReissueController {
     status: 404,
     description: '사용자의 카드 재발급 신청내역 없음',
   })
-  @ApiResponse({ status: 503, description: '구글스프레드시트/잔디알림 실패' })
+  @ApiResponse({ status: 503, description: '구글스프레드시트 업데이트 실패' })
   async patchReissueState(
     @User() user: UserSessionDto,
   ): Promise<reissueFinishedDto> {

@@ -1,4 +1,9 @@
-import { Inject, Injectable, Logger, HttpException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { sheets, auth } from '@googleapis/sheets';
 
@@ -75,9 +80,8 @@ export class GoogleApi {
       this.logger.error(
         `@getAllValues) failed to read google sheet: ${error.message}`,
       );
-      throw new HttpException(
+      throw new ServiceUnavailableException(
         `구글스프레드 시트 조회 실패: ${error.message}`,
-        514,
       );
     }
     return result;
@@ -100,9 +104,8 @@ export class GoogleApi {
       this.logger.error(
         `@appendValues) failed to append to google sheet: ${error.message}`,
       );
-      throw new HttpException(
+      throw new ServiceUnavailableException(
         `카드 재발급 신청 구글스프레드 시트에 추가 실패: ${error.message}`,
-        514,
       );
     }
   }
@@ -124,9 +127,8 @@ export class GoogleApi {
       this.logger.error(
         `@updateValues) failed to update google sheet: ${error.message}`,
       );
-      throw new HttpException(
+      throw new ServiceUnavailableException(
         `수령완료 행 구글스프레드 시트에 업데이트 실패: ${error.message}`,
-        514,
       );
     }
   }
