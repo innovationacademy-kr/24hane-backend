@@ -1,10 +1,10 @@
 import axios from 'axios';
 import {
+  HttpException,
   Inject,
   Injectable,
   Logger,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
@@ -107,16 +107,8 @@ export class ReissueService {
       '',
       initialCardNo,
     ];
-    try {
-      await this.googleApi.appendValues(data);
-    } catch (error) {
-      this.logger.error(
-        `@reissueRequest) failed to request for new card issuance for ${user.login}: ${error.message}`,
-      );
-      throw new ServiceUnavailableException(
-        `카드 재발급 신청 구글스프레드 시트에 업데이트 실패: ${error.message}`,
-      );
-    }
+    await this.googleApi.appendValues(data);
+
     try {
       const jandiData = {
         request: 'request',
@@ -132,8 +124,9 @@ export class ReissueService {
       this.logger.error(
         `@reissueRequest) failed to alarm jandi for new card issuance for ${user.login}: ${error.message}`,
       );
-      throw new ServiceUnavailableException(
+      throw new HttpException(
         `카드 재발급 신청 잔디알림 실패: ${error.message}`,
+        513,
       );
     }
     return {
@@ -161,20 +154,15 @@ export class ReissueService {
       throw new NotFoundException('신청내역 없음');
     }
     const recent = filtered.pop();
-    const rowNum = recent['index'] + 1;
-    try {
-      await this.googleApi.updateValues(rowNum, 'O');
-    } catch (error) {
-      this.logger.error(
-        `@patchReissueState) failed to change state for ${user.login} in google sheet: ${error.message}`,
-      );
-      throw new ServiceUnavailableException(
-        `수령완료 행 구글스프레드 시트에 업데이트 실패: ${error.message}`,
-      );
-    }
 
     const initialCardNo = recent['row'][6];
     const newCardNo = recent['row'][7];
+    // if (!newCardNo) {
+    //   throw new HttpException('변경카드번호 없음', 512);
+    // }
+    const rowNum = recent['index'] + 1;
+    await this.googleApi.updateValues(rowNum, 'O');
+
     const pickedUpAt = this.getTimeNowKST();
     try {
       const jandiData = {
@@ -192,9 +180,7 @@ export class ReissueService {
       this.logger.error(
         `@patchReissueState) failed to alarm jandi for new card issuance for ${user.login}: ${error.message}`,
       );
-      throw new ServiceUnavailableException(
-        `재발급 카드 수령완료 잔디알림 실패: ${error.message}`,
-      );
+      throw new HttpException('재발급 카드 수령완료 잔디알림 실패', 513);
     }
     return {
       login: user.login,

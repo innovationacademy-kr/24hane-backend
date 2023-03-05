@@ -1,4 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { sheets, auth } from '@googleapis/sheets';
 
@@ -71,8 +76,13 @@ export class GoogleApi {
         range: this.gsRange,
       });
       result = allCardReissues.data.values;
-    } catch (e) {
-      this.logger.error(e.message);
+    } catch (error) {
+      this.logger.error(
+        `@getAllValues) failed to read google sheet: ${error.message}`,
+      );
+      throw new ServiceUnavailableException(
+        `구글스프레드 시트 조회 실패: ${error.message}`,
+      );
     }
     return result;
   }
@@ -90,8 +100,13 @@ export class GoogleApi {
           values: [data],
         },
       });
-    } catch (e) {
-      this.logger.error(e.message);
+    } catch (error) {
+      this.logger.error(
+        `@appendValues) failed to append to google sheet: ${error.message}`,
+      );
+      throw new ServiceUnavailableException(
+        `카드 재발급 신청 구글스프레드 시트에 추가 실패: ${error.message}`,
+      );
     }
   }
 
@@ -108,8 +123,13 @@ export class GoogleApi {
         },
         valueInputOption: 'USER_ENTERED',
       });
-    } catch (e) {
-      this.logger.error(e.message);
+    } catch (error) {
+      this.logger.error(
+        `@updateValues) failed to update google sheet: ${error.message}`,
+      );
+      throw new ServiceUnavailableException(
+        `수령완료 행 구글스프레드 시트에 업데이트 실패: ${error.message}`,
+      );
     }
   }
 }
