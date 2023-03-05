@@ -180,7 +180,6 @@ export class ReissueService {
       this.logger.error(
         `@patchReissueState) failed to alarm jandi for new card issuance for ${user.login}: ${error.message}`,
       );
-      throw new HttpException('재발급 카드 수령완료 잔디알림 실패', 513);
     }
     return {
       login: user.login,
