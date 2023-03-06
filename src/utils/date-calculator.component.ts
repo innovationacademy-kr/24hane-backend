@@ -50,6 +50,29 @@ export class DateCalculator {
   }
 
   /**
+   * 인자로 주어진 일에 대해 그 주의 첫 날짜(월요일)의 가장 빠른 시간을 반환합니다.
+   * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   */
+  getStartOfWeek(date: Date): Date {
+    const dayOfWeek = date.getDay() - 1;
+    const diff = dayOfWeek === -1 ? 6 : dayOfWeek;
+    const rtn = new Date(date.getFullYear(), date.getMonth(), date.getDate() - diff);
+    return rtn;
+  }
+
+  /**
+   * 인자로 주어진 일에 대해 그 주의 마지막 날짜(일요일)와 가장 늦은 시간을 반환합니다.
+   * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   */
+  getEndOfWeek(date: Date): Date {
+    const startOfWeek = this.getStartOfWeek(date);
+    const rtn = new Date(startOfWeek);
+    rtn.setDate(startOfWeek.getDate() + 7);
+    rtn.setTime(rtn.getTime() - 1);
+    return rtn;
+  }
+
+  /**
    * 인자로 주어진 일에 대해 해당 월의 시작 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
    *
@@ -81,7 +104,7 @@ export class DateCalculator {
    * @param date2 date 객체 2
    */
   checkEqualDay(date1: Date, date2: Date) {
-    this.logger.debug(`@checkEqualDay) ${date1}, ${date2}`);
+    //this.logger.debug(`@checkEqualDay) ${date1}, ${date2}`);
     return (
       date1.getFullYear() === date2.getFullYear() &&
       date1.getMonth() === date2.getMonth() &&
@@ -96,20 +119,36 @@ export class DateCalculator {
    * @return number 타임스탬프
    */
   toTimestamp(date: Date): number {
-    this.logger.debug(`@toTimestamp) ${date}`);
+    //this.logger.debug(`@toTimestamp) ${date}`);
     return Math.floor(date.getTime() / 1000);
   }
 
   /**
    * 주어진 년, 월에 대해 일의 개수를 구합니다.
-   *
-   * @param year 년
-   * @param month 월
-   * @return days 해당 달의 일의 개수
-   */
+  *
+  * @param year 년
+  * @param month 월
+  * @return days 해당 달의 일의 개수
+  */
   getDaysInMonth(year: number, month: number): number {
     this.logger.debug(`@getDaysInMonth) ${year}, ${month}`);
     const date = new Date(year, month, 0);
     return date.getDate();
+  }
+
+  /**
+   * 주어진 년도와 주차에 대해 날짜 범위를 구합니다.
+   * 
+   * @param year 년
+   * @param week 주차
+   * @returns 
+  */
+  getDateOfWeek(year: number, week: number): Date {
+    const januaryFirst = new Date(year, 0, 1);
+    const dayOfWeek = januaryFirst.getDay();
+    const daysToAdd = 7 - dayOfWeek;
+    const secondSundayOfYear = new Date(year, 0, daysToAdd + 1);
+    const rtn = new Date(secondSundayOfYear.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+    return rtn;
   }
 }

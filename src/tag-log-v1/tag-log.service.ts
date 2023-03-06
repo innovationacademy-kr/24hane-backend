@@ -1,13 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import InOut from 'src/enums/inout.enum';
+import { UserService } from 'src/user/user.service';
 import { DateCalculator } from 'src/utils/date-calculator.component';
+import { InOutDto } from './dto/inout.dto';
+import { TagLogDto } from './dto/tag-log.dto';
 import { PairInfoDto } from './dto/pair-info.dto';
 import { InOutLogType } from './dto/subType/InOutLog.type';
-import { TagLogDto } from './dto/tag-log.dto';
-import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
-import { UserService } from 'src/user/user.service';
-import { InOutDto } from './dto/inout.dto';
+import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 
 @Injectable()
 export class TagLogService {
@@ -61,18 +61,18 @@ export class TagLogService {
     const lastLog = taglogs.at(-1);
     if (lastLog) {
       // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
-      const beforelastLog = await this.tagLogRepository.findNextTagLog(
+      const afterLastLog = await this.tagLogRepository.findNextTagLog(
         [lastLog.card_id],
         lastLog.tag_at,
       );
       // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
-      if (beforelastLog !== null) {
+      if (afterLastLog !== null) {
         const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
         taglogs.push({
           tag_at: virtualLeaveTime,
-          device_id: beforelastLog.device_id,
+          device_id: afterLastLog.device_id,
           idx: -1,
-          card_id: beforelastLog.card_id,
+          card_id: afterLastLog.card_id,
         });
       }
     }
@@ -111,6 +111,7 @@ export class TagLogService {
     deviceInfos: PairInfoDto[],
   ): InOutLogType[] {
     this.logger.debug(`@getPairsByTagLogs)`);
+
     /**
      * 데이터를 날짜의 내림차순으로 정렬
      */
@@ -193,6 +194,7 @@ export class TagLogService {
         leave = temp;
       }
     }
+
     return resultPairs;
   }
 

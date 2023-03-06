@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  CacheModule,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -7,10 +12,15 @@ import TypeOrmConfigService from './configs/typeorm.config';
 import { ExtModule } from './ext/ext.module';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { TagLogModule } from './tag-log-v1/tag-log.module';
+import { TagLogModule2 } from './tag-log-v2/tag-log-v2.module';
 import { UserModule } from './user/user.module';
+import { ReissueModule } from './reissue/reissue.module';
+import { StatisticsModule } from './statistics/statictics.module';
+import { RedirectModule } from './redirect/redirect.module';
 
 @Module({
   imports: [
+    CacheModule.register({ isGlobal: true }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
@@ -19,10 +29,14 @@ import { UserModule } from './user/user.module';
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
     }),
+    StatisticsModule,
+    RedirectModule,
     AuthModule,
     TagLogModule,
+    TagLogModule2,
     UserModule,
     ExtModule,
+    ReissueModule,
   ],
   providers: [SessionMiddleware],
 })
