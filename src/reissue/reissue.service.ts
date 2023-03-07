@@ -109,17 +109,7 @@ export class ReissueService {
       origin_card_id: initialCardNo,
       new_card_id: '',
     };
-    try {
-      //await this.googleApi.appendValues(data);
-      await this.cardReissueRepository.save(data);
-    } catch (error) {
-      this.logger.error(
-        `@reissueRequest) failed to request for new card issuance for ${user.login}: ${error.message}`,
-      );
-      throw new ServiceUnavailableException(
-        `카드 재발급 신청 구글스프레드 시트에 업데이트 실패: ${error.message}`,
-      );
-    }
+   await this.cardReissueRepository.save(data);
     try {
       const jandiData = {
         request: 'request',
