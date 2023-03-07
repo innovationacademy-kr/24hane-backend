@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class reissueFinishedType {
+export class RequestType {
   @ApiProperty({
     description: '42 로그인 ID',
     example: 'joopark',
@@ -8,8 +8,8 @@ export class reissueFinishedType {
   login: string;
 
   @ApiProperty({
-    description: '재발급 카드 수령 날짜/시간',
+    description: '카드 재발급 신청 날짜/시간',
     example: '2042-04-02 04:02:42',
   })
-  picked_up_at: Date;
+  requested_at: Date;
 }
