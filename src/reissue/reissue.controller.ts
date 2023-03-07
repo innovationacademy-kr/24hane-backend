@@ -8,10 +8,10 @@ import {
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
-import { reissueFinishedDto } from './dto/reissueFinished.dto';
-import { reissueRequestDto } from './dto/reissueRequest.dto';
-import { ReissueRequestType } from './dto/reissueRequest.type';
-import { reissueSateDto } from './dto/reissueState.dto';
+import { FinishedDto } from './dto/finished.dto';
+import { RequestDto } from './dto/request.dto';
+import { RequestType } from './dto/request.type';
+import { StateDto } from './dto/state.dto';
 import { ReissueService } from './reissue.service';
 
 @ApiTags('카드 재발급 관련')
@@ -61,7 +61,7 @@ export class ReissueController {
       },
     },
   })
-  async getReissueState(@User() user: UserSessionDto): Promise<reissueSateDto> {
+  async getReissueState(@User() user: UserSessionDto): Promise<StateDto> {
     const result = await this.reissueService.getReissueState(user.user_id);
     return result;
   }
@@ -73,14 +73,12 @@ export class ReissueController {
   })
   @ApiResponse({
     status: 201,
-    type: ReissueRequestType,
+    type: RequestType,
     description: '신청 성공',
   })
   @ApiResponse({ status: 404, description: '사용자의 기존 카드번호 없음' })
   @ApiResponse({ status: 503, description: '구글스프레드시트 업데이트 실패' })
-  async reissueRequest(
-    @User() user: UserSessionDto,
-  ): Promise<reissueRequestDto> {
+  async reissueRequest(@User() user: UserSessionDto): Promise<RequestDto> {
     const result = await this.reissueService.reissueRequest(user);
     return result;
   }
@@ -92,7 +90,7 @@ export class ReissueController {
   })
   @ApiResponse({
     status: 200,
-    type: ReissueRequestType,
+    type: RequestType,
     description: '카드 재발급 신청 상태 수령완료로 변경',
   })
   @ApiResponse({
@@ -100,9 +98,7 @@ export class ReissueController {
     description: '사용자의 카드 재발급 신청내역 없음',
   })
   @ApiResponse({ status: 503, description: '구글스프레드시트 업데이트 실패' })
-  async patchReissueState(
-    @User() user: UserSessionDto,
-  ): Promise<reissueFinishedDto> {
+  async patchReissueState(@User() user: UserSessionDto): Promise<FinishedDto> {
     const result = await this.reissueService.patchReissueState(user);
     return result;
   }

@@ -9,10 +9,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
 import { IUserCardRepository } from './repository/interface/user-card-no.repository.interface';
-import { reissueSateDto } from './dto/reissueState.dto';
-import { reissueRequestDto } from './dto/reissueRequest.dto';
-import { reissueFinishedDto } from './dto/reissueFinished.dto';
+import { StateDto } from './dto/state.dto';
+import { RequestDto } from './dto/request.dto';
+import { FinishedDto } from './dto/finished.dto';
 import { GoogleApi } from 'src/utils/google-api.component';
+import ReissueState from 'src/enums/reissue-state.enum';
+import { StateType } from './dto/state.type';
 
 @Injectable()
 export class ReissueService {
@@ -45,20 +47,21 @@ export class ReissueService {
    * @param user_id number
    * @returns 출입카드 재신청 상태 reissueSateDto
    */
-  async getReissueState(user_id: number): Promise<reissueSateDto> {
+  async getReissueState(user_id: number): Promise<StateDto> {
     this.logger.debug(
       `@getReissueState) reissue state requested from user_id: ${user_id}`,
     );
     const result = await this.googleApi.getAllValues();
     const filtered = [];
-    let state = '';
+    let state;
     for (const row of result) {
       if (row[0] == user_id) {
         filtered.push(row);
       }
     }
     if (!filtered.length) {
-      return { state: 'none' };
+      state = ReissueState.NONE;
+      return { state: state };
     }
     const recent = filtered.pop();
     const isRequested = recent[3];
@@ -66,15 +69,15 @@ export class ReissueService {
     const isPickedUp = recent[5];
     if (isIssued) {
       if (isPickedUp) {
-        state = 'done';
+        state = ReissueState.DONE;
       } else {
-        state = 'pick_up_requested';
+        state = ReissueState.PICK_UP_REQUESTED;
       }
     } else {
       if (isRequested) {
-        state = 'in_progress';
+        state = ReissueState.IN_PROGRESS;
       } else {
-        state = 'apply';
+        state = ReissueState.APPLY;
       }
     }
     return { state: state };
@@ -85,7 +88,7 @@ export class ReissueService {
    * @param user 사용자
    * @returns 출입카드 재신청 reissueRequestDto
    */
-  async reissueRequest(user: UserSessionDto): Promise<reissueRequestDto> {
+  async reissueRequest(user: UserSessionDto): Promise<RequestDto> {
     this.logger.debug(
       `@reissueRequest) ${user.login} requested for card reissuance.`,
     );
@@ -139,7 +142,7 @@ export class ReissueService {
    * @param user 사용자
    * @returns 출입카드 재신청 상태 reissueFinishedDto
    */
-  async patchReissueState(user: UserSessionDto): Promise<reissueFinishedDto> {
+  async patchReissueState(user: UserSessionDto): Promise<FinishedDto> {
     this.logger.debug(
       `@patchReissueState) ${user.login} requested for card reissuance.`,
     );
