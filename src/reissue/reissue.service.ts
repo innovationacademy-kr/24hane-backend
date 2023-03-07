@@ -14,7 +14,6 @@ import { RequestDto } from './dto/request.dto';
 import { FinishedDto } from './dto/finished.dto';
 import { GoogleApi } from 'src/utils/google-api.component';
 import ReissueState from 'src/enums/reissue-state.enum';
-import { StateType } from './dto/state.type';
 
 @Injectable()
 export class ReissueService {
