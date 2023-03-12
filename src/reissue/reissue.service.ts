@@ -5,19 +5,23 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
 import { IUserCardRepository } from './repository/interface/user-card-no.repository.interface';
-import { reissueSateDto } from './dto/reissueState.dto';
-import { reissueRequestDto } from './dto/reissueRequest.dto';
-import { reissueFinishedDto } from './dto/reissueFinished.dto';
-import { GoogleApi } from 'src/utils/google-api.component';
+import { StateDto } from './dto/state.dto';
+import { RequestDto } from './dto/request.dto';
+import { FinishedDto } from './dto/finished.dto';
+import ReissueState from 'src/enums/reissue-state.enum';
+import { ICardReissueRepository } from './repository/interface/card-reissue.repository.interface';
+import { CardReissue } from 'src/entities/card-reissue.entity';
 
 @Injectable()
 export class ReissueService {
   constructor(
-    private googleApi: GoogleApi,
+    @Inject('ICardReissueRepository')
+    private cardReissueRepository: ICardReissueRepository,
     @Inject(ConfigService)
     private configService: ConfigService,
     @Inject('IUserCardRepository')
@@ -45,36 +49,32 @@ export class ReissueService {
    * @param user_id number
    * @returns 출입카드 재신청 상태 reissueSateDto
    */
-  async getReissueState(user_id: number): Promise<reissueSateDto> {
+  async getReissueState(user_id: number): Promise<StateDto> {
     this.logger.debug(
       `@getReissueState) reissue state requested from user_id: ${user_id}`,
     );
-    const result = await this.googleApi.getAllValues();
-    const filtered = [];
-    let state = '';
-    for (const row of result) {
-      if (row[0] == user_id) {
-        filtered.push(row);
-      }
-    }
+    const filtered = await this.cardReissueRepository.findByUserId(user_id);
+
+    let state: ReissueState;
     if (!filtered.length) {
-      return { state: 'none' };
+      state = ReissueState.NONE;
+      return { state: state };
     }
     const recent = filtered.pop();
-    const isRequested = recent[3];
-    const isIssued = recent[4];
-    const isPickedUp = recent[5];
+    const isRequested = recent.requestd;
+    const isIssued = recent.issued;
+    const isPickedUp = recent.picked;
     if (isIssued) {
       if (isPickedUp) {
-        state = 'done';
+        state = ReissueState.DONE;
       } else {
-        state = 'pick_up_requested';
+        state = ReissueState.PICK_UP_REQUESTED;
       }
     } else {
       if (isRequested) {
-        state = 'in_progress';
+        state = ReissueState.IN_PROGRESS;
       } else {
-        state = 'apply';
+        state = ReissueState.APPLY;
       }
     }
     return { state: state };
@@ -85,11 +85,11 @@ export class ReissueService {
    * @param user 사용자
    * @returns 출입카드 재신청 reissueRequestDto
    */
-  async reissueRequest(user: UserSessionDto): Promise<reissueRequestDto> {
+  async reissueRequest(user: UserSessionDto): Promise<RequestDto> {
     this.logger.debug(
       `@reissueRequest) ${user.login} requested for card reissuance.`,
     );
-    const requestedAt = this.getTimeNowKST();
+    const requestedAt = new Date();
     const initialCardNo = (
       await this.UserCardRepository.findInitialCardByUserId(user.user_id)
     ).pop();
@@ -98,23 +98,24 @@ export class ReissueService {
       throw new NotFoundException('기존 카드번호 없음');
     }
 
-    const data = [
-      user.user_id,
-      user.login,
-      requestedAt,
-      '',
-      '',
-      '',
-      initialCardNo,
-    ];
-    await this.googleApi.appendValues(data);
-
+    const data: CardReissue = {
+      idx: undefined,
+      user_id: user.user_id,
+      login_id: user.login,
+      apply_date: requestedAt,
+      requestd: false,
+      issued: false,
+      picked: false,
+      origin_card_id: initialCardNo,
+      new_card_id: '',
+    };
+   await this.cardReissueRepository.save(data);
     try {
       const jandiData = {
         request: 'request',
         login: user.login,
         initial_card_no: initialCardNo,
-        requested_at: requestedAt,
+        requested_at: this.getTimeNowKST(),
       };
       await axios.post(this.jandiWebhook, jandiData);
       this.logger.debug(
@@ -131,7 +132,7 @@ export class ReissueService {
     }
     return {
       login: user.login,
-      requested_at: requestedAt,
+      requested_at: this.getTimeNowKST(),
     };
   }
   /**
@@ -139,30 +140,21 @@ export class ReissueService {
    * @param user 사용자
    * @returns 출입카드 재신청 상태 reissueFinishedDto
    */
-  async patchReissueState(user: UserSessionDto): Promise<reissueFinishedDto> {
+  async patchReissueState(user: UserSessionDto): Promise<FinishedDto> {
     this.logger.debug(
       `@patchReissueState) ${user.login} requested for card reissuance.`,
     );
-    const result = await this.googleApi.getAllValues();
-    const filtered = [];
-    result.forEach((row, index) => {
-      if (row[0] == user.user_id) {
-        filtered.push({ index: index, row: row });
-      }
-    });
+    const filtered = await this.cardReissueRepository.findByUserId(
+      user.user_id,
+    );
     if (!filtered.length) {
       throw new NotFoundException('신청내역 없음');
     }
     const recent = filtered.pop();
-
-    const initialCardNo = recent['row'][6];
-    const newCardNo = recent['row'][7];
-    // if (!newCardNo) {
-    //   throw new HttpException('변경카드번호 없음', 512);
-    // }
-    const rowNum = recent['index'] + 1;
-    await this.googleApi.updateValues(rowNum, 'O');
-
+    recent.picked = true;
+    await this.cardReissueRepository.save(recent);
+    const initialCardNo = recent.origin_card_id;
+    const newCardNo = recent.new_card_id;
     const pickedUpAt = this.getTimeNowKST();
     try {
       const jandiData = {
