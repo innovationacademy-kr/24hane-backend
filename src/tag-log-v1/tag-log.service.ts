@@ -91,7 +91,7 @@ export class TagLogService {
     inDevice: number,
     outDevice: number,
   ): boolean {
-    this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
+    //this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
     // TODO: O(N) 보다 더 적게 시간을 소요하도록 리팩터링 필요
     const find = deviceInfos.find(
       (device) =>
