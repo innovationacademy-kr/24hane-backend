@@ -37,3 +37,10 @@ lerna-debug.log*
 # env
 .env
 .env.*
+
+db/
+key/
+sql/
+
+test-db/
+test-docker/

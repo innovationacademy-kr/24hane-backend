@@ -1,4 +1,3 @@
-
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import InOut from 'src/enums/inout.enum';
 import { UserService } from 'src/user/user.service';
@@ -208,15 +207,46 @@ export class TagLogService {
         continue;
       }
 
-      // 만약 동일한 날짜에 속한다면 해당 쌍이 짝이 됩니다.
-      const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
-      const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
-      resultPairs.push({
-        inTimeStamp,
-        outTimeStamp,
-        durationSecond: outTimeStamp - inTimeStamp,
-      });
-      //this.logger.debug(`정상 태그 (같은 날)`);
+      if (this.dateCalculator.checkEqualDay(temp.tag_at, leave.tag_at)) {
+        //this.logger.debug(`정상 태그 (같은 날)`);
+        // 만약 동일한 날짜에 속한다면 해당 쌍이 짝이 됩니다.
+        const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
+        const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
+        resultPairs.push({
+          inTimeStamp,
+          outTimeStamp,
+          durationSecond: outTimeStamp - inTimeStamp,
+        });
+      } else {
+        //this.logger.debug(`정상 태그 (다른 날)`);
+        // 만약 입장 로그와 퇴장 로그가 짝이 맞지만, 동일한 날짜에 속하지 않으면 일 단위로 자릅니다.
+
+        // 퇴장 로그의 정시 (00시)를 기준으로 두 날짜의 간격을 자릅니다. 두 날짜는 가상의 입퇴장 짝이 됩니다.
+        const virtualEnterTime = this.dateCalculator.getStartOfDate(
+          leave.tag_at,
+        );
+        const virtualLeaveTime = this.dateCalculator.getEndOfLastDate(
+          leave.tag_at,
+        );
+
+        // 가상 입장시간 (퇴장시간의 날짜의 정시 - 00시)과 퇴장시간이 짝을 맞춥니다.
+        const inTimeStamp = this.dateCalculator.toTimestamp(virtualEnterTime);
+        const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
+        resultPairs.push({
+          inTimeStamp,
+          outTimeStamp,
+          durationSecond: outTimeStamp - inTimeStamp,
+        });
+
+        // 그리고 가상 퇴장시간을 다시 배열에 넣어 가상 퇴장시간과 맞는 짝을 찾습니다.
+        timeLines.push(temp); //todo: temp? leave?
+        timeLines.push({
+          tag_at: virtualLeaveTime,
+          device_id: leave.device_id,
+          idx: -1,
+          card_id: temp.card_id,
+        });
+      }
 
       temp = null;
       leave = null;
@@ -251,7 +281,7 @@ export class TagLogService {
       a.tag_at > b.tag_at ? 1 : -1,
     );
 
-    const devicePairs = await this.pairInfoRepository.findAll()
+    const devicePairs = await this.pairInfoRepository.findAll();
 
     const filteredTagLogs = sortedTagLogs.filter(
       taglog => !!(devicePairs.find(temp => temp.in_device === taglog.device_id || temp.out_device === taglog.device_id))
@@ -261,7 +291,7 @@ export class TagLogService {
       filteredTagLogs,
       tagStart,
       tagEnd,
-      );
+    );
 
     return trimmedTagLogs;
   }
@@ -277,10 +307,10 @@ export class TagLogService {
     this.logger.debug(`@getAllTagPerDay) ${userId}, ${date}`);
 
     const pairs = await this.pairInfoRepository.findAll();
-    
+
     const tagStart = this.dateCalculator.getStartOfDate(date);
     const tagEnd = this.dateCalculator.getEndOfDate(date);
-    
+
     const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
@@ -324,7 +354,7 @@ export class TagLogService {
       );
 
       weekPairs.forEach(weekPair => totalSecond += weekPair.durationSecond);
-      
+
       ret.push(totalSecond);
 
       beforeSixWeek.setDate(beforeSixWeek.getDate() + 7);
@@ -333,7 +363,7 @@ export class TagLogService {
 
     return ret.reverse();
   }
-  
+
   /**
    * 인자로 들어가는 사용자 ID와 날짜에 대한 월별 모든 태그를 반환합니다.
    *
