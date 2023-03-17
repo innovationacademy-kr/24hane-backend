@@ -151,18 +151,6 @@ export class TagLogService {
 
     // 타임라인 배열이 빌 때까지 루프를 돌립니다.
     while (timeLines.length > 0) {
-      //todo: 임시해결 :( 로직 살펴보고 고치기
-      if (timeLines.length <= 2) {
-        this.logger.debug(taglogs[0].idx);
-        if (taglogs[0].idx === -1) {
-          resultPairs.push({
-            inTimeStamp: this.dateCalculator.toTimestamp(taglogs[0].tag_at),
-            outTimeStamp: this.dateCalculator.toTimestamp(taglogs[1].tag_at),
-            durationSecond: this.dateCalculator.toTimestamp(taglogs[1].tag_at) - this.dateCalculator.toTimestamp(taglogs[0].tag_at),
-          })
-        }
-      }
-
       if (temp === null) {
         temp = timeLines.pop();
       }
@@ -251,7 +239,7 @@ export class TagLogService {
         });
 
         // 그리고 가상 퇴장시간을 다시 배열에 넣어 가상 퇴장시간과 맞는 짝을 찾습니다.
-        timeLines.push(temp);
+        timeLines.push(temp); //todo: temp? leave?
         timeLines.push({
           tag_at: virtualLeaveTime,
           device_id: leave.device_id,
