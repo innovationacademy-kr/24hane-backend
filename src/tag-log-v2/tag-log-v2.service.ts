@@ -157,8 +157,6 @@ export class TagLogService {
         }
       }
 
-      //this.logger.debug(`temp: ${temp.tag_at}, ${temp.device_id}`);
-
       // 내부에 있거나 중복 입실태그인 경우
       if (this.isInDevice(deviceInfos, temp.device_id)) {
         const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
@@ -237,7 +235,7 @@ export class TagLogService {
         });
 
         // 그리고 가상 퇴장시간을 다시 배열에 넣어 가상 퇴장시간과 맞는 짝을 찾습니다.
-        timeLines.push(temp);
+        timeLines.push(temp); //todo: temp? leave?
         timeLines.push({
           tag_at: virtualLeaveTime,
           device_id: leave.device_id,
