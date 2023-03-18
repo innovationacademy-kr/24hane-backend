@@ -149,7 +149,13 @@ export class TagLogService {
 
     // 타임라인 배열이 빌 때까지 루프를 돌립니다.
     while (timeLines.length > 0) {
-      temp = timeLines.pop();
+      if (temp === null) {
+        if (timeLines.length > 0) {
+          temp = timeLines.pop();
+        } else {
+          break;
+        }
+      }
 
       //this.logger.debug(`temp: ${temp.tag_at}, ${temp.device_id}`);
 
@@ -173,10 +179,12 @@ export class TagLogService {
         temp = null;
       }
 
-      if (temp === null && timeLines.length > 0) {
-        temp = timeLines.pop();
-      } else {
-        break;
+      if (temp === null) {
+        if (timeLines.length > 0) {
+          temp = timeLines.pop();
+        } else {
+          break;
+        }
       }
 
       //this.logger.debug(`temp: ${temp.tag_at}, ${temp.device_id}`);
@@ -385,11 +393,15 @@ export class TagLogService {
 
     const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
+    //taglogs.forEach((element) => {
+    //  this.logger.debug(`taglogs: ${element.device_id}, ${element.tag_at}`);
+    //});
+
     const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
     //resultPairs.forEach((element) => {
-    //  console.log(
-    //    `${new Date(element.inTimeStamp * 1000)}, ${new Date(
+    //  this.logger.debug(
+    //    `resultPairs: ${new Date(element.inTimeStamp * 1000)}, ${new Date(
     //      element.outTimeStamp * 1000,
     //    )}`,
     //  );
