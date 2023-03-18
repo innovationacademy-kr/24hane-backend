@@ -151,7 +151,6 @@ export class TagLogService {
     while (timeLines.length > 0) {
       temp = timeLines.pop();
 
-      //this.logger.debug(`temp: ${temp.tag_at}, ${temp.device_id}`);
 
       // 내부에 있거나 중복 입실태그인 경우
       if (this.isInDevice(deviceInfos, temp.device_id)) {
