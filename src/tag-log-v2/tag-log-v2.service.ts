@@ -387,14 +387,6 @@ export class TagLogService {
 
     const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
-    //resultPairs.forEach((element) => {
-    //  console.log(
-    //    `${new Date(element.inTimeStamp * 1000)}, ${new Date(
-    //      element.outTimeStamp * 1000,
-    //    )}`,
-    //  );
-    //});
-
     return resultPairs;
   }
 
