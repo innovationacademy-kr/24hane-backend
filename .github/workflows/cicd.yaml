@@ -5,6 +5,10 @@ jobs:
   CI:
     runs-on: ubuntu-latest
     steps:
+      - name: 타임존 설정
+        uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: "Asia/Seoul"
       - name: 체크아웃
         uses: actions/checkout@v2
       - name: Node.js 16.x Version
