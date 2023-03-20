@@ -120,39 +120,41 @@ export class TagLogService {
 
   /**
    * 인자로 들어간 디바이스 번호가 입실 디바이스인지 확인합니다.
-   *
-   * @param deviceInfos
-   * @param targetDevice
+   * 
+   * @param deviceInfos 
+   * @param targetDevice 
    */
-  isInDevice(deviceInfos: PairInfoDto[], targetDevice: number): boolean {
-    const inDevice = deviceInfos.find(
-      (deviceInfo) => deviceInfo.in_device === targetDevice,
-    );
+  isInDevice(
+    deviceInfos: PairInfoDto[],
+    targetDevice: number,
+  ): boolean {
+    const inDevice = deviceInfos.find(deviceInfo => deviceInfo.in_device === targetDevice);
 
     return !!inDevice;
   }
 
   /**
    * 인자로 들어간 디바이스 번호가 퇴실 디바이스인지 확인합니다.
-   *
-   * @param deviceInfos
-   * @param targetDevice
-   */
-  isOutDevice(deviceInfos: PairInfoDto[], targetDevice: number): boolean {
-    const outDevice = deviceInfos.find(
-      (deviceInfo) => deviceInfo.out_device === targetDevice,
-    );
+   * 
+   * @param deviceInfos 
+   * @param targetDevice 
+  */
+  isOutDevice(
+    deviceInfos: PairInfoDto[],
+    targetDevice: number,
+  ): boolean {
+    const outDevice = deviceInfos.find(deviceInfo => deviceInfo.out_device === targetDevice);
 
     return !!outDevice;
   }
 
-  /**
-   * 기기 쌍 정보와 태깅한 로그들을 이용하여
-   * 짝이 맞지 않는 출입로그도 null과 함께 반환합니다.
-   *
-   * @param taglogs 입출입 로그
-   * @param deviceInfos 기기 짝 정보
-   */
+/**
+ * 기기 쌍 정보와 태깅한 로그들을 이용하여
+ * 짝이 맞지 않는 출입로그도 null과 함께 반환합니다.
+ * 
+ * @param taglogs 입출입 로그
+ * @param deviceInfos 기기 짝 정보
+ */
   getAllPairsByTagLogs(
     taglogs: TagLogDto[],
     deviceInfos: PairInfoDto[],
@@ -176,7 +178,9 @@ export class TagLogService {
       }
 
       // 내부에 있거나 중복 입실태그인 경우
-      if (this.isInDevice(deviceInfos, temp.device_id)) {
+      if (
+        this.isInDevice(deviceInfos, temp.device_id)
+      ) {
         const inTimeStamp = this.dateCalculator.toTimestamp(temp.tag_at);
         const outTimeStamp = null;
         const durationSecond = null;
@@ -203,11 +207,15 @@ export class TagLogService {
         }
       }
 
-      //this.logger.debug(`temp: ${temp.tag_at}, ${temp.device_id}`);
-      //this.logger.debug(`leave: ${leave.tag_at}, ${leave.device_id}`);
+      if (timeLines.length <= 0) {
+        break;
+      }
+      //this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
 
       // 중복 퇴실태그인 경우
-      if (this.isOutDevice(deviceInfos, temp.device_id)) {
+      if (
+        this.isOutDevice(deviceInfos, temp.device_id)
+      ) {
         const inTimeStamp = null;
         const outTimeStamp = this.dateCalculator.toTimestamp(leave.tag_at);
         const durationSecond = null;
@@ -272,17 +280,13 @@ export class TagLogService {
   /**
    * tagStart에서 tagEnd의 기간 내에 userId의 태그로그를 전부 반환합니다.
    * 24시를 기준으로 가상 태그로그가 포함되어 있습니다.
-   *
+   * 
    * @param userId number
    * @param tagStart Date
    * @param tagEnd Date
    * @returns TagLogDto[]
    */
-  async getAllTagLogsByPeriod(
-    userId: number,
-    tagStart: Date,
-    tagEnd: Date,
-  ): Promise<TagLogDto[]> {
+  async getAllTagLogsByPeriod(userId: number, tagStart: Date, tagEnd: Date): Promise<TagLogDto[]> {
     const cards = await this.userService.findCardsByUserId(
       userId,
       tagStart,
@@ -302,12 +306,7 @@ export class TagLogService {
     const devicePairs = await this.pairInfoRepository.findAll();
 
     const filteredTagLogs = sortedTagLogs.filter(
-      (taglog) =>
-        !!devicePairs.find(
-          (temp) =>
-            temp.in_device === taglog.device_id ||
-            temp.out_device === taglog.device_id,
-        ),
+      taglog => !!(devicePairs.find(temp => temp.in_device === taglog.device_id || temp.out_device === taglog.device_id))
     );
 
     const trimmedTagLogs = await this.trimTagLogs(
@@ -356,20 +355,14 @@ export class TagLogService {
     const today = new Date();
     //today.setDate(today.getDate()-3); //일요일 테스트
     const endOfSixWeek = this.dateCalculator.getEndOfWeek(today);
-    const beforeSixWeek = this.dateCalculator.getStartOfWeek(
-      new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5 * 7),
-    );
+    const beforeSixWeek = this.dateCalculator.getStartOfWeek(new Date(today.getFullYear(), today.getMonth(), today.getDate()-(5*7)));
     const endOfWeek = this.dateCalculator.getEndOfWeek(beforeSixWeek);
 
     this.logger.debug(`@getTimeSixWeek) ${today}-${beforeSixWeek}`);
 
     const pairs = await this.pairInfoRepository.findAll();
 
-    const taglogs = await this.getAllTagLogsByPeriod(
-      userId,
-      beforeSixWeek,
-      today,
-    );
+    const taglogs = await this.getAllTagLogsByPeriod(userId, beforeSixWeek, today);
 
     const newtaglogs = this.removeDuplicates(taglogs);
 
@@ -377,16 +370,16 @@ export class TagLogService {
 
     const ret: number[] = [];
 
-    while (endOfWeek <= endOfSixWeek) {
+    while(endOfWeek <= endOfSixWeek) {
       let totalSecond = 0;
 
-      const weekPairs = resultPairs.filter(
-        (resultPair) =>
-          beforeSixWeek <= new Date(resultPair.inTimeStamp * 1000) &&
-          new Date(resultPair.inTimeStamp * 1000) <= endOfWeek,
+      const weekPairs = resultPairs.filter(resultPair => 
+        beforeSixWeek <= new Date(resultPair.inTimeStamp * 1000) 
+        && 
+        new Date(resultPair.inTimeStamp * 1000) <= endOfWeek
       );
 
-      weekPairs.forEach((weekPair) => (totalSecond += weekPair.durationSecond));
+      weekPairs.forEach(weekPair => totalSecond += weekPair.durationSecond);
 
       ret.push(totalSecond);
 
@@ -437,7 +430,7 @@ export class TagLogService {
    * 배열의 첫 인자가 현재 달의 누적시간입니다.
    *
    * @param userId 사용자 ID
-   * @returns number[]
+   * @returns number[] 
    */
   async getTimeSixMonth(userId: number): Promise<number[]> {
     this.logger.debug(`@getTagPerMonth) by ${userId}`);
@@ -477,9 +470,6 @@ export class TagLogService {
       beforeSixMonth.setMonth(beforeSixMonth.getMonth() + 1);
       endOfMonth = this.dateCalculator.getEndOfMonth(beforeSixMonth);
     }
-
-    return ret.reverse();
-  }
 
   /**
    * 사용자가 클러스터에 체류중인지 확인합니다.
