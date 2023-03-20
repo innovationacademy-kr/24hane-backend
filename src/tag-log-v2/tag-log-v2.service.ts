@@ -23,6 +23,24 @@ export class TagLogService {
   ) {}
 
   /**
+   * DB에서 중복된 태그 기록이 올 경우, 중복된 태그 기록을 필터링합니다.
+   * 중복 기준은 태그 시간, 태그 ID, 태그 기기입니다.
+   *
+   * @param taglogs TagLogDto[]
+   * @return TagLogDto[]
+   */
+  removeDuplicates(taglogs: TagLogDto[]): TagLogDto[] {
+    const comp = (a: TagLogDto, b: TagLogDto) =>
+      a.tag_at.getTime() === b.tag_at.getTime() &&
+      a.card_id === b.card_id &&
+      a.device_id === b.device_id;
+    return taglogs.reduce(
+      (acc, tag) => (acc.find((val) => comp(val, tag)) ? acc : [...acc, tag]),
+      [],
+    );
+  }
+
+  /**
    * 카드 태그 로그에 대해 로그 맨 앞, 맨 뒤 원소가 잘려 있다면 앞, 뒤에 가상의 입출입 로그를 삽입합니다.
    * 삽입하는 로그는 짝 여부에 관계없이 전후 원소를 삽입합니다.
    * 짝 일치 여부 판단은 다른 로직에서 진행합니다.
@@ -318,8 +336,10 @@ export class TagLogService {
 
     const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
+    const newtaglogs = this.removeDuplicates(taglogs);
+
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
-    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
+    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
 
     return resultPairs;
   }
@@ -351,7 +371,9 @@ export class TagLogService {
       today,
     );
 
-    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
+    const newtaglogs = this.removeDuplicates(taglogs);
+
+    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
 
     const ret: number[] = [];
 
@@ -395,7 +417,9 @@ export class TagLogService {
     //  this.logger.debug(`taglogs: ${element.device_id}, ${element.tag_at}`);
     //});
 
-    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
+    const newtaglogs = this.removeDuplicates(taglogs);
+
+    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
 
     //resultPairs.forEach((element) => {
     //  this.logger.debug(
@@ -429,7 +453,9 @@ export class TagLogService {
       today,
     );
 
-    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
+    const newtaglogs = this.removeDuplicates(taglogs);
+
+    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
 
     const ret: number[] = [];
 

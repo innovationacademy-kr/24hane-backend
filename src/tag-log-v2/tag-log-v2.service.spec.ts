@@ -81,6 +81,38 @@ describe('Tag Log (v2) unit 테스트', () => {
       expect(resultPairs).toHaveProperty('[0].durationSecond', 50 * 60); // 50 min
     });
 
+    test('특정 일수 내 입-퇴실 짝이 맞긴 하지만, 중복으로 입실이 찍힌 케이스', async () => {
+      // given
+      const taglogs: TagLogDto[] = [
+        {
+          idx: 1,
+          tag_at: new Date('2023-03-19T05:10Z'), // 오후 2:10:00
+          card_id: '',
+          device_id: 1,
+        },
+        {
+          idx: 2,
+          tag_at: new Date('2023-03-19T05:20Z'), // 오후 2:20:00
+          card_id: '',
+          device_id: 1,
+        },
+        {
+          idx: 3,
+          tag_at: new Date('2023-03-19T06:00Z'), // 오후 3:00:00
+          card_id: '',
+          device_id: 2,
+        },
+      ];
+
+      // when
+      const resultPairs = tagLogService.getAllPairsByTagLogs(taglogs, pairs);
+
+      //then
+      expect(resultPairs).toHaveLength(2);
+      expect(resultPairs).toHaveProperty('[0].durationSecond', 40 * 60); // 50 min
+      expect(resultPairs).toHaveProperty('[1].outTimeStamp', null); // 짝이 맞지 않음.
+    });
+
     test('입-퇴실 짝이 월 경계 자정을 넘어가는 케이스', async () => {
       // given
       const taglogs: TagLogDto[] = [
@@ -156,6 +188,66 @@ describe('Tag Log (v2) unit 테스트', () => {
       //then
       expect(resultPairs).toHaveLength(1);
       expect(resultPairs).toHaveProperty('[0].durationSecond', 1); // 1 sec
+    });
+  });
+  describe('removeDuplicates', () => {
+    test('중복되지 않은 태그 로그', async () => {
+      // given
+      const taglogs: TagLogDto[] = [
+        {
+          idx: 1,
+          tag_at: new Date('2023-03-19T05:10Z'), // 오후 2:10:00
+          card_id: '',
+          device_id: 1,
+        },
+        {
+          idx: 2,
+          tag_at: new Date('2023-03-19T06:00Z'), // 오후 3:00:00
+          card_id: '',
+          device_id: 2,
+        },
+      ];
+
+      // when
+      const resultPairs = tagLogService.removeDuplicates(taglogs);
+
+      //then
+      expect(resultPairs).toHaveLength(2);
+    });
+    test('중복되는 태그 로그', async () => {
+      // given
+      const taglogs: TagLogDto[] = [
+        {
+          idx: 1,
+          tag_at: new Date('2023-03-19T05:10Z'), // 오후 2:10:00
+          card_id: '',
+          device_id: 1,
+        },
+        {
+          idx: 2,
+          tag_at: new Date('2023-03-19T06:00Z'), // 오후 3:00:00
+          card_id: '',
+          device_id: 2,
+        },
+        {
+          idx: 3,
+          tag_at: new Date('2023-03-19T06:00Z'), // 오후 3:00:00
+          card_id: '',
+          device_id: 2,
+        },
+        {
+          idx: 4,
+          tag_at: new Date('2023-03-19T06:00Z'), // 오후 3:00:00
+          card_id: '',
+          device_id: 2,
+        },
+      ];
+
+      // when
+      const resultPairs = tagLogService.removeDuplicates(taglogs);
+
+      //then
+      expect(resultPairs).toHaveLength(2);
     });
   });
 });
