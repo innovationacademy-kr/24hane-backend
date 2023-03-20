@@ -469,6 +469,8 @@ export class TagLogService {
 
       beforeSixMonth.setMonth(beforeSixMonth.getMonth() + 1);
       endOfMonth = this.dateCalculator.getEndOfMonth(beforeSixMonth);
+      
+      return ret.reverse();
     }
 
   /**
