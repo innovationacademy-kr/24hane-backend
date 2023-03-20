@@ -56,6 +56,9 @@ export class TagLogService {
     end: Date,
   ): Promise<TagLogDto[]> {
     this.logger.debug(`@trimTagLogs)`);
+
+    const pairs = await this.pairInfoRepository.findAll();
+
     // 1. 맨 앞의 로그를 가져옴.
     const firstLog = taglogs.at(0);
     if (firstLog) {
@@ -65,7 +68,7 @@ export class TagLogService {
         firstLog.tag_at,
       );
       // NOTE: tag log에 기록된 첫번째 로그가 퇴실인 경우 현재는 짝을 맞추지 않음.
-      if (beforeFirstLog !== null) {
+      if (beforeFirstLog !== null && this.isOutDevice(pairs, firstLog.device_id)) {
         const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
         taglogs.unshift({
           tag_at: virtualEnterTime,
@@ -84,7 +87,7 @@ export class TagLogService {
         lastLog.tag_at,
       );
       // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
-      if (afterLastLog !== null) {
+      if (afterLastLog !== null && this.isInDevice(pairs, lastLog.device_id)) {
         const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
         taglogs.push({
           tag_at: virtualLeaveTime,
