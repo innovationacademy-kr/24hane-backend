@@ -203,9 +203,6 @@ export class TagLogService {
         }
       }
 
-      if (timeLines.length <= 0) {
-        break;
-      }
       //this.logger.debug(`temp2:`, temp.device_id, temp.tag_at);
 
       // 중복 퇴실태그인 경우
@@ -267,6 +264,8 @@ export class TagLogService {
       temp = null;
       leave = null;
     }
+
+    console.log(resultPairs.length);
 
     return resultPairs;
   }
