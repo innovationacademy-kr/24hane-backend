@@ -1,6 +1,6 @@
 {
   "name": "24hane",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "24Hane Backend Server",
   "author": "joohongpark",
   "private": true,
@@ -85,6 +85,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
     "testEnvironment": "node"
   }
 }
