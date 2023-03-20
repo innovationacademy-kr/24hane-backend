@@ -109,7 +109,7 @@ describe('Tag Log (v2) unit 테스트', () => {
 
       //then
       expect(resultPairs).toHaveLength(2);
-      expect(resultPairs).toHaveProperty('[0].durationSecond', 40 * 60); // 50 min
+      expect(resultPairs).toHaveProperty('[0].durationSecond', 40 * 60); // 40 min
       expect(resultPairs).toHaveProperty('[1].outTimeStamp', null); // 짝이 맞지 않음.
     });
 
