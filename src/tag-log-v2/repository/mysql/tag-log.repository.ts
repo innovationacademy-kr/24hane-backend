@@ -84,35 +84,35 @@ export class TagLogRepository implements ITagLogRepository {
     return result;
   }
 
-  async findPrevTagLog(
-    cardIDs: string[],
-    date: Date,
-  ): Promise<TagLogDto | null> {
+  async findPrevTagLog(cardID: CardDto, date: Date): Promise<TagLogDto | null> {
     const result = await this.tagLogRepository.findOne({
       where: {
-        card_id: In(cardIDs),
+        card_id: cardID.card_id,
         tag_at: LessThan(date),
       },
       order: {
         idx: 'DESC',
       },
     });
+    if (result && cardID.begin.getTime() > result.tag_at.getTime()) {
+      return null;
+    }
     return result;
   }
 
-  async findNextTagLog(
-    cardIDs: string[],
-    date: Date,
-  ): Promise<TagLogDto | null> {
+  async findNextTagLog(cardID: CardDto, date: Date): Promise<TagLogDto | null> {
     const result = await this.tagLogRepository.findOne({
       where: {
-        card_id: In(cardIDs),
+        card_id: cardID.card_id,
         tag_at: MoreThan(date),
       },
       order: {
         idx: 'ASC',
       },
     });
+    if (result && cardID.end.getTime() < result.tag_at.getTime()) {
+      return null;
+    }
     return result;
   }
 }
