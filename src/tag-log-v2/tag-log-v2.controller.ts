@@ -85,11 +85,16 @@ export class TagLogController {
     @Query('month', ParseIntPipe) month: number,
     @Query('day', ParseIntPipe) day: number,
   ): Promise<UserInOutLogsType> {
-    this.logger.debug(`@getAllTagPerDay) ${year}-${month}-${day} by ${user.login}`);
+    this.logger.debug(
+      `@getAllTagPerDay) ${year}-${month}-${day} by ${user.login}`,
+    );
 
     const date = new Date(`${year}-${month}-${day}`);
 
-    const results = await this.tagLogService.getAllTagPerDay(user.user_id, date);
+    const results = await this.tagLogService.getAllTagPerDay(
+      user.user_id,
+      date,
+    );
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -138,7 +143,10 @@ export class TagLogController {
 
     const date = new Date(`${year}-${month}`);
 
-    const results = await this.tagLogService.getAllTagPerMonth(user.user_id, date);
+    const results = await this.tagLogService.getAllTagPerMonth(
+      user.user_id,
+      date,
+    );
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -212,7 +220,10 @@ export class TagLogController {
   ): Promise<UserAccumulationType> {
     this.logger.debug(`@getAccumulationTimes) by ${user.login}`);
     const date = new Date();
-    const resultDay = await this.tagLogService.getAllTagPerDay(user.user_id, date);
+    const resultDay = await this.tagLogService.getAllTagPerDay(
+      user.user_id,
+      date,
+    );
     const resultMonth = await this.tagLogService.getAllTagPerMonth(
       user.user_id,
       date,
@@ -227,8 +238,12 @@ export class TagLogController {
       0,
     );
 
-    const resultSixWeekArray = await this.tagLogService.getTimeSixWeek(user.user_id);
-    const resultSixMonthArray = await this.tagLogService.getTimeSixMonth(user.user_id);
+    const resultSixWeekArray = await this.tagLogService.getTimeSixWeek(
+      user.user_id,
+    );
+    const resultSixMonthArray = await this.tagLogService.getTimeSixMonth(
+      user.user_id,
+    );
 
     const result: UserAccumulationType = {
       todayAccumulationTime: resultDaySum,
