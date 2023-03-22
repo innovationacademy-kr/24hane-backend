@@ -8,6 +8,7 @@ import { PairInfoDto } from './dto/pair-info.dto';
 import { InOutLogType } from './dto/subType/InOutLog.type';
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
 import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
+import { CardDto } from 'src/user/dto/card.dto';
 
 @Injectable()
 export class TagLogService {
@@ -45,27 +46,39 @@ export class TagLogService {
    * 삽입하는 로그는 짝 여부에 관계없이 전후 원소를 삽입합니다.
    * 짝 일치 여부 판단은 다른 로직에서 진행합니다.
    * version 2: 카드의 짝을 맞추도록 수정하였습니다.
+   * version 3: 카드의 짝을 엄밀하게 맞추도록 수정하였습니다.
+   * version 4: 이전/이후 로그를 가져올 때, 카드의 유효 기간도 고려하도록 변경하였습니다.
    *
    * @param taglogs TagLogDto[]
    * @return TagLogDto[]
-   * @version 2
+   * @version 4
    */
   async trimTagLogs(
     taglogs: TagLogDto[],
+    cards: CardDto[],
     start: Date,
     end: Date,
+    pairs: PairInfoDto[],
   ): Promise<TagLogDto[]> {
     this.logger.debug(`@trimTagLogs)`);
+
     // 1. 맨 앞의 로그를 가져옴.
     const firstLog = taglogs.at(0);
     if (firstLog) {
       // 2. 맨 앞의 로그 이전의 로그를 가져옴.
       const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
-        [firstLog.card_id],
+        cards.find((v) => v.card_id === firstLog.card_id),
         firstLog.tag_at,
       );
       // NOTE: tag log에 기록된 첫번째 로그가 퇴실인 경우 현재는 짝을 맞추지 않음.
-      if (beforeFirstLog !== null) {
+      if (
+        beforeFirstLog !== null &&
+        this.validateDevicePair(
+          pairs,
+          beforeFirstLog.device_id,
+          firstLog.device_id,
+        )
+      ) {
         const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
         taglogs.unshift({
           tag_at: virtualEnterTime,
@@ -80,11 +93,18 @@ export class TagLogService {
     if (lastLog) {
       // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
       const afterLastLog = await this.tagLogRepository.findNextTagLog(
-        [lastLog.card_id],
+        cards.find((v) => v.card_id === lastLog.card_id),
         lastLog.tag_at,
       );
       // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
-      if (afterLastLog !== null) {
+      if (
+        afterLastLog !== null &&
+        this.validateDevicePair(
+          pairs,
+          lastLog.device_id,
+          afterLastLog.device_id,
+        )
+      ) {
         const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
         taglogs.push({
           tag_at: virtualLeaveTime,
@@ -104,19 +124,19 @@ export class TagLogService {
   // * @param enterDevice
   // * @param device
   // */
-  //validateDevicePair(
-  //  deviceInfos: PairInfoDto[],
-  //  inDevice: number,
-  //  outDevice: number,
-  //): boolean {
-  //  //this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
-  //  // TODO: O(N) 보다 더 적게 시간을 소요하도록 리팩터링 필요
-  //  const find = deviceInfos.find(
-  //    (device) =>
-  //      device.in_device === inDevice && device.out_device === outDevice,
-  //  );
-  //  return !!find;
-  //}
+  validateDevicePair(
+    deviceInfos: PairInfoDto[],
+    inDevice: number,
+    outDevice: number,
+  ): boolean {
+    //this.logger.debug(`@validateDevicePair) ${inDevice} - ${outDevice}`);
+    // TODO: O(N) 보다 더 적게 시간을 소요하도록 리팩터링 필요
+    const find = deviceInfos.find(
+      (device) =>
+        device.in_device === inDevice && device.out_device === outDevice,
+    );
+    return !!find;
+  }
 
   /**
    * 인자로 들어간 디바이스 번호가 입실 디바이스인지 확인합니다.
@@ -313,8 +333,10 @@ export class TagLogService {
 
     const trimmedTagLogs = await this.trimTagLogs(
       filteredTagLogs,
+      cards,
       tagStart,
       tagEnd,
+      devicePairs,
     );
 
     return trimmedTagLogs;

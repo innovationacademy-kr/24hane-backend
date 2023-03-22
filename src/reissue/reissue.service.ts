@@ -5,7 +5,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserSessionDto } from '../auth/dto/user.session.dto';
@@ -109,7 +108,7 @@ export class ReissueService {
       origin_card_id: initialCardNo,
       new_card_id: '',
     };
-   await this.cardReissueRepository.save(data);
+    await this.cardReissueRepository.save(data);
     try {
       const jandiData = {
         request: 'request',

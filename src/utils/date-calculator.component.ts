@@ -56,7 +56,11 @@ export class DateCalculator {
   getStartOfWeek(date: Date): Date {
     const dayOfWeek = date.getDay() - 1;
     const diff = dayOfWeek === -1 ? 6 : dayOfWeek;
-    const rtn = new Date(date.getFullYear(), date.getMonth(), date.getDate() - diff);
+    const rtn = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate() - diff,
+    );
     return rtn;
   }
 
@@ -125,11 +129,11 @@ export class DateCalculator {
 
   /**
    * 주어진 년, 월에 대해 일의 개수를 구합니다.
-  *
-  * @param year 년
-  * @param month 월
-  * @return days 해당 달의 일의 개수
-  */
+   *
+   * @param year 년
+   * @param month 월
+   * @return days 해당 달의 일의 개수
+   */
   getDaysInMonth(year: number, month: number): number {
     this.logger.debug(`@getDaysInMonth) ${year}, ${month}`);
     const date = new Date(year, month, 0);
@@ -138,17 +142,19 @@ export class DateCalculator {
 
   /**
    * 주어진 년도와 주차에 대해 날짜 범위를 구합니다.
-   * 
+   *
    * @param year 년
    * @param week 주차
-   * @returns 
-  */
+   * @returns
+   */
   getDateOfWeek(year: number, week: number): Date {
     const januaryFirst = new Date(year, 0, 1);
     const dayOfWeek = januaryFirst.getDay();
     const daysToAdd = 7 - dayOfWeek;
     const secondSundayOfYear = new Date(year, 0, daysToAdd + 1);
-    const rtn = new Date(secondSundayOfYear.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+    const rtn = new Date(
+      secondSundayOfYear.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000,
+    );
     return rtn;
   }
 }
