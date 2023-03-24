@@ -6,13 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 타임존 설정
-        uses: szenius/set-timezone@v1.0
+        uses: szenius/set-timezone@v1.2
         with:
           timezoneLinux: "Asia/Seoul"
       - name: 체크아웃
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Node.js 16.x Version
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
       - name: 종속 모듈들 캐싱
