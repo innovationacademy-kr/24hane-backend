@@ -285,8 +285,6 @@ export class TagLogService {
       leave = null;
     }
 
-    console.log(resultPairs.length);
-
     return resultPairs;
   }
 
