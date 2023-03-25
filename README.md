@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="312" alt="24시간이 모자라" src="https://user-images.githubusercontent.com/27172454/204820918-082dfc20-b77a-46f3-8ab9-3a3cd39abc67.png" />
+<img width="100" alt="image" src="https://user-images.githubusercontent.com/72684256/222954950-6ab18005-81e1-4d0b-93d5-6097f11fee32.png">
 
 [![GitHub Stars](https://img.shields.io/github/stars/innovationacademy-kr/42checkin_v3-backend?style=for-the-badge)](https://github.com/innovationacademy-kr/42checkin_v3-backend/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/innovationacademy-kr/42checkin_v3-backend?style=for-the-badge)](https://github.com/innovationacademy-kr/42checkin_v3-backend/issues)
@@ -29,6 +29,7 @@
 
 - http://api.24hoursarenotenough.42seoul.kr/docs/
 
+
 ### 프로젝트 개요 및 목표
 - 체류시간을 기준으로 지원금을 지급하는 것으로 운영정책이 변경됨에 따라 약 1,500여명의 학생에게 지원금을 지급하기 위해 체류시간에 대한 데이터가 필요한 상황입니다.
 - 학생에겐 본인의 체류시간을 제공해야 합니다.
@@ -39,6 +40,18 @@
 - 24HANE 프론트앤드 개발자 팀원에게 요구사항에 맞는 API 제공
 - 운영진에게 요구사항에 맞는 형태로 약 1,500명의 학생에 대한 월별 체류시간 제공
   - 운영진의 요구사항에 따라 현재 Google Sheet를 이용하기 때문에 API만 제공합니다.
+
+
+
+### 서비스 동작 예제
+
+<table align="center">
+  <tr>
+    <td><img width="345" alt="image" src="https://user-images.githubusercontent.com/72684256/222955031-4ce9edd6-6dda-46f3-ac17-e6bacacfbcfe.png"></td>
+    <td><img width="345" alt="image" src="https://user-images.githubusercontent.com/72684256/222955101-301b7088-890b-4291-899f-9e685264c78f.png"></td>
+    <td><img width="345" alt="image" src="https://user-images.githubusercontent.com/72684256/222955264-301460c7-cc7d-4d2c-905a-5b73cba8383c.png"></td>
+  <tr>
+</table>
 
 ### 기술적 도전
 해당 백앤드 서비스를 **1,500여명 이상의 카뎃들**과 관리자에게 더 양질의 서비스를 제공하기 위해 아래와 같은 주제에 대해 고민을 하였습니다.
