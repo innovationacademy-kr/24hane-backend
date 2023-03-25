@@ -18,6 +18,10 @@ const mocks = [
     provide: 'IPairInfoRepository',
     useClass: jest.fn(),
   },
+  {
+    provide: 'IDeviceInfoRepository',
+    useClass: jest.fn(),
+  },
 ];
 
 describe('Tag Log (v2) unit 테스트', () => {
