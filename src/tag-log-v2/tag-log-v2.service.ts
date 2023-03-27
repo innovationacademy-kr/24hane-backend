@@ -9,6 +9,8 @@ import { InOutLogType } from './dto/subType/InOutLog.type';
 import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
 import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
 import { CardDto } from 'src/user/dto/card.dto';
+import { IDeviceInfoRepository } from './repository/interface/device-info-repository.interface';
+import { DeviceInfoDto } from './dto/device-info.dto';
 
 @Injectable()
 export class TagLogService {
@@ -20,6 +22,8 @@ export class TagLogService {
     private tagLogRepository: ITagLogRepository,
     @Inject('IPairInfoRepository')
     private pairInfoRepository: IPairInfoRepository,
+    @Inject('IDeviceInfoRepository')
+    private deviceInfoRepository: IDeviceInfoRepository,
     private dateCalculator: DateCalculator,
   ) {}
 
@@ -42,44 +46,44 @@ export class TagLogService {
   }
 
   /**
-   * 카드 태그 로그에 대해 로그 맨 앞, 맨 뒤 원소가 잘려 있다면 앞, 뒤에 가상의 입출입 로그를 삽입합니다.
-   * 삽입하는 로그는 짝 여부에 관계없이 전후 원소를 삽입합니다.
-   * 짝 일치 여부 판단은 다른 로직에서 진행합니다.
-   * version 2: 카드의 짝을 맞추도록 수정하였습니다.
-   * version 3: 카드의 짝을 엄밀하게 맞추도록 수정하였습니다.
-   * version 4: 이전/이후 로그를 가져올 때, 카드의 유효 기간도 고려하도록 변경하였습니다.
+   * 인자로 들어온 태그 로그의 첫 기록이 OUT이라면, 더 과거 로그를 가져와 정각 기준으로 가상 로그를 삽입합니다.
    *
-   * @param taglogs TagLogDto[]
-   * @return TagLogDto[]
-   * @version 4
+   * @param taglogs TagLogDto[] 태그 로그
+   * @param cards CardDto[] 태깅한 유저의 카드 정보와 유효 기간
+   * @param deviceInfos DeviceInfoDto[] 디바이스 정보
+   * @return TagLogDto[] 태그 로그
+   * @version 1
    */
-  async trimTagLogs(
+  async checkAndInsertStartVirtualTagLog(
     taglogs: TagLogDto[],
     cards: CardDto[],
-    start: Date,
-    end: Date,
-    pairs: PairInfoDto[],
+    deviceInfos: DeviceInfoDto[],
   ): Promise<TagLogDto[]> {
-    this.logger.debug(`@trimTagLogs)`);
-
-    // 1. 맨 앞의 로그를 가져옴.
+    // 1. 맨 앞의 로그를 가져온다.
     const firstLog = taglogs.at(0);
-    if (firstLog) {
-      // 2. 맨 앞의 로그 이전의 로그를 가져옴.
+
+    // 2. 만약 맨 앞의 로그가 OUT이라면 맨 앞의 로그 이전의 로그를 가져온다.
+    if (
+      firstLog &&
+      !!deviceInfos.find(
+        (v) => v.device_id === firstLog.device_id && v.io_type === InOut.OUT,
+      )
+    ) {
       const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
         cards.find((v) => v.card_id === firstLog.card_id),
         firstLog.tag_at,
       );
-      // NOTE: tag log에 기록된 첫번째 로그가 퇴실인 경우 현재는 짝을 맞추지 않음.
+      // 3. 만약 맨 앞의 로그 이전의 로그가 IN이 아니라면, 가상 로그를 삽입하지 않는다.
       if (
         beforeFirstLog !== null &&
-        this.validateDevicePair(
-          pairs,
-          beforeFirstLog.device_id,
-          firstLog.device_id,
+        !!deviceInfos.find(
+          (v) =>
+            v.device_id === beforeFirstLog.device_id && v.io_type === InOut.IN,
         )
       ) {
-        const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
+        const virtualEnterTime = this.dateCalculator.getStartOfDate(
+          firstLog.tag_at,
+        );
         taglogs.unshift({
           tag_at: virtualEnterTime,
           device_id: beforeFirstLog.device_id,
@@ -88,24 +92,48 @@ export class TagLogService {
         });
       }
     }
-    // 3. 맨 뒤의 로그를 가져옴.
+    return taglogs;
+  }
+
+  /**
+   * 인자로 들어온 태그 로그의 마지막 기록이 IN이라면, 더 최신 로그를 가져와 정각 기준으로 가상 로그를 삽입합니다.
+   *
+   * @param taglogs TagLogDto[] 태그 로그
+   * @param cards CardDto[] 태깅한 유저의 카드 정보와 유효 기간
+   * @param deviceInfos DeviceInfoDto[] 디바이스 정보
+   * @return TagLogDto[] 태그 로그
+   * @version 1
+   */
+  async checkAndInsertEndVirtualTagLog(
+    taglogs: TagLogDto[],
+    cards: CardDto[],
+    deviceInfos: DeviceInfoDto[],
+  ): Promise<TagLogDto[]> {
+    // 1. 맨 뒤의 로그를 가져온다.
     const lastLog = taglogs.at(-1);
-    if (lastLog) {
-      // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
+
+    // 2. 만약 맨 뒤의 로그가 IN이라면 맨 뒤의 로그 이후의 로그를 가져온다.
+    if (
+      lastLog &&
+      !!deviceInfos.find(
+        (v) => v.device_id === lastLog.device_id && v.io_type === InOut.IN,
+      )
+    ) {
       const afterLastLog = await this.tagLogRepository.findNextTagLog(
         cards.find((v) => v.card_id === lastLog.card_id),
         lastLog.tag_at,
       );
-      // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
+      // 3. 만약 맨 뒤의 로그 이후의 로그가 OUT이 아니라면, 가상 로그를 삽입하지 않는다.
       if (
         afterLastLog !== null &&
-        this.validateDevicePair(
-          pairs,
-          lastLog.device_id,
-          afterLastLog.device_id,
+        !!deviceInfos.find(
+          (v) =>
+            v.device_id === afterLastLog.device_id && v.io_type === InOut.OUT,
         )
       ) {
-        const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
+        const virtualLeaveTime = this.dateCalculator.getEndOfDate(
+          lastLog.tag_at,
+        );
         taglogs.push({
           tag_at: virtualLeaveTime,
           device_id: afterLastLog.device_id,
@@ -318,25 +346,24 @@ export class TagLogService {
       a.tag_at > b.tag_at ? 1 : -1,
     );
 
-    const devicePairs = await this.pairInfoRepository.findAll();
+    const deviceInfos = await this.deviceInfoRepository.findAll();
 
     const filteredTagLogs = sortedTagLogs.filter(
       (taglog) =>
-        !!devicePairs.find(
-          (temp) =>
-            temp.in_device === taglog.device_id ||
-            temp.out_device === taglog.device_id,
-        ),
+        !!deviceInfos.find((temp) => temp.device_id === taglog.device_id),
     );
 
-    const trimmedTagLogs = await this.trimTagLogs(
-      filteredTagLogs,
+    const deduplicatedTagLogs = this.removeDuplicates(filteredTagLogs);
+    const trimmedStartTagLogs = await this.checkAndInsertStartVirtualTagLog(
+      deduplicatedTagLogs,
       cards,
-      tagStart,
-      tagEnd,
-      devicePairs,
+      deviceInfos,
     );
-
+    const trimmedTagLogs = await this.checkAndInsertEndVirtualTagLog(
+      trimmedStartTagLogs,
+      cards,
+      deviceInfos,
+    );
     return trimmedTagLogs;
   }
 
@@ -357,10 +384,8 @@ export class TagLogService {
 
     const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
-    const newtaglogs = this.removeDuplicates(taglogs);
-
     //짝이 안맞는 로그도 null과 pair를 만들어 반환한다.
-    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
+    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
     return resultPairs;
   }
@@ -392,9 +417,7 @@ export class TagLogService {
       today,
     );
 
-    const newtaglogs = this.removeDuplicates(taglogs);
-
-    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
+    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
     const ret: number[] = [];
 
@@ -438,9 +461,7 @@ export class TagLogService {
     //  this.logger.debug(`taglogs: ${element.device_id}, ${element.tag_at}`);
     //});
 
-    const newtaglogs = this.removeDuplicates(taglogs);
-
-    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
+    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
     //resultPairs.forEach((element) => {
     //  this.logger.debug(
@@ -474,9 +495,7 @@ export class TagLogService {
       today,
     );
 
-    const newtaglogs = this.removeDuplicates(taglogs);
-
-    const resultPairs = this.getAllPairsByTagLogs(newtaglogs, pairs);
+    const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
 
     const ret: number[] = [];
 
