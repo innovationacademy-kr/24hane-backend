@@ -4,7 +4,7 @@
 
 [![GitHub Stars](https://img.shields.io/github/stars/innovationacademy-kr/42checkin_v3-backend?style=for-the-badge)](https://github.com/innovationacademy-kr/42checkin_v3-backend/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/innovationacademy-kr/42checkin_v3-backend?style=for-the-badge)](https://github.com/innovationacademy-kr/42checkin_v3-backend/issues)
-[![Current Version](https://img.shields.io/badge/version-3.1.1-green?style=for-the-badge)](https://github.com/innovationacademy-kr/42checkin_v3-backend/releases/tag/v3.1.1)
+[![Current Version](https://img.shields.io/badge/version-3.1.1-green?style=for-the-badge)](https://github.com/innovationacademy-kr/42checkin_v3-backend/releases/tag/v4.2.1)
 
 </div>
 
