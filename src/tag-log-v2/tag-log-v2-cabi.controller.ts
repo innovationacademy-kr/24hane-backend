@@ -20,15 +20,15 @@ import { UserAccumulationDayType } from './dto/admin/user-accumulation-day.type'
 import { TagLogCabiService } from './tag-log-v2-cabi.service';
 import { ExtAuthGuard } from 'src/auth/guard/ext-auth.guard';
 
-@ApiTags('체류 시간 산출 V2 (관리자 전용 API)')
+@ApiTags('체류 시간 산출 V2 (cabi 전용 API)')
 @ApiBearerAuth()
 @UseGuards(ExtAuthGuard)
 @Controller({
   version: '2',
-  path: 'tag-log/admin',
+  path: 'tag-log/cabi',
 })
-export class TagLogAdminController {
-  private logger = new Logger(TagLogAdminController.name);
+export class TagLogCabiController {
+  private logger = new Logger(TagLogCabiController.name);
 
   constructor(private tagLogCabiService: TagLogCabiService) {}
   /**
