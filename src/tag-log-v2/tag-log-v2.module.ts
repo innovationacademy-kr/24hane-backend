@@ -14,6 +14,8 @@ import { DeviceInfo } from 'src/entities/device-info.entity';
 import { DeviceInfoRepository } from './repository/mysql/device-info.repository';
 import { TagLogAdminController } from './tag-log-v2-admin.controller';
 import { TagLogAdminService } from './tag-log-v2-admin.service';
+import { TagLogCabiController } from './tag-log-v2-cabi.controller';
+import { TagLogCabiService } from './tag-log-v2-cabi.service';
 
 const tagLogRepo = {
   provide: 'ITagLogRepository',
@@ -39,13 +41,14 @@ const deviceInfoRepo = {
     StatisticsModule,
   ],
   exports: [TypeOrmModule],
-  controllers: [TagLogController, TagLogAdminController],
+  controllers: [TagLogController, TagLogAdminController, TagLogCabiController],
   providers: [
     tagLogRepo,
     pairInfoRepo,
     deviceInfoRepo,
     TagLogService,
     TagLogAdminService,
+    TagLogCabiService
   ],
 })
 export class TagLogModule2 {}
