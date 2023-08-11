@@ -17,10 +17,10 @@ export class AuthExternalStrategy extends PassportStrategy(Strategy, 'ext') {
   }
 
   async validate(payload: any) {
-    // FIXME: 수정 필요
-    if (payload.extfunc !== 'Where42') {
-      return false;
+    if (payload.extfunc === 'Where42' || payload.extfunc === 'Cabi42') {
+      return payload;
     }
-    return payload;
+
+    return false;
   }
 }
