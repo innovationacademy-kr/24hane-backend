@@ -123,6 +123,7 @@ export class TagLogService {
         cards.find((v) => v.card_id === lastLog.card_id),
         lastLog.tag_at,
       );
+
       // 3. 만약 맨 뒤의 로그 이후의 로그가 OUT이 아니라면, 가상 로그를 삽입하지 않는다.
       if (
         afterLastLog !== null &&
@@ -134,12 +135,39 @@ export class TagLogService {
         const virtualLeaveTime = this.dateCalculator.getEndOfDate(
           lastLog.tag_at,
         );
+
         taglogs.push({
           tag_at: virtualLeaveTime,
           device_id: afterLastLog.device_id,
           idx: -1,
           card_id: afterLastLog.card_id,
         });
+
+        const nextDayOfLastLog = new Date(lastLog.tag_at);
+        nextDayOfLastLog.setDate(nextDayOfLastLog.getDate() + 1);
+
+        while (
+          !this.dateCalculator.checkEqualDay(
+            nextDayOfLastLog,
+            afterLastLog.tag_at,
+          )
+        ) {
+          taglogs.push({
+            //IN
+            tag_at: this.dateCalculator.getStartOfDate(nextDayOfLastLog),
+            device_id: lastLog.device_id,
+            idx: -1,
+            card_id: lastLog.card_id,
+          });
+          taglogs.push({
+            //OUT
+            tag_at: this.dateCalculator.getEndOfDate(nextDayOfLastLog),
+            device_id: afterLastLog.device_id,
+            idx: -1,
+            card_id: afterLastLog.card_id,
+          });
+          nextDayOfLastLog.setDate(nextDayOfLastLog.getDate() + 1);
+        }
       }
     }
     return taglogs;
@@ -354,16 +382,19 @@ export class TagLogService {
     );
 
     const deduplicatedTagLogs = this.removeDuplicates(filteredTagLogs);
+
     const trimmedStartTagLogs = await this.checkAndInsertStartVirtualTagLog(
       deduplicatedTagLogs,
       cards,
       deviceInfos,
     );
+
     const trimmedTagLogs = await this.checkAndInsertEndVirtualTagLog(
       trimmedStartTagLogs,
       cards,
       deviceInfos,
     );
+
     return trimmedTagLogs;
   }
 
@@ -457,19 +488,7 @@ export class TagLogService {
 
     const taglogs = await this.getAllTagLogsByPeriod(userId, tagStart, tagEnd);
 
-    //taglogs.forEach((element) => {
-    //  this.logger.debug(`taglogs: ${element.device_id}, ${element.tag_at}`);
-    //});
-
     const resultPairs = this.getAllPairsByTagLogs(taglogs, pairs);
-
-    //resultPairs.forEach((element) => {
-    //  this.logger.debug(
-    //    `resultPairs: ${new Date(element.inTimeStamp * 1000)}, ${new Date(
-    //      element.outTimeStamp * 1000,
-    //    )}`,
-    //  );
-    //});
 
     return resultPairs;
   }
