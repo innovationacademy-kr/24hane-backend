@@ -42,5 +42,4 @@ db/
 key/
 sql/
 
-test-db/
-test-docker/
+package-lock.json
