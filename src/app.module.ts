@@ -17,6 +17,7 @@ import { UserModule } from './user/user.module';
 import { ReissueModule } from './reissue/reissue.module';
 import { StatisticsModule } from './statistics/statictics.module';
 import { RedirectModule } from './redirect/redirect.module';
+import { TagLogModule3 } from './tag-log-v3/tag-log-v3.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RedirectModule } from './redirect/redirect.module';
     AuthModule,
     TagLogModule,
     TagLogModule2,
+    TagLogModule3,
     UserModule,
     ExtModule,
     ReissueModule,
