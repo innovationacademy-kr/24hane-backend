@@ -181,7 +181,7 @@ export class TagLogController {
       await this.cacheManager.get('getCadetPerCluster');
     if (cadetPerCluster === undefined) {
       cadetPerCluster = await this.statisticsService.getCadetPerCluster(2);
-      await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60);
+      await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60000);
     }
     const gaepo = +cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
     const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
