@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { DateCalculator } from 'src/data-calculator/date-calculator.component';
 import InOut from 'src/enums/inout.enum';
+import { StatisticsService } from 'src/statistics/statictics.service';
 import { CardDto } from 'src/user/dto/card.dto';
 import { UserService } from 'src/user/user.service';
 import { DeviceInfoDto } from './dto/device-info.dto';
@@ -17,6 +18,7 @@ export class TagLogService {
   private logger = new Logger(TagLogService.name);
 
   constructor(
+    private statisticsService: StatisticsService,
     private userService: UserService,
     @Inject('ITagLogRepository')
     private tagLogRepository: ITagLogRepository,
@@ -26,6 +28,10 @@ export class TagLogService {
     private deviceInfoRepository: IDeviceInfoRepository,
     private dateCalculator: DateCalculator,
   ) {}
+
+  async getCadetPerCluster(day: number) {
+    return await this.statisticsService.getCadetPerCluster(day);
+  }
 
   /**
    * DB에서 중복된 태그 기록이 올 경우, 중복된 태그 기록을 필터링합니다.

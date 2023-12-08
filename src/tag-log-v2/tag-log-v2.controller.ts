@@ -1,8 +1,6 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   Controller,
   Get,
-  Inject,
   Logger,
   ParseIntPipe,
   Query,
@@ -15,12 +13,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Cache } from 'cache-manager';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
-import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
-import { StatisticsService } from 'src/statistics/statictics.service';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { UserInfoType } from './dto/user-Info.type';
 import { UserAccumulationType } from './dto/user-accumulation.type';
@@ -36,11 +31,7 @@ import { TagLogService } from './tag-log-v2.service';
 export class TagLogController {
   private logger = new Logger(TagLogController.name);
 
-  constructor(
-    private tagLogService: TagLogService,
-    private statisticsService: StatisticsService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  constructor(private tagLogService: TagLogService) {}
 
   /**
    * 특정 일에 대한 모든 태그로그를 조회합니다.
@@ -95,6 +86,7 @@ export class TagLogController {
       user.user_id,
       date,
     );
+
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -147,6 +139,7 @@ export class TagLogController {
       user.user_id,
       date,
     );
+
     return {
       login: user.login,
       profileImage: user.image_url,
@@ -175,25 +168,23 @@ export class TagLogController {
   @Get('maininfo')
   async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
     this.logger.debug(`@getMainInfo) by ${user.login}`);
+
     const inoutState = await this.tagLogService.checkClusterById(user.user_id);
-    // FIXME: 추후에 캐시 관련 리팩터링 필요
-    let cadetPerCluster: undefined | CadetPerClusterDto[] =
-      await this.cacheManager.get('getCadetPerCluster');
-    if (cadetPerCluster === undefined) {
-      cadetPerCluster = await this.statisticsService.getCadetPerCluster(2);
-      await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60000);
-    }
-    const gaepo = +cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
-    const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
+    const cadetPerCluster = await this.tagLogService.getCadetPerCluster(2);
+
+    const gaepo = cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
+    const seocho = cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
+
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
       isAdmin: user.is_staff,
       inoutState: inoutState.inout,
       tagAt: inoutState.log,
-      gaepo: gaepo ? gaepo : 0,
-      seocho: seocho ? seocho : 0,
+      gaepo: gaepo ?? 0,
+      seocho: seocho ?? 0,
     };
+
     return result;
   }
 
@@ -202,7 +193,7 @@ export class TagLogController {
    */
   @ApiOperation({
     summary: '로그인한 유저의 일별/월별 누적 체류시간',
-    description: '로그인한 유저의 일별/월별 누적 체류시간을 조s회합니다.',
+    description: '로그인한 유저의 일별/월별 누적 체류시간을 조회합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -219,38 +210,44 @@ export class TagLogController {
     @User() user: UserSessionDto,
   ): Promise<UserAccumulationType> {
     this.logger.debug(`@getAccumulationTimes) by ${user.login}`);
+
     const date = new Date();
+
     const resultDay = await this.tagLogService.getAllTagPerDay(
       user.user_id,
       date,
     );
+
+    const todayAccumulationTime = resultDay.reduce(
+      (prev, result) => result.durationSecond + prev,
+      0,
+    );
+
     const resultMonth = await this.tagLogService.getAllTagPerMonth(
       user.user_id,
       date,
     ); //todo: change to all tag (and check plus null value)
 
-    const resultDaySum = resultDay.reduce(
-      (prev, result) => result.durationSecond + prev,
-      0,
-    );
-    const resultMonthSum = resultMonth.reduce(
+    const monthAccumulationTime = resultMonth.reduce(
       (prev, result) => result.durationSecond + prev,
       0,
     );
 
-    const resultSixWeekArray = await this.tagLogService.getTimeSixWeek(
+    const sixWeekAccumulationTime = await this.tagLogService.getTimeSixWeek(
       user.user_id,
     );
-    const resultSixMonthArray = await this.tagLogService.getTimeSixMonth(
+
+    const sixMonthAccumulationTime = await this.tagLogService.getTimeSixMonth(
       user.user_id,
     );
 
     const result: UserAccumulationType = {
-      todayAccumulationTime: resultDaySum,
-      monthAccumulationTime: resultMonthSum,
-      sixWeekAccumulationTime: resultSixWeekArray,
-      sixMonthAccumulationTime: resultSixMonthArray,
+      todayAccumulationTime,
+      monthAccumulationTime,
+      sixWeekAccumulationTime,
+      sixMonthAccumulationTime,
     };
+
     return result;
   }
 }
