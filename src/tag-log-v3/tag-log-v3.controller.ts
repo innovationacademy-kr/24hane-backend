@@ -25,6 +25,7 @@ import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { Cache } from 'cache-manager';
 import { StatisticsService } from 'src/statistics/statictics.service';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
+import { InOutLogPerDay, groupLogsByDay } from './dto/subType/InOutLogPerDay.type';
 
 @ApiTags('체류 시간 산출 v3')
 @Controller({
@@ -202,7 +203,7 @@ export class TagLogController {
    */
   @ApiOperation({
     summary: '로그인한 유저의 일별/월별 누적 체류시간',
-    description: '로그인한 유저의 일별/월별 누적 체류시간을 조s회합니다.',
+    description: '로그인한 유저의 일별/월별 누적 체류시간을 조회합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -229,13 +230,21 @@ export class TagLogController {
       date,
     ); //todo: change to all tag (and check plus null value)
 
-    const resultDaySum = this.tagLogService.cutTime(resultDay.reduce(
+    const twelveHoursInSeconds = 12 * 60 * 60;
+    const resultPerDay : InOutLogPerDay[] = groupLogsByDay(resultMonth, twelveHoursInSeconds);
+
+    // 하루 최대 인정시간 합
+    const resultDaySumWithFilter = resultPerDay.reduce(
+      (prev, result) => result.getDurationSecondPerDay() + prev, 0,
+    );
+        
+    const resultDaySum = resultDay.reduce(
       (prev, result) => result.durationSecond + prev,
       0,
-    ));
+    );
     
     const resultMonthSum = resultMonth.reduce(
-      (prev, result) => (this.tagLogService.cutTime(result.durationSecond)) + prev,
+      (prev, result) => result.durationSecond + prev,
       0,
     );
 
@@ -251,6 +260,7 @@ export class TagLogController {
       monthAccumulationTime: resultMonthSum,
       sixWeekAccumulationTime: resultSixWeekArray,
       sixMonthAccumulationTime: resultSixMonthArray,
+      monthlyAcceptedAccumulationTime: resultDaySumWithFilter,
     };
     return result;
   }

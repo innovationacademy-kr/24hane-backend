@@ -24,4 +24,10 @@ export class UserAccumulationType {
     example: [12345, 67890, 12345, 67890, 12345, 67890],
   })
   sixMonthAccumulationTime: number[];
+
+  @ApiProperty({
+    description: '한달 인정 시간(하루 최대 12시간)',
+    example: 86400,
+  })
+  monthlyAcceptedAccumulationTime: number;
 }
