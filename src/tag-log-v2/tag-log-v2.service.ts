@@ -1,16 +1,16 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import InOut from 'src/enums/inout.enum';
+import { DeviceInfoDto } from 'src/tag-log/dto/device-info.dto';
+import { InOutDto } from 'src/tag-log/dto/inout.dto';
+import { PairInfoDto } from 'src/tag-log/dto/pair-info.dto';
+import { TagLogDto } from 'src/tag-log/dto/tag-log.dto';
+import { IPairInfoRepository } from 'src/tag-log/repository/interface/pair-info-repository.interface';
+import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
+import { CardDto } from 'src/user/dto/card.dto';
 import { UserService } from 'src/user/user.service';
 import { DateCalculator } from 'src/utils/date-calculator.component';
-import { InOutDto } from './dto/inout.dto';
-import { TagLogDto } from './dto/tag-log.dto';
-import { PairInfoDto } from './dto/pair-info.dto';
+import { IDeviceInfoRepository } from '../tag-log/repository/interface/device-info-repository.interface';
 import { InOutLogType } from './dto/subType/InOutLog.type';
-import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
-import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
-import { CardDto } from 'src/user/dto/card.dto';
-import { IDeviceInfoRepository } from './repository/interface/device-info-repository.interface';
-import { DeviceInfoDto } from './dto/device-info.dto';
 
 @Injectable()
 export class TagLogService {

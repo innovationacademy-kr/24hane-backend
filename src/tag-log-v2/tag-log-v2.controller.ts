@@ -21,8 +21,8 @@ import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 import { StatisticsService } from 'src/statistics/statictics.service';
-import { UserInOutLogsType } from './dto/UserInOutLogs.type';
-import { UserInfoType } from './dto/user-Info.type';
+import { UserInOutLogsType } from 'src/tag-log/dto/UserInOutLogs.type';
+import { UserInfoType } from 'src/tag-log/dto/user-Info.type';
 import { UserAccumulationType } from './dto/user-accumulation.type';
 import { TagLogService } from './tag-log-v2.service';
 

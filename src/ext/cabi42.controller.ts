@@ -19,7 +19,7 @@ import {
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { ExtAuthGuard } from 'src/auth/guard/ext-auth.guard';
 import { User } from 'src/auth/user.decorator';
-import { UserAccumulationMonthType } from '../tag-log-v2/dto/admin/user-accumulation-month.type';
+import { UserAccumulationMonthType } from 'src/tag-log/dto/admin/user-accumulation-month.type';
 import { TagLogAdminService } from '../tag-log-v2/tag-log-v2-admin.service';
 
 @ApiTags('Cabi42 전용 API')

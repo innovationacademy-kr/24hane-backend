@@ -13,13 +13,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
-import { UserAccumulationType } from './dto/user-accumulation.type';
-import { UserInfoType } from './dto/user-Info.type';
-import { UserInOutLogsType } from './dto/UserInOutLogs.type';
-import { TagLogService } from './tag-log.service';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
+import { User } from 'src/auth/user.decorator';
+import { UserInfoType } from 'src/tag-log/dto/user-Info.type';
+import { UserInOutLogsType } from '../tag-log/dto/UserInOutLogs.type';
+import { UserAccumulationType } from './dto/user-accumulation.type';
+import { TagLogService } from './tag-log.service';
 
 @ApiTags('체류 시간 산출')
 @Controller({

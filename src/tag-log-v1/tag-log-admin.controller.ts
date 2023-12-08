@@ -17,12 +17,12 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
-import { UserAccumulationDayType } from './dto/admin/user-accumulation-day.type';
-import { UserAccumulationMonthType } from './dto/admin/user-accumulation-month.type';
-import { TagLogAdminService } from './tag-log-admin.service';
 import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
+import { User } from 'src/auth/user.decorator';
+import { UserAccumulationDayType } from 'src/tag-log/dto/admin/user-accumulation-day.type';
+import { UserAccumulationMonthType } from 'src/tag-log/dto/admin/user-accumulation-month.type';
+import { TagLogAdminService } from './tag-log-admin.service';
 
 @ApiTags('체류 시간 산출 (관리자 전용 API)')
 @ApiBearerAuth()

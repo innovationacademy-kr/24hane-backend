@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { InOutLogType } from './subType/InOutLog.type';
+import { InOutLogType } from '../../tag-log-v1/dto/subType/InOutLog.type';
 
 export class UserInOutLogsType {
   @ApiProperty({

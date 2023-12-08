@@ -5,7 +5,7 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { ITagLogRepository } from 'src/tag-log-v1/repository/interface/tag-log-repository.interface';
+import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 import { UserService } from 'src/user/user.service';
 import { Where42ResponseDto } from './dto/where42.response.dto';
 import { IDeviceInfoRepository } from './repository/interface/device-info.repository.interface';

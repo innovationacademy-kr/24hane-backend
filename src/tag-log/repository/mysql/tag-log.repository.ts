@@ -1,9 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { TagLogDto } from 'src/tag-log-v1/dto/tag-log.dto';
-import { ITagLogRepository } from '../interface/tag-log-repository.interface';
 import { Repository, In, Between, LessThan, MoreThan } from 'typeorm';
 import { TagLog } from 'src/entities/tag-log.entity';
 import { CardDto } from 'src/user/dto/card.dto';
+import { TagLogDto } from 'src/tag-log/dto/tag-log.dto';
+import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 
 export class TagLogRepository implements ITagLogRepository {
   constructor(

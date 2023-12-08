@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { UserAccumulationDayType } from 'src/tag-log/dto/admin/user-accumulation-day.type';
+import { UserAccumulationMonthType } from 'src/tag-log/dto/admin/user-accumulation-month.type';
 import { UserService } from 'src/user/user.service';
 import { DateCalculator } from 'src/utils/date-calculator.component';
-import { UserAccumulationDayType } from './dto/admin/user-accumulation-day.type';
-import { UserAccumulationMonthType } from './dto/admin/user-accumulation-month.type';
 import { TagLogService } from './tag-log.service';
 
 @Injectable()

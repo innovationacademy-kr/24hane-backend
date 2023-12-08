@@ -1,14 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import InOut from 'src/enums/inout.enum';
+import { InOutDto } from 'src/tag-log/dto/inout.dto';
+import { PairInfoDto } from 'src/tag-log/dto/pair-info.dto';
+import { TagLogDto } from 'src/tag-log/dto/tag-log.dto';
+import { CardDto } from 'src/user/dto/card.dto';
 import { UserService } from 'src/user/user.service';
 import { DateCalculator } from 'src/utils/date-calculator.component';
-import { InOutDto } from './dto/inout.dto';
-import { TagLogDto } from './dto/tag-log.dto';
-import { PairInfoDto } from './dto/pair-info.dto';
+import { IPairInfoRepository } from '../tag-log/repository/interface/pair-info-repository.interface';
+import { ITagLogRepository } from '../tag-log/repository/interface/tag-log-repository.interface';
 import { InOutLogType } from './dto/subType/InOutLog.type';
-import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
-import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
-import { CardDto } from 'src/user/dto/card.dto';
 
 @Injectable()
 export class TagLogService {
