@@ -11,8 +11,8 @@ import { Where42ResponseDto } from './dto/where42.response.dto';
 import { IDeviceInfoRepository } from './repository/interface/device-info.repository.interface';
 
 @Injectable()
-export class ExtService {
-  private logger = new Logger(ExtService.name);
+export class Where42Service {
+  private logger = new Logger(Where42Service.name);
 
   constructor(
     private userService: UserService,

@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeviceInfo } from 'src/entities/device-info.entity';
-import { DeviceDto } from 'src/ext/dto/device.dto';
-import { IDeviceInfoRepository } from '../interface/device-info.repository.interface';
+import { DeviceDto } from 'src/external/where42/dto/device.dto';
 import { Repository } from 'typeorm';
+import { IDeviceInfoRepository } from '../interface/device-info.repository.interface';
 
 export class DeviceInfoRepository implements IDeviceInfoRepository {
   constructor(
