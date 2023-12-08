@@ -1,13 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DateCalculator } from 'src/data-calculator/date-calculator.component';
+import { StatisticsService } from 'src/statistics/statictics.service';
 import { UserService } from 'src/user/user.service';
 import { PairInfoDto } from './dto/pair-info.dto';
 import { TagLogDto } from './dto/tag-log.dto';
-import { TagLogService } from './tag-log-v2.service';
+import { TagLogService } from './tag-log.service';
 
 const mocks = [
   {
     provide: UserService,
+    useClass: jest.fn(),
+  },
+  {
+    provide: StatisticsService,
     useClass: jest.fn(),
   },
   {

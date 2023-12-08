@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TagLog } from 'src/entities/tag-log.entity';
-import { TagLogRepository } from 'src/tag-log-v1/repository/mysql/tag-log.repository';
-import { TagLogModule2 } from 'src/tag-log-v2/tag-log-v2.module';
+import { TagLogRepository } from 'src/tag-log/repository/mysql/tag-log.repository';
+import { TagLogModule2 } from 'src/tag-log/tag-log.module';
 import { UserModule } from 'src/user/user.module';
 import { Cabi42Controller } from './cabi42.controller';
 import { Cabi42Service } from './cabi42.service';

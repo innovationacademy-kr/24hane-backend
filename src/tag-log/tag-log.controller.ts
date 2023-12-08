@@ -19,7 +19,7 @@ import { User } from 'src/auth/user.decorator';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { UserInfoType } from './dto/user-Info.type';
 import { UserAccumulationType } from './dto/user-accumulation.type';
-import { TagLogService } from './tag-log-v2.service';
+import { TagLogService } from './tag-log.service';
 
 @ApiTags('체류 시간 산출 v2')
 @Controller({

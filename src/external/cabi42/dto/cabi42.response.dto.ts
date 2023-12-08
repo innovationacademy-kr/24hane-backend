@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserIdType } from 'src/tag-log-v2/dto/admin/user-id.type';
+import { UserIdType } from 'src/tag-log/dto/admin/user-id.type';
 
 export class Cabi42ResponseDto extends UserIdType {
   @ApiProperty({

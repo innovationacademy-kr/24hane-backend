@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DeviceInfo } from 'src/entities/device-info.entity';
 import { TagLog } from 'src/entities/tag-log.entity';
-import { TagLogRepository } from 'src/tag-log-v1/repository/mysql/tag-log.repository';
+import { TagLogRepository } from 'src/tag-log/repository/mysql/tag-log.repository';
 import { UserModule } from 'src/user/user.module';
 import { DeviceInfoRepository } from './repository/mysql/device-info.repository';
 import { Where42Controller } from './where42.controller';

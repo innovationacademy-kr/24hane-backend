@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class InOutLogType {
+export class InOutLogTypeV1 {
   @ApiProperty({
     description: '입장한 시간 (타임스탬프, 초 단위)',
     example: 1658980000,
