@@ -97,9 +97,8 @@ export class TagLogController {
 
     const InOutLogPerDays: InOutLogPerDay[] = groupLogsByDay(results, TWELVE_HOURS_IN_SECONDS);
     
-    const twelveHoursInSeconds = TWELVE_HOURS_IN_SECONDS;
     const filteredMonthlyAccumulationTime = InOutLogPerDays.reduce(
-      (prev, result) => result.getDurationSecondWithFilter(twelveHoursInSeconds) + prev, 0,
+      (prev, result) => result.getDurationSecondWithFilter(TWELVE_HOURS_IN_SECONDS) + prev, 0,
     );
 
     return {
@@ -186,8 +185,7 @@ export class TagLogController {
       date,
     ); //todo: change to all tag (and check plus null value)
 
-    const twelveHoursInSeconds = TWELVE_HOURS_IN_SECONDS;
-    const resultPerDay : InOutLogPerDay[] = groupLogsByDay(resultMonth, twelveHoursInSeconds);
+    const resultPerDay : InOutLogPerDay[] = groupLogsByDay(resultMonth, TWELVE_HOURS_IN_SECONDS);
 
     // 하루 최대 인정시간 합
     const resultDaySumWithFilter = resultPerDay.reduce(
