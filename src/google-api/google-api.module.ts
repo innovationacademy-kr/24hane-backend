@@ -5,4 +5,4 @@ import { GoogleApi } from './google-api.component';
   providers: [GoogleApi],
   exports: [GoogleApi],
 })
-export class GoogleModule {}
+export class GoogleApiModule {}
