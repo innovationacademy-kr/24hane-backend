@@ -21,6 +21,7 @@ export class TagLogAdminService {
     arr: number[],
   ): UserAccumulationDayType {
     this.logger.debug(`@genDayType) ${id}, ${login} -> ${arr}`);
+
     return {
       id,
       login,
@@ -60,6 +61,7 @@ export class TagLogAdminService {
 
   async findIdByLogin(login: string): Promise<number> {
     this.logger.debug(`@findIdByLogin) ${login}`);
+
     return this.userService.findIdByLogin(login);
   }
 
@@ -79,15 +81,21 @@ export class TagLogAdminService {
     month: number,
   ): Promise<UserAccumulationDayType> {
     this.logger.debug(`@getPerDaysById) ${id}, ${login}, ${year}, ${month}`);
+
     const date = new Date(`${year}-${month}`);
-    const resultMonth = await this.tagLogService.getPerMonth(id, date);
+
+    const resultMonth = await this.tagLogService.getAllTagPerMonth(id, date);
+
     const dayCount = this.dateCalculator.getDaysInMonth(year, month);
+
     const dayArr = Array.from({ length: dayCount }, () => 0);
+
     for (const log of resultMonth) {
       const date = new Date(log.inTimeStamp * 1000);
       const day = date.getDate();
       dayArr[day - 1] += log.durationSecond;
     }
+
     return this.genDayType(id, login, dayArr);
   }
 
@@ -110,7 +118,7 @@ export class TagLogAdminService {
       `@getAccumulationInMonthById) ${id}, ${login}, ${year}, ${month}`,
     );
     const date = new Date(`${year}-${month}`);
-    const resultMonth = await this.tagLogService.getPerMonth(id, date);
+    const resultMonth = await this.tagLogService.getAllTagPerMonth(id, date);
     const monthAccumationTime = resultMonth.reduce(
       (prev, result) => result.durationSecond + prev,
       0,

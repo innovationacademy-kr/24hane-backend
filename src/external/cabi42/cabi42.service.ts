@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TagLogService } from 'src/tag-log-v2/tag-log-v2.service';
+import { TagLogService } from 'src/tag-log/tag-log.service';
 import { UserService } from 'src/user/user.service';
 import { Cabi42ResponseDto } from './dto/cabi42.response.dto';
 

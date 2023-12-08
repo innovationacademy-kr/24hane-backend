@@ -17,20 +17,20 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
+import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
+import { User } from 'src/auth/user.decorator';
 import { UserAccumulationDayType } from './dto/admin/user-accumulation-day.type';
 import { UserAccumulationMonthType } from './dto/admin/user-accumulation-month.type';
-import { TagLogAdminService } from './tag-log-v2-admin.service';
-import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
+import { TagLogAdminService } from './tag-log-admin.service';
 
-@ApiTags('체류 시간 산출 V2 (관리자 전용 API)')
-@ApiBearerAuth()
-@UseGuards(AdminAuthGuard)
+@ApiTags('체류 시간 산출 v2 (관리자 전용 API)')
 @Controller({
   version: '2',
   path: 'tag-log/admin',
 })
+@ApiBearerAuth()
+@UseGuards(AdminAuthGuard)
 export class TagLogAdminController {
   private logger = new Logger(TagLogAdminController.name);
 
@@ -73,15 +73,18 @@ export class TagLogAdminController {
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationMonthType[]> {
     this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
+
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
       });
     }
+
     const results = await this.tagLogAdminService.getAccumulationInMonthByAll(
       year,
       month,
     );
+
     return results;
   }
 
@@ -131,24 +134,28 @@ export class TagLogAdminController {
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationMonthType> {
     this.logger.debug(`@getPerMonthByLogin) ${year}-${month} by ${user.login}`);
+
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
       });
     }
+
     const id = await this.tagLogAdminService.findIdByLogin(login);
+
     if (id < 0) {
       throw new BadRequestException({
         message: '서버상에 존재하지 않는 login ID입니다.',
       });
     }
+
     const result = await this.tagLogAdminService.getAccumulationInMonthById(
       id,
       login,
       year,
       month,
     );
-    console.log(result);
+
     return result;
   }
 
@@ -188,12 +195,15 @@ export class TagLogAdminController {
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationDayType[]> {
     this.logger.debug(`@getPerDays) ${year}-${month} by ${user.login}`);
+
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
       });
     }
+
     const results = await this.tagLogAdminService.getPerDaysByAll(year, month);
+
     return results;
   }
 
@@ -243,23 +253,28 @@ export class TagLogAdminController {
     @Query('month', ParseIntPipe) month: number,
   ): Promise<UserAccumulationDayType> {
     this.logger.debug(`@getPerDaysByLogin) ${year}-${month} by ${user.login}`);
+
     if (!user.is_staff) {
       throw new UnauthorizedException({
         description: '관리자 계정으로만 이용 가능한 기능입니다.',
       });
     }
+
     const id = await this.tagLogAdminService.findIdByLogin(login);
+
     if (id < 0) {
       throw new BadRequestException({
         message: '서버상에 존재하지 않는 login ID입니다.',
       });
     }
+
     const result = this.tagLogAdminService.getPerDaysById(
       id,
       login,
       year,
       month,
     );
+
     return result;
   }
 }

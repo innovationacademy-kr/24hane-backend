@@ -1,4 +1,4 @@
-import { DeviceInfoDto } from 'src/tag-log-v2/dto/device-info.dto';
+import { DeviceInfoDto } from 'src/tag-log/dto/device-info.dto';
 
 export interface IDeviceInfoRepository {
   /**

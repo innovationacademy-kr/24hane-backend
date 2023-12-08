@@ -11,8 +11,7 @@ import { SessionMiddleware } from './middleware/session-middleware';
 import { RedirectModule } from './redirect/redirect.module';
 import { ReissueModule } from './reissue/reissue.module';
 import { StatisticsModule } from './statistics/statictics.module';
-import { TagLogModule } from './tag-log-v1/tag-log.module';
-import { TagLogModule2 } from './tag-log-v2/tag-log-v2.module';
+import { TagLogModule2 as TagLogModule } from './tag-log/tag-log.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -30,7 +29,6 @@ import { UserModule } from './user/user.module';
     RedirectModule,
     AuthModule,
     TagLogModule,
-    TagLogModule2,
     UserModule,
     Where42Module,
     Cabi42Module,
