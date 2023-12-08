@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TagLogService } from './tag-log-v2.service';
+import { DateCalculator } from 'src/data-calculator/date-calculator.component';
+import { UserService } from 'src/user/user.service';
 import { PairInfoDto } from './dto/pair-info.dto';
 import { TagLogDto } from './dto/tag-log.dto';
-import { DateCalculator } from 'src/utils/date-calculator.component';
-import { UserService } from 'src/user/user.service';
+import { TagLogService } from './tag-log-v2.service';
 
 const mocks = [
   {
