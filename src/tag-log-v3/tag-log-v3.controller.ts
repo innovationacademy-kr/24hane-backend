@@ -45,65 +45,6 @@ export class TagLogController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  /**
-   * 특정 일에 대한 모든 태그로그를 조회합니다.
-   *
-   * @param user 로그인한 사용자 세션
-   * @returns UserInOutLogsType
-   */
-  @ApiOperation({
-    summary: '일별 모든 태그로그 조회',
-    description: '일별 모든 태그로그를 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    type: UserInOutLogsType,
-    description: '조회 성공',
-  })
-  @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
-  @ApiResponse({ status: 401, description: '접근 권한 없음' })
-  @ApiResponse({
-    status: 500,
-    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-  })
-  @ApiQuery({
-    name: 'year',
-    description: '년도',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'month',
-    description: '월',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'day',
-    description: '일',
-    required: true,
-  })
-  @Get('getAllTagPerDay')
-  async getAllTagPerDay(
-    @User() user: UserSessionDto,
-    @Query('year', ParseIntPipe) year: number,
-    @Query('month', ParseIntPipe) month: number,
-    @Query('day', ParseIntPipe) day: number,
-  ): Promise<UserInOutLogsType> {
-    this.logger.debug(
-      `@getAllTagPerDay) ${year}-${month}-${day} by ${user.login}`,
-    );
-
-    const date = new Date(`${year}-${month}-${day}`);
-
-    const results = await this.tagLogService.getAllTagPerDay(
-      user.user_id,
-      date,
-    );
-    return {
-      login: user.login,
-      profileImage: user.image_url,
-      inOutLogs: results,
-    };
-  }
 
   /**
    * 특정 월에 대한 모든 태그로그를 조회합니다.
