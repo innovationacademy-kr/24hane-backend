@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { InOutLogType } from './subType/InOutLog.type';
 
-export class UserInOutLogsType {
+export class UserMonthlyInOutLogsType {
   @ApiProperty({
     description: '42 로그인 ID',
     example: 'joopark',
@@ -20,4 +20,15 @@ export class UserInOutLogsType {
   })
   inOutLogs: InOutLogType[];
 
+  @ApiProperty({
+    description: '월별 누적시간',
+    example: 12345,
+  })
+  totalAccumulationTime: number | null = null;
+
+  @ApiProperty({
+    description: '월별 인정 누적시간',
+    example: 12345,
+  })
+  acceptedAccumulationTime: number | null = null;
 }

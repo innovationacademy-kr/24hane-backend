@@ -26,6 +26,8 @@ import { Cache } from 'cache-manager';
 import { StatisticsService } from 'src/statistics/statictics.service';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 import { InOutLogPerDay, groupLogsByDay } from './dto/subType/InOutLogPerDay.type';
+import { UserMonthlyInOutLogsType } from './dto/UserMonthlyInOutLogs.type';
+import { TWELVE_HOURS_IN_SECONDS } from 'src/utils/common.constants';
 
 @ApiTags('체류 시간 산출 v3')
 @Controller({
@@ -139,7 +141,7 @@ export class TagLogController {
     @User() user: UserSessionDto,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
-  ): Promise<UserInOutLogsType> {
+  ): Promise<UserMonthlyInOutLogsType> {
     this.logger.debug(`@getAllTagPerMonth) ${year}-${month} by ${user.login}`);
 
     const date = new Date(`${year}-${month}`);
@@ -148,10 +150,23 @@ export class TagLogController {
       user.user_id,
       date,
     );
+    const monthlyAccumulationTime = results.reduce(
+      (prev, result) => result.durationSecond + prev, 0,
+    );
+
+    const InOutLogPerDays: InOutLogPerDay[] = groupLogsByDay(results, TWELVE_HOURS_IN_SECONDS);
+    
+    const twelveHoursInSeconds = TWELVE_HOURS_IN_SECONDS;
+    const filteredMonthlyAccumulationTime = InOutLogPerDays.reduce(
+      (prev, result) => result.getDurationSecondWithFilter(twelveHoursInSeconds) + prev, 0,
+    );
+
     return {
       login: user.login,
       profileImage: user.image_url,
       inOutLogs: results,
+      totalAccumulationTime: monthlyAccumulationTime,
+      acceptedAccumulationTime: filteredMonthlyAccumulationTime,
     };
   }
 
@@ -230,7 +245,7 @@ export class TagLogController {
       date,
     ); //todo: change to all tag (and check plus null value)
 
-    const twelveHoursInSeconds = 12 * 60 * 60;
+    const twelveHoursInSeconds = TWELVE_HOURS_IN_SECONDS;
     const resultPerDay : InOutLogPerDay[] = groupLogsByDay(resultMonth, twelveHoursInSeconds);
 
     // 하루 최대 인정시간 합
