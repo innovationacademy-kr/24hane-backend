@@ -1,14 +1,14 @@
 import { Controller, Get, Logger, Param, UseGuards } from '@nestjs/common';
 import {
-  ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { ExtAuthGuard } from 'src/auth/guard/ext-auth.guard';
 import { Where42ResponseDto } from './dto/where42.response.dto';
-import { ExtService } from './ext.service';
+import { Where42Service } from './where42.service';
 
 @ApiTags('Where42 전용 API')
 @Controller('ext/where42')
@@ -17,7 +17,7 @@ import { ExtService } from './ext.service';
 export class Where42Controller {
   private logger = new Logger(Where42Controller.name);
 
-  constructor(private extService: ExtService) {}
+  constructor(private where42Service: Where42Service) {}
 
   /**
    * 특정 사용자가 클러스터에 체류중인지 확인합니다.
@@ -48,6 +48,6 @@ export class Where42Controller {
   @Get('where42/:login')
   async where42(@Param('login') login: string): Promise<Where42ResponseDto> {
     this.logger.debug(`@islogin) where42: ${login}`);
-    return this.extService.where42(login);
+    return this.where42Service.where42(login);
   }
 }

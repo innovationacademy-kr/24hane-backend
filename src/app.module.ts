@@ -5,7 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
-import { ExtModule } from './ext/ext.module';
+import { Cabi42Module } from './external/cabi42/cabi42.module';
+import { Where42Module } from './external/where42/where42.module';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { RedirectModule } from './redirect/redirect.module';
 import { ReissueModule } from './reissue/reissue.module';
@@ -31,7 +32,8 @@ import { UserModule } from './user/user.module';
     TagLogModule,
     TagLogModule2,
     UserModule,
-    ExtModule,
+    Where42Module,
+    Cabi42Module,
     ReissueModule,
   ],
   providers: [SessionMiddleware],

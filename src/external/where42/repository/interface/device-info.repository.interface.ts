@@ -1,4 +1,4 @@
-import { DeviceDto } from 'src/ext/dto/device.dto';
+import { DeviceDto } from 'src/external/where42/dto/device.dto';
 
 export interface IDeviceInfoRepository {
   /**
