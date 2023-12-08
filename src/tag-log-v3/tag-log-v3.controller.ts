@@ -28,6 +28,8 @@ import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 import { InOutLogPerDay, groupLogsByDay } from './dto/subType/InOutLogPerDay.type';
 import { UserMonthlyInOutLogsType } from './dto/UserMonthlyInOutLogs.type';
 import { TWELVE_HOURS_IN_SECONDS } from 'src/utils/common.constants';
+import { InfoMessageDto } from './dto/info-message.dto';
+import { MessageGenerator } from 'src/utils/message-generator.component';
 
 @ApiTags('체류 시간 산출 v3')
 @Controller({
@@ -42,6 +44,7 @@ export class TagLogController {
   constructor(
     private tagLogService: TagLogService,
     private statisticsService: StatisticsService,
+    private messageGenerator: MessageGenerator,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -140,7 +143,11 @@ export class TagLogController {
       await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60);
     }
     const gaepo = +cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
-    const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
+    // const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
+    
+    const infoMessages: InfoMessageDto[] = [];
+    infoMessages.push(this.messageGenerator.generateInfoMessage());
+    
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
@@ -148,7 +155,8 @@ export class TagLogController {
       inoutState: inoutState.inout,
       tagAt: inoutState.log,
       gaepo: gaepo ? gaepo : 0,
-      seocho: seocho ? seocho : 0,
+      // seocho: seocho ? seocho : 0,
+      infoMessages: infoMessages,
     };
     return result;
   }

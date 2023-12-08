@@ -1,16 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import InOut from 'src/enums/inout.enum';
+import { InfoMessageDto } from './info-message.dto';
 
 export class UserInfoType {
   @ApiProperty({
     description: '42 로그인 ID',
-    example: 'joopark',
+    example: 'wchae',
   })
   login: string;
 
   @ApiProperty({
     description: '인트라 이미지 URI',
-    example: 'https://cdn.intra.42.fr/users/joopark.jpg',
+    example: 'https://cdn.intra.42.fr/users/wchae.jpg',
   })
   profileImage: string;
 
@@ -27,10 +28,19 @@ export class UserInfoType {
   gaepo?: number;
 
   @ApiPropertyOptional({
-    description: '서초 체류인원 (Optional)',
-    example: 42,
+    description: '안내 메세지(Optional)',
+    example: [
+      {
+        title: "제목",
+        content: "메세지"
+      },
+      {
+        title: "제목",
+        content: "메세지"
+      },
+    ],
   })
-  seocho?: number;
+  infoMessages? : InfoMessageDto[];
 
   @ApiProperty({
     description: '본인의 클러스터 체류 여부',
