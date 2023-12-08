@@ -1,6 +1,6 @@
+import { auth, sheets } from '@googleapis/sheets';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { sheets, auth } from '@googleapis/sheets';
 
 /**
  * doosoo 팀장님의 요청에 따라 Google API를 이용해서 Spread Sheet로 Data를 송부하기 위한 컴포넌트입니다.
