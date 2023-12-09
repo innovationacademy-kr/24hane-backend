@@ -1,4 +1,5 @@
-import { CACHE_MANAGER, Controller, Get, Inject, Logger } from '@nestjs/common';
+import { Controller, Get, Inject, Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StatisticsService } from './statictics.service';
 import { CadetPerClusterDto } from './dto/cadet-per-cluster.dto';
@@ -43,7 +44,7 @@ export class StatisticsController {
     );
     if (rtn === undefined) {
       rtn = await this.statisticsService.getCadetPerCluster(2);
-      await this.cacheManager.set('getCadetPerCluster', rtn, 60);
+      await this.cacheManager.set('getCadetPerCluster', rtn, 60000);
     }
     return rtn;
   }
