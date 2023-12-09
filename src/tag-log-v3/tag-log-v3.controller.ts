@@ -122,6 +122,9 @@ export class TagLogController {
 
   /**
    * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.
+   *
+   * @version 4 gaepo, seocho 인원 수 반환 추가
+   * @version 5 클러스터가 사라짐에 따라 seocho 인원 수 반환 제거 및 infoMessage 추가
    */
   @ApiOperation({
     summary: '사용자 접속 시 보여줄 메인 정보',
