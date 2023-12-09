@@ -2,6 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import InOut from 'src/enums/inout.enum';
 import { InfoMessageDto } from './info-message.dto';
 
+/**
+ * @version 4: login, profileImage, isAdmin, gaepo, seocho, inoutState, tagAt
+ * @version 5: login, profileImage, isAdmin, gaepo, infoMessages, inoutState, tagAt
+ */
 export class UserInfoType {
   @ApiProperty({
     description: '42 로그인 ID',
@@ -31,16 +35,16 @@ export class UserInfoType {
     description: '안내 메세지(Optional)',
     example: [
       {
-        title: "제목",
-        content: "메세지"
+        title: '제목',
+        content: '메세지',
       },
       {
-        title: "제목",
-        content: "메세지"
+        title: '제목',
+        content: '메세지',
       },
     ],
   })
-  infoMessages? : InfoMessageDto[];
+  infoMessages?: InfoMessageDto[];
 
   @ApiProperty({
     description: '본인의 클러스터 체류 여부',

@@ -5,6 +5,7 @@ import { DateCalculatorModule } from 'src/data-calculator/data-calculator.module
 import { DeviceInfo } from 'src/entities/device-info.entity';
 import { PairInfo } from 'src/entities/pair-info.entity';
 import { TagLog } from 'src/entities/tag-log.entity';
+import { MessageGeneratorModule } from 'src/message-generator/message-generator.module';
 import { StatisticsModule } from 'src/statistics/statictics.module';
 import { DeviceInfoRepository } from 'src/tag-log/repository/mysql/device-info.repository';
 import { PairInfoRepository } from 'src/tag-log/repository/mysql/pair-info.repository';
@@ -34,6 +35,7 @@ const deviceInfoRepo = {
     TypeOrmModule.forFeature([TagLog, PairInfo, DeviceInfo]),
     DateCalculatorModule,
     UserModule,
+    MessageGeneratorModule,
     StatisticsModule,
   ],
   exports: [TypeOrmModule],

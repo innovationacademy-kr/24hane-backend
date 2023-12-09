@@ -20,7 +20,7 @@ import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { TWELVE_HOURS_IN_SECONDS } from 'src/data-calculator/common.constants';
-import { MessageGenerator } from 'src/data-calculator/message-generator.component';
+import { MessageGenerator } from 'src/message-generator/message-generator.component';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 import { StatisticsService } from 'src/statistics/statictics.service';
 import { UserInOutLogsType } from 'src/tag-log/dto/UserInOutLogs.type';

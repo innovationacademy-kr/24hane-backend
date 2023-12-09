@@ -183,7 +183,6 @@ export class TagLogController {
       inoutState: inoutState.inout,
       tagAt: inoutState.log,
       gaepo: gaepo ?? 0,
-      seocho: seocho ?? 0,
     };
 
     return result;
