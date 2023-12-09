@@ -1,5 +1,5 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
-  CACHE_MANAGER,
   Controller,
   Get,
   Inject,
@@ -15,19 +15,22 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/auth/user.decorator';
-import { UserSessionDto } from 'src/auth/dto/user.session.dto';
-import { UserAccumulationType } from './dto/user-accumulation.type';
-import { UserInfoType } from './dto/user-Info.type';
-import { UserInOutLogsType } from './dto/UserInOutLogs.type';
-import { TagLogService } from './tag-log-v3.service';
-import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { Cache } from 'cache-manager';
-import { StatisticsService } from 'src/statistics/statictics.service';
+import { UserSessionDto } from 'src/auth/dto/user.session.dto';
+import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
+import { User } from 'src/auth/user.decorator';
+import { TWELVE_HOURS_IN_SECONDS } from 'src/data-calculator/common.constants';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
-import { InOutLogPerDay, groupLogsByDay } from './dto/subType/InOutLogPerDay.type';
-import { UserMonthlyInOutLogsType } from './dto/UserMonthlyInOutLogs.type';
-import { TWELVE_HOURS_IN_SECONDS } from 'src/utils/common.constants';
+import { StatisticsService } from 'src/statistics/statictics.service';
+import { UserInOutLogsType } from 'src/tag-log/dto/UserInOutLogs.type';
+import { UserInfoType } from 'src/tag-log/dto/user-Info.type';
+import { UserAccumulationTypeV3 } from 'src/tag-log/dto/user-accumulation.type.v3';
+import { UserMonthlyInOutLogsType } from '../tag-log/dto/UserMonthlyInOutLogs.type';
+import {
+  InOutLogPerDay,
+  groupLogsByDay,
+} from '../tag-log/dto/subType/InOutLogPerDay.type';
+import { TagLogService } from './tag-log-v3.service';
 
 @ApiTags('체류 시간 산출 v3')
 @Controller({
@@ -44,7 +47,6 @@ export class TagLogController {
     private statisticsService: StatisticsService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-
 
   /**
    * 특정 월에 대한 모든 태그로그를 조회합니다.
@@ -92,13 +94,19 @@ export class TagLogController {
       date,
     );
     const monthlyAccumulationTime = results.reduce(
-      (prev, result) => result.durationSecond + prev, 0,
+      (prev, result) => result.durationSecond + prev,
+      0,
     );
 
-    const InOutLogPerDays: InOutLogPerDay[] = groupLogsByDay(results, TWELVE_HOURS_IN_SECONDS);
-    
+    const InOutLogPerDays: InOutLogPerDay[] = groupLogsByDay(
+      results,
+      TWELVE_HOURS_IN_SECONDS,
+    );
+
     const filteredMonthlyAccumulationTime = InOutLogPerDays.reduce(
-      (prev, result) => result.getDurationSecondWithFilter(TWELVE_HOURS_IN_SECONDS) + prev, 0,
+      (prev, result) =>
+        result.getDurationSecondWithFilter(TWELVE_HOURS_IN_SECONDS) + prev,
+      0,
     );
 
     return {
@@ -162,7 +170,7 @@ export class TagLogController {
   })
   @ApiResponse({
     status: 200,
-    type: UserAccumulationType,
+    type: UserAccumulationTypeV3,
     description: '조회 성공',
   })
   @ApiResponse({ status: 401, description: '접근 권한 없음' })
@@ -173,7 +181,7 @@ export class TagLogController {
   @Get('accumulationTimes')
   async getAccumulationTimes(
     @User() user: UserSessionDto,
-  ): Promise<UserAccumulationType> {
+  ): Promise<UserAccumulationTypeV3> {
     this.logger.debug(`@getAccumulationTimes) by ${user.login}`);
     const date = new Date();
     const resultDay = await this.tagLogService.getAllTagPerDay(
@@ -185,18 +193,22 @@ export class TagLogController {
       date,
     ); //todo: change to all tag (and check plus null value)
 
-    const resultPerDay : InOutLogPerDay[] = groupLogsByDay(resultMonth, TWELVE_HOURS_IN_SECONDS);
+    const resultPerDay: InOutLogPerDay[] = groupLogsByDay(
+      resultMonth,
+      TWELVE_HOURS_IN_SECONDS,
+    );
 
     // 하루 최대 인정시간 합
     const resultDaySumWithFilter = resultPerDay.reduce(
-      (prev, result) => result.getDurationSecondPerDay() + prev, 0,
+      (prev, result) => result.getDurationSecondPerDay() + prev,
+      0,
     );
-        
+
     const resultDaySum = resultDay.reduce(
       (prev, result) => result.durationSecond + prev,
       0,
     );
-    
+
     const resultMonthSum = resultMonth.reduce(
       (prev, result) => result.durationSecond + prev,
       0,
@@ -209,7 +221,7 @@ export class TagLogController {
       user.user_id,
     );
 
-    const result: UserAccumulationType = {
+    const result: UserAccumulationTypeV3 = {
       todayAccumulationTime: resultDaySum,
       monthAccumulationTime: resultMonthSum,
       sixWeekAccumulationTime: resultSixWeekArray,

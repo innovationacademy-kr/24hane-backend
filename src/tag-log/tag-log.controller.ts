@@ -18,7 +18,7 @@ import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { UserInfoType } from './dto/user-Info.type';
-import { UserAccumulationType } from './dto/user-accumulation.type';
+import { UserAccumulationTypeV2 } from './dto/user-accumulation.type.v2';
 import { TagLogService } from './tag-log.service';
 
 @ApiTags('체류 시간 산출 v2')
@@ -197,7 +197,7 @@ export class TagLogController {
   })
   @ApiResponse({
     status: 200,
-    type: UserAccumulationType,
+    type: UserAccumulationTypeV2,
     description: '조회 성공',
   })
   @ApiResponse({ status: 401, description: '접근 권한 없음' })
@@ -208,7 +208,7 @@ export class TagLogController {
   @Get('accumulationTimes')
   async getAccumulationTimes(
     @User() user: UserSessionDto,
-  ): Promise<UserAccumulationType> {
+  ): Promise<UserAccumulationTypeV2> {
     this.logger.debug(`@getAccumulationTimes) by ${user.login}`);
 
     const date = new Date();
@@ -241,7 +241,7 @@ export class TagLogController {
       user.user_id,
     );
 
-    const result: UserAccumulationType = {
+    const result: UserAccumulationTypeV2 = {
       todayAccumulationTime,
       monthAccumulationTime,
       sixWeekAccumulationTime,

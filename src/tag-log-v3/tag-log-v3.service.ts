@@ -1,16 +1,16 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { DateCalculator } from 'src/data-calculator/date-calculator.component';
 import InOut from 'src/enums/inout.enum';
-import { UserService } from 'src/user/user.service';
-import { DateCalculator } from 'src/utils/date-calculator.component';
-import { InOutDto } from './dto/inout.dto';
-import { TagLogDto } from './dto/tag-log.dto';
-import { PairInfoDto } from './dto/pair-info.dto';
-import { InOutLogType } from './dto/subType/InOutLog.type';
-import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
-import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
+import { DeviceInfoDto } from 'src/tag-log/dto/device-info.dto';
+import { InOutDto } from 'src/tag-log/dto/inout.dto';
+import { PairInfoDto } from 'src/tag-log/dto/pair-info.dto';
+import { TagLogDto } from 'src/tag-log/dto/tag-log.dto';
+import { IDeviceInfoRepository } from 'src/tag-log/repository/interface/device-info-repository.interface';
+import { IPairInfoRepository } from 'src/tag-log/repository/interface/pair-info-repository.interface';
+import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 import { CardDto } from 'src/user/dto/card.dto';
-import { IDeviceInfoRepository } from './repository/interface/device-info-repository.interface';
-import { DeviceInfoDto } from './dto/device-info.dto';
+import { UserService } from 'src/user/user.service';
+import { InOutLogType } from '../tag-log/dto/subType/InOutLog.type';
 
 @Injectable()
 export class TagLogService {
@@ -472,7 +472,6 @@ export class TagLogService {
     return ret.reverse();
   }
 
-
   /**
    * 인자로 들어가는 사용자 ID와 날짜에 대한 월별 모든 태그를 반환합니다.
    *
@@ -577,6 +576,8 @@ export class TagLogService {
 
   cutTime(duration: number): number {
     const resultDuration = this.dateCalculator.cutTimeByLimit(duration);
-    return resultDuration > 12 ? this.dateCalculator.getTwelveHoursInSeconds() : resultDuration;
+    return resultDuration > 12
+      ? this.dateCalculator.getTwelveHoursInSeconds()
+      : resultDuration;
   }
 }
