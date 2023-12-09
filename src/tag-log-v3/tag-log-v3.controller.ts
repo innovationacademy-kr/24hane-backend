@@ -1,5 +1,5 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
-  CACHE_MANAGER,
   Controller,
   Get,
   Inject,
@@ -25,7 +25,10 @@ import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { Cache } from 'cache-manager';
 import { StatisticsService } from 'src/statistics/statictics.service';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
-import { InOutLogPerDay, groupLogsByDay } from './dto/subType/InOutLogPerDay.type';
+import {
+  InOutLogPerDay,
+  groupLogsByDay,
+} from './dto/subType/InOutLogPerDay.type';
 import { UserMonthlyInOutLogsType } from './dto/UserMonthlyInOutLogs.type';
 import { TWELVE_HOURS_IN_SECONDS } from 'src/utils/common.constants';
 import { InfoMessageDto } from './dto/info-message.dto';
@@ -47,7 +50,6 @@ export class TagLogController {
     private messageGenerator: MessageGenerator,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-
 
   /**
    * 특정 월에 대한 모든 태그로그를 조회합니다.
@@ -95,13 +97,19 @@ export class TagLogController {
       date,
     );
     const monthlyAccumulationTime = results.reduce(
-      (prev, result) => result.durationSecond + prev, 0,
+      (prev, result) => result.durationSecond + prev,
+      0,
     );
 
-    const InOutLogPerDays: InOutLogPerDay[] = groupLogsByDay(results, TWELVE_HOURS_IN_SECONDS);
-    
+    const InOutLogPerDays: InOutLogPerDay[] = groupLogsByDay(
+      results,
+      TWELVE_HOURS_IN_SECONDS,
+    );
+
     const filteredMonthlyAccumulationTime = InOutLogPerDays.reduce(
-      (prev, result) => result.getDurationSecondWithFilter(TWELVE_HOURS_IN_SECONDS) + prev, 0,
+      (prev, result) =>
+        result.getDurationSecondWithFilter(TWELVE_HOURS_IN_SECONDS) + prev,
+      0,
     );
 
     return {
@@ -144,9 +152,9 @@ export class TagLogController {
     }
     const gaepo = +cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
     // const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
-    
+
     const infoMessages = this.messageGenerator.generateInfoMessages();
-    
+
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
@@ -192,18 +200,22 @@ export class TagLogController {
       date,
     ); //todo: change to all tag (and check plus null value)
 
-    const resultPerDay : InOutLogPerDay[] = groupLogsByDay(resultMonth, TWELVE_HOURS_IN_SECONDS);
+    const resultPerDay: InOutLogPerDay[] = groupLogsByDay(
+      resultMonth,
+      TWELVE_HOURS_IN_SECONDS,
+    );
 
     // 하루 최대 인정시간 합
     const resultDaySumWithFilter = resultPerDay.reduce(
-      (prev, result) => result.getDurationSecondPerDay() + prev, 0,
+      (prev, result) => result.getDurationSecondPerDay() + prev,
+      0,
     );
-        
+
     const resultDaySum = resultDay.reduce(
       (prev, result) => result.durationSecond + prev,
       0,
     );
-    
+
     const resultMonthSum = resultMonth.reduce(
       (prev, result) => result.durationSecond + prev,
       0,

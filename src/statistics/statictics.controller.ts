@@ -1,4 +1,5 @@
-import { CACHE_MANAGER, Controller, Get, Inject, Logger } from '@nestjs/common';
+import { Controller, Get, Inject, Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StatisticsService } from './statictics.service';
 import { CadetPerClusterDto } from './dto/cadet-per-cluster.dto';
@@ -38,9 +39,8 @@ export class StatisticsController {
   async getCadetPerCluster(): Promise<CadetPerClusterDto[]> {
     this.logger.debug(`@getCadetPerCluster)`);
     // FIXME: 추후에 캐시 리팩터링 필요
-    let rtn: undefined | CadetPerClusterDto[] = await this.cacheManager.get(
-      'getCadetPerCluster',
-    );
+    let rtn: undefined | CadetPerClusterDto[] =
+      await this.cacheManager.get('getCadetPerCluster');
     if (rtn === undefined) {
       rtn = await this.statisticsService.getCadetPerCluster(2);
       await this.cacheManager.set('getCadetPerCluster', rtn, 60);
