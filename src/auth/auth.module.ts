@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
-import { UtilsModule } from 'src/utils/utils.module';
+import { GoogleApiModule } from 'src/google-api/google-api.module';
 import { Auth42Controller } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './repository/auth.repository';
@@ -21,7 +21,7 @@ const repo = {
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserInfo]),
-    UtilsModule,
+    GoogleApiModule,
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({

@@ -43,7 +43,7 @@ export class StatisticsController {
       await this.cacheManager.get('getCadetPerCluster');
     if (rtn === undefined) {
       rtn = await this.statisticsService.getCadetPerCluster(2);
-      await this.cacheManager.set('getCadetPerCluster', rtn, 60);
+      await this.cacheManager.set('getCadetPerCluster', rtn, 60000);
     }
     return rtn;
   }

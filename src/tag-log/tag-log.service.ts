@@ -2,16 +2,16 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { DateCalculator } from 'src/data-calculator/date-calculator.component';
 import InOut from 'src/enums/inout.enum';
 import { StatisticsService } from 'src/statistics/statictics.service';
-import { DeviceInfoDto } from 'src/tag-log/dto/device-info.dto';
-import { InOutDto } from 'src/tag-log/dto/inout.dto';
-import { PairInfoDto } from 'src/tag-log/dto/pair-info.dto';
-import { TagLogDto } from 'src/tag-log/dto/tag-log.dto';
-import { IDeviceInfoRepository } from 'src/tag-log/repository/interface/device-info-repository.interface';
-import { IPairInfoRepository } from 'src/tag-log/repository/interface/pair-info-repository.interface';
-import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 import { CardDto } from 'src/user/dto/card.dto';
 import { UserService } from 'src/user/user.service';
-import { InOutLogType } from '../tag-log/dto/subType/InOutLog.type';
+import { DeviceInfoDto } from './dto/device-info.dto';
+import { InOutDto } from './dto/inout.dto';
+import { PairInfoDto } from './dto/pair-info.dto';
+import { InOutLogType } from './dto/subType/InOutLog.type';
+import { TagLogDto } from './dto/tag-log.dto';
+import { IDeviceInfoRepository } from './repository/interface/device-info-repository.interface';
+import { IPairInfoRepository } from './repository/interface/pair-info-repository.interface';
+import { ITagLogRepository } from './repository/interface/tag-log-repository.interface';
 
 @Injectable()
 export class TagLogService {
@@ -578,11 +578,62 @@ export class TagLogService {
       inout: inout,
     };
   }
-
-  cutTime(duration: number): number {
-    const resultDuration = this.dateCalculator.cutTimeByLimit(duration);
-    return resultDuration > 12
-      ? this.dateCalculator.getTwelveHoursInSeconds()
-      : resultDuration;
+  /**
+   * 카드 태그 로그에 대해 로그 맨 앞, 맨 뒤 원소가 잘려 있다면 앞, 뒤에 가상의 입출입 로그를 삽입합니다.
+   * 삽입하는 로그는 짝 여부에 관계없이 전후 원소를 삽입합니다.
+   * 짝 일치 여부 판단은 다른 로직에서 진행합니다.
+   * version 2: 카드의 짝을 맞추도록 수정하였습니다.
+   * version 3: 이전/이후 로그를 가져올 때, 카드의 유효 기간도 고려하도록 변경하였습니다.
+   *
+   * @param taglogs TagLogDto[]
+   * @return TagLogDto[]
+   * @version 3
+   */
+  async trimTagLogs(
+    taglogs: TagLogDto[],
+    cards: CardDto[],
+    start: Date,
+    end: Date,
+  ): Promise<TagLogDto[]> {
+    this.logger.debug(`@trimTagLogs)`);
+    // 1. 맨 앞의 로그를 가져옴.
+    const firstLog = taglogs.at(0);
+    if (firstLog) {
+      // 2. 맨 앞의 로그 이전의 로그를 가져옴.
+      const beforeFirstLog = await this.tagLogRepository.findPrevTagLog(
+        cards.find((v) => v.card_id === firstLog.card_id),
+        firstLog.tag_at,
+      );
+      // NOTE: tag log에 기록된 첫번째 로그가 퇴실인 경우 현재는 짝을 맞추지 않음.
+      if (beforeFirstLog !== null) {
+        const virtualEnterTime = this.dateCalculator.getStartOfDate(start);
+        taglogs.unshift({
+          tag_at: virtualEnterTime,
+          device_id: beforeFirstLog.device_id,
+          idx: -1,
+          card_id: beforeFirstLog.card_id,
+        });
+      }
+    }
+    // 3. 맨 뒤의 로그를 가져옴.
+    const lastLog = taglogs.at(-1);
+    if (lastLog) {
+      // 6. 맨 뒤의 로그 이후의 로그를 가져옴.
+      const afterLastLog = await this.tagLogRepository.findNextTagLog(
+        cards.find((v) => v.card_id === lastLog.card_id),
+        lastLog.tag_at,
+      );
+      // NOTE: 현재는 카뎃의 현재 입실여부에 관계없이 짝을 맞춤.
+      if (afterLastLog !== null) {
+        const virtualLeaveTime = this.dateCalculator.getEndOfDate(end);
+        taglogs.push({
+          tag_at: virtualLeaveTime,
+          device_id: afterLastLog.device_id,
+          idx: -1,
+          card_id: afterLastLog.card_id,
+        });
+      }
+    }
+    return taglogs;
   }
 }
