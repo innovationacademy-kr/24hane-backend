@@ -4,13 +4,13 @@ import { InOutLogType } from './subType/InOutLog.type';
 export class UserMonthlyInOutLogsType {
   @ApiProperty({
     description: '42 로그인 ID',
-    example: 'joopark',
+    example: 'wchae',
   })
   login: string;
 
   @ApiProperty({
     description: '인트라 이미지 URI',
-    example: 'https://cdn.intra.42.fr/users/joopark.jpg',
+    example: 'https://cdn.intra.42.fr/users/wchae.jpg',
   })
   profileImage: string;
 

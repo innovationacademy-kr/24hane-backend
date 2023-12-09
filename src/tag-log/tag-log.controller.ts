@@ -17,7 +17,6 @@ import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
-import { UserInfoType } from './dto/user-Info.type';
 import { UserAccumulationTypeV2 } from './dto/user-accumulation.type.v2';
 import { TagLogService } from './tag-log.service';
 
@@ -145,47 +144,6 @@ export class TagLogController {
       profileImage: user.image_url,
       inOutLogs: results,
     };
-  }
-
-  /**
-   * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.
-   */
-  @ApiOperation({
-    summary: '사용자 접속 시 보여줄 메인 정보',
-    description:
-      '로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    type: UserInfoType,
-    description: '조회 성공',
-  })
-  @ApiResponse({ status: 401, description: '접근 권한 없음' })
-  @ApiResponse({
-    status: 500,
-    description: '서버 내부 에러 (백앤드 관리자 문의 필요)',
-  })
-  @Get('maininfo')
-  async getMainInfo(@User() user: UserSessionDto): Promise<UserInfoType> {
-    this.logger.debug(`@getMainInfo) by ${user.login}`);
-
-    const inoutState = await this.tagLogService.checkClusterById(user.user_id);
-    const cadetPerCluster = await this.tagLogService.getCadetPerCluster(2);
-
-    const gaepo = cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
-    const seocho = cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
-
-    const result: UserInfoType = {
-      login: user.login,
-      profileImage: user.image_url,
-      isAdmin: user.is_staff,
-      inoutState: inoutState.inout,
-      tagAt: inoutState.log,
-      gaepo: gaepo ?? 0,
-      seocho: seocho ?? 0,
-    };
-
-    return result;
   }
 
   /**

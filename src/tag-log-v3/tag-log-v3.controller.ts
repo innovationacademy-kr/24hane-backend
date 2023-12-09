@@ -20,6 +20,7 @@ import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { TWELVE_HOURS_IN_SECONDS } from 'src/data-calculator/common.constants';
+import { MessageGenerator } from 'src/message-generator/message-generator.component';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 import { StatisticsService } from 'src/statistics/statictics.service';
 import { UserInOutLogsType } from 'src/tag-log/dto/UserInOutLogs.type';
@@ -45,6 +46,7 @@ export class TagLogController {
   constructor(
     private tagLogService: TagLogService,
     private statisticsService: StatisticsService,
+    private messageGenerator: MessageGenerator,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -120,6 +122,9 @@ export class TagLogController {
 
   /**
    * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.
+   *
+   * @version 4 gaepo, seocho 인원 수 반환 추가
+   * @version 5 클러스터가 사라짐에 따라 seocho 인원 수 반환 제거 및 infoMessage 추가
    */
   @ApiOperation({
     summary: '사용자 접속 시 보여줄 메인 정보',
@@ -148,7 +153,10 @@ export class TagLogController {
       await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60);
     }
     const gaepo = +cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
-    const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
+    // const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
+
+    const infoMessages = this.messageGenerator.generateInfoMessages();
+
     const result: UserInfoType = {
       login: user.login,
       profileImage: user.image_url,
@@ -156,7 +164,8 @@ export class TagLogController {
       inoutState: inoutState.inout,
       tagAt: inoutState.log,
       gaepo: gaepo ? gaepo : 0,
-      seocho: seocho ? seocho : 0,
+      // seocho: seocho ? seocho : 0,
+      infoMessages: infoMessages,
     };
     return result;
   }
