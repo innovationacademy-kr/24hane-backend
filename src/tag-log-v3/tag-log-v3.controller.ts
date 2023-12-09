@@ -145,8 +145,7 @@ export class TagLogController {
     const gaepo = +cadetPerCluster.find((v) => v.cluster === 'GAEPO')?.cadet;
     // const seocho = +cadetPerCluster.find((v) => v.cluster === 'SEOCHO')?.cadet;
     
-    const infoMessages: InfoMessageDto[] = [];
-    infoMessages.push(this.messageGenerator.generateInfoMessage());
+    const infoMessages = this.messageGenerator.generateInfoMessages();
     
     const result: UserInfoType = {
       login: user.login,
