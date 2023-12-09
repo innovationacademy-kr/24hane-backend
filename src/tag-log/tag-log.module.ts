@@ -46,4 +46,4 @@ const deviceInfoRepo = {
     TagLogAdminService,
   ],
 })
-export class TagLogModule2 {}
+export class TagLogModule {}
