@@ -157,4 +157,24 @@ export class DateCalculator {
     );
     return rtn;
   }
+  /**
+   *  12시간을 초단위로 반환합니다.
+   * @returns 초
+   */
+
+  getTwelveHoursInSeconds(): number{
+    return (12 * 60 * 60);
+  }
+/**
+ * 하루단위로 초를 계산하여 12시간으로 나눈 나머지를 리턴합니다.
+ * 
+ * @param durationPerday 하루에 있었던 체류시간
+ * @returns number
+ */
+  cutTimeByLimit(durationPerday: number): number { 
+    const twelveHoursInSeconds = this.getTwelveHoursInSeconds();
+    const seconds = (durationPerday % (twelveHoursInSeconds * 2) + twelveHoursInSeconds * 2) % (twelveHoursInSeconds * 2);
+    const remainder = seconds % twelveHoursInSeconds;
+    return remainder;
+  }
 }
