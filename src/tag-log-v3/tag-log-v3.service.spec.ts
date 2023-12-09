@@ -4,7 +4,7 @@ import { StatisticsService } from 'src/statistics/statictics.service';
 import { PairInfoDto } from 'src/tag-log/dto/pair-info.dto';
 import { TagLogDto } from 'src/tag-log/dto/tag-log.dto';
 import { UserService } from 'src/user/user.service';
-import { TagLogService } from './tag-log.service';
+import { TagLogService } from './tag-log-v3.service';
 
 const mocks = [
   {
