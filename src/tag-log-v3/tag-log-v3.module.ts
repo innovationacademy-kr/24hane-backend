@@ -5,7 +5,6 @@ import { DateCalculatorModule } from 'src/data-calculator/data-calculator.module
 import { DeviceInfo } from 'src/entities/device-info.entity';
 import { PairInfo } from 'src/entities/pair-info.entity';
 import { TagLog } from 'src/entities/tag-log.entity';
-import { GoogleApiModule } from 'src/google-api/google-api.module';
 import { StatisticsModule } from 'src/statistics/statictics.module';
 import { DeviceInfoRepository } from 'src/tag-log/repository/mysql/device-info.repository';
 import { PairInfoRepository } from 'src/tag-log/repository/mysql/pair-info.repository';
