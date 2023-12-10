@@ -34,17 +34,18 @@ export class UserInfoType {
   @ApiPropertyOptional({
     description: '안내 메세지(Optional)',
     example: [
-      {
-        title: '제목',
-        content: '메세지',
+      "fundInfoNotice", {
+          title: '제목',
+          content: '메세지',
       },
+      "tagLatencyNotice",
       {
         title: '제목',
         content: '메세지',
       },
     ],
   })
-  infoMessages?: InfoMessageDto[];
+  infoMessages?: Record<string, InfoMessageDto>;
 
   @ApiProperty({
     description: '본인의 클러스터 체류 여부',
