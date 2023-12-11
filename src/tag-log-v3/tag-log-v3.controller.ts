@@ -23,7 +23,6 @@ import { TWELVE_HOURS_IN_SECONDS } from 'src/data-calculator/common.constants';
 import { MessageGenerator } from 'src/message-generator/message-generator.component';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 import { StatisticsService } from 'src/statistics/statictics.service';
-import { UserInOutLogsType } from 'src/tag-log/dto/UserInOutLogs.type';
 import { UserInfoType } from 'src/tag-log/dto/user-Info.type';
 import { UserAccumulationTypeV3 } from 'src/tag-log/dto/user-accumulation.type.v3';
 import { UserMonthlyInOutLogsType } from '../tag-log/dto/UserMonthlyInOutLogs.type';
@@ -57,12 +56,12 @@ export class TagLogController {
    * @returns UsageResponseDto
    */
   @ApiOperation({
-    summary: '월별 모든 태그로그 조회',
-    description: '월별 모든 태그로그를 조회합니다.',
+    summary: '월별 모든 태그로그 및 인정 누적시간 조회',
+    description: '월별 모든 태그로그 및 인정 누적시간을 조회합니다.',
   })
   @ApiResponse({
     status: 200,
-    type: UserInOutLogsType,
+    type: UserMonthlyInOutLogsType,
     description: '조회 성공',
   })
   @ApiResponse({ status: 400, description: '쿼리 타입 에러' })
@@ -128,8 +127,7 @@ export class TagLogController {
    */
   @ApiOperation({
     summary: '사용자 접속 시 보여줄 메인 정보',
-    description:
-      '로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 조회합니다.',
+    description: '메인 화면에서 필요한 정보들을 모두 조회합니다.',
   })
   @ApiResponse({
     status: 200,
