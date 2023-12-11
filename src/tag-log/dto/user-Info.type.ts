@@ -33,17 +33,16 @@ export class UserInfoType {
 
   @ApiPropertyOptional({
     description: '안내 메세지(Optional)',
-    example: [
-      "fundInfoNotice", {
-          title: '제목',
-          content: '메세지',
-      },
-      "tagLatencyNotice",
-      {
+    example: {
+      fundInfoNotice: {
         title: '제목',
         content: '메세지',
       },
-    ],
+      tagLatencyNotice: {
+        title: '제목',
+        content: '메세지',
+      },
+    },
   })
   infoMessages?: Record<string, InfoMessageDto>;
 
