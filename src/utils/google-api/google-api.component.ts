@@ -13,10 +13,12 @@ export class GoogleApi {
   async transportData(data: string): Promise<boolean> {
     this.logger.log(`call transportData (data: ${data})`);
     let result = true;
-    const envEmail = this.configService.get<string>('googleApi.email');
-    const envKey = this.configService.get<string>('googleApi.key');
-    const envSsid = this.configService.get<string>('googleApi.spreadsheetId');
-    const envRange = this.configService.get<string>('googleApi.range');
+    const envEmail = this.configService.getOrThrow<string>('googleApi.email');
+    const envKey = this.configService.getOrThrow<string>('googleApi.key');
+    const envSsid = this.configService.getOrThrow<string>(
+      'googleApi.spreadsheetId',
+    );
+    const envRange = this.configService.getOrThrow<string>('googleApi.range');
     try {
       const googleAuth = new auth.JWT({
         email: envEmail,

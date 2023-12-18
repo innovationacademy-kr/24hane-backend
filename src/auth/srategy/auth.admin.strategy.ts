@@ -13,7 +13,7 @@ export class AuthAdminStrategy extends PassportStrategy(Strategy, 'admin') {
   constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('jwt.secret'),
+      secretOrKey: configService.getOrThrow<string>('jwt.secret'),
     });
   }
 

@@ -25,9 +25,9 @@ const repo = {
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret'),
+        secret: configService.getOrThrow<string>('jwt.secret'),
         signOptions: {
-          expiresIn: configService.get<string>('jwt.expiresIn'),
+          expiresIn: configService.getOrThrow<string>('jwt.expiresIn'),
         },
       }),
       inject: [ConfigService],

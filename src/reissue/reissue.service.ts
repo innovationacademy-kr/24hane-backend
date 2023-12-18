@@ -28,7 +28,7 @@ export class ReissueService {
   ) {}
 
   private logger = new Logger(ReissueService.name);
-  private jandiWebhook = this.configService.get<string>('jandi.webhook');
+  private jandiWebhook = this.configService.getOrThrow<string>('jandi.webhook');
 
   getTimeNowKST(): string {
     const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
