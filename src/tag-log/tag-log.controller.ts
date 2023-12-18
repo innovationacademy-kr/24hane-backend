@@ -20,7 +20,7 @@ import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 import { UserAuthGuard } from 'src/auth/guard/user-auth.guard';
 import { User } from 'src/auth/user.decorator';
 import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
-import { StatisticsService } from 'src/statistics/statictics.service';
+import { StatisticsService } from 'src/statistics/statistics.service';
 import { UserInOutLogsType } from './dto/UserInOutLogs.type';
 import { UserInfoTypeV4 } from './dto/user-Info.type';
 import { UserAccumulationTypeV2 } from './dto/user-accumulation.type.v2';

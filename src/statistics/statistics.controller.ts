@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StatisticsService } from './statictics.service';
+import { StatisticsService } from './statistics.service';
 import { CadetPerClusterDto } from './dto/cadet-per-cluster.dto';
 import { Cache } from 'cache-manager';
 

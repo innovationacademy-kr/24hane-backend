@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import InOut from 'src/enums/inout.enum';
-import { StatisticsService } from 'src/statistics/statictics.service';
+import { StatisticsService } from 'src/statistics/statistics.service';
 import { DeviceInfoDto } from 'src/tag-log/dto/device-info.dto';
 import { InOutDto } from 'src/tag-log/dto/inout.dto';
 import { PairInfoDto } from 'src/tag-log/dto/pair-info.dto';

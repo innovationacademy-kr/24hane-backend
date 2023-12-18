@@ -10,7 +10,7 @@ import { Where42Module } from './external/where42/where42.module';
 import { SessionMiddleware } from './middleware/session-middleware';
 import { RedirectModule } from './redirect/redirect.module';
 import { ReissueModule } from './reissue/reissue.module';
-import { StatisticsModule } from './statistics/statictics.module';
+import { StatisticsModule } from './statistics/statistics.module';
 import { TagLogModule3 } from './tag-log-v3/tag-log-v3.module';
 import { TagLogModule } from './tag-log/tag-log.module';
 import { UserModule } from './user/user.module';
