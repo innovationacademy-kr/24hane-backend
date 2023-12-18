@@ -7,7 +7,7 @@ export class MessageGenerator {
 
   private generateFundInfoMessage(): InfoMessageDto {
     const INFO_MESSAGE_TITLE: string =
-      '인정 시간은 지원금 정책에\n반영되는 시간입니다.';
+      '인정 시간은 지원금 산정 시\n반영되는 시간입니다.';
     const INFO_MESSAGE_CONTENT: string = '1일 최대 12시간';
     const infoMessage = new InfoMessageDto(
       INFO_MESSAGE_TITLE,
