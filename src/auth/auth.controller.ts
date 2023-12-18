@@ -14,7 +14,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { GoogleApi } from 'src/google-api/google-api.component';
+import { GoogleApi } from 'src/utils/google-api/google-api.component';
 import { FtOAuthGuard } from './guard/ft-oauth.guard';
 import { JWTSignGuard } from './guard/jwt-sign.guard';
 import { UserAuthGuard } from './guard/user-auth.guard';
