@@ -59,6 +59,7 @@ export class TagLogAdminService {
     };
   }
 
+  //todo: move to userService
   async findIdByLogin(login: string): Promise<number> {
     this.logger.debug(`@findIdByLogin) ${login}`);
 

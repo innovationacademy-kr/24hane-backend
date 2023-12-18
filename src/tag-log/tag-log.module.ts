@@ -36,7 +36,7 @@ const deviceInfoRepo = {
     UserModule,
     StatisticsModule,
   ],
-  exports: [TypeOrmModule, TagLogService],
+  exports: [TypeOrmModule, TagLogService, TagLogAdminService],
   controllers: [TagLogController, TagLogAdminController],
   providers: [
     tagLogRepo,

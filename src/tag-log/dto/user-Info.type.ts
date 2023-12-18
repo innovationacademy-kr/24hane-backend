@@ -4,7 +4,7 @@ import { InfoMessageDto } from './info-message.dto';
 
 /**
  * @version 4
- * For removal in 5.0
+ * For removal in 5.0.0
  */
 export class UserInfoTypeV4 {
   @ApiProperty({

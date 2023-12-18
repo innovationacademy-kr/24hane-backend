@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Logger,
+  Param,
   ParseIntPipe,
   Query,
   UseGuards,
@@ -66,5 +67,19 @@ export class Cabi42Controller {
   ): Promise<Cabi42ResponseDto[]> {
     this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
     return await this.cabi42Service.cabi42(year, month);
+  }
+
+  /**
+   * For removal in 5.0.0
+   */
+  @Get('permonth/:login')
+  async getPerMonthByLogin(
+    @User() user: UserSessionDto,
+    @Param('login') login: string,
+    @Query('year', ParseIntPipe) year: number,
+    @Query('month', ParseIntPipe) month: number,
+  ): Promise<Cabi42ResponseDto[]> {
+    this.logger.debug(`@getPerMonth) ${year}-${month} by ${user.login}`);
+    return await this.cabi42Service.cabi42ByLogin(year, month, login);
   }
 }
