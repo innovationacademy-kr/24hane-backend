@@ -1,8 +1,8 @@
 {
   "name": "24hane",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "description": "24Hane Backend Server",
-  "author": "joohongpark",
+  "author": "joohongpark, niamu01, enaenen",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
