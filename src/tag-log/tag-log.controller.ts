@@ -221,6 +221,7 @@ export class TagLogController {
 
   /**
    * 로그인한 유저가 메인 화면에 접속할 때 가져올 정보를 반환합니다.
+   * For removal in 5.0.0
    */
   @ApiOperation({
     summary: '사용자 접속 시 보여줄 메인 정보',

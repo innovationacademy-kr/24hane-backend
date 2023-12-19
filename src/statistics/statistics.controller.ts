@@ -39,12 +39,18 @@ export class StatisticsController {
   async getCadetPerCluster(): Promise<CadetPerClusterDto[]> {
     this.logger.debug(`@getCadetPerCluster)`);
     // FIXME: 추후에 캐시 리팩터링 필요
-    let rtn: undefined | CadetPerClusterDto[] =
+    let cadetPerCluster: undefined | CadetPerClusterDto[] =
       await this.cacheManager.get('getCadetPerCluster');
-    if (rtn === undefined) {
-      rtn = await this.statisticsService.getCadetPerCluster(2);
-      await this.cacheManager.set('getCadetPerCluster', rtn, 60000);
+    if (cadetPerCluster === undefined) {
+      cadetPerCluster = await this.statisticsService.getCadetPerCluster(2);
+      await this.cacheManager.set('getCadetPerCluster', cadetPerCluster, 60000);
     }
-    return rtn;
+    if (cadetPerCluster.length === 0) {
+      return [
+        { cluster: 'GAEPO', cadet: 0 },
+        { cluster: 'SEOCHO', cadet: 0 },
+      ];
+    }
+    return cadetPerCluster;
   }
 }
