@@ -14,6 +14,9 @@ lerna-debug.log*
 # OS
 .DS_Store
 
+# eslint
+.eslintcache
+
 # Tests
 /coverage
 /.nyc_output
@@ -42,5 +45,4 @@ db/
 key/
 sql/
 
-test-db/
-test-docker/
+package-lock.json

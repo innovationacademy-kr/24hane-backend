@@ -14,8 +14,8 @@ async function bootstrap() {
     logger: log_level,
   });
   const configService = app.get(ConfigService);
-  const cors_uri = configService.get<string>('frontend.uri');
-  const version = configService.get<string>('version');
+  const cors_uri = configService.getOrThrow<string>('frontend.uri');
+  const version = configService.getOrThrow<string>('version');
   // enable CORS if exists
   if (cors_uri) {
     app.enableCors({

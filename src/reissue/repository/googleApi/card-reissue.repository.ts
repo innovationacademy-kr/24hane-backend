@@ -15,10 +15,10 @@ export class CardReissueRepository implements ICardReissueRepository {
 
   constructor(@Inject(ConfigService) private configService: ConfigService) {
     this.gsScope = ['https://www.googleapis.com/auth/spreadsheets'];
-    this.gsKey = this.configService.get<string>('googleCardApi.key');
-    this.gsEmail = this.configService.get<string>('googleCardApi.email');
-    this.gsRange = this.configService.get<string>('googleCardApi.range');
-    this.gsSheetId = this.configService.get<string>(
+    this.gsKey = this.configService.getOrThrow<string>('googleCardApi.key');
+    this.gsEmail = this.configService.getOrThrow<string>('googleCardApi.email');
+    this.gsRange = this.configService.getOrThrow<string>('googleCardApi.range');
+    this.gsSheetId = this.configService.getOrThrow<string>(
       'googleCardApi.spreadsheetId',
     );
   }

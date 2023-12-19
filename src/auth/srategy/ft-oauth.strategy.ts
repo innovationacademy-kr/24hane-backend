@@ -19,9 +19,9 @@ export class FtOAuthStrategy extends PassportStrategy(Strategy, '42-oauth2') {
     private readonly configService: ConfigService,
   ) {
     super({
-      clientID: configService.get('ftAuth.clientid'),
-      clientSecret: configService.get('ftAuth.secret'),
-      callbackURL: configService.get('ftAuth.callbackuri'),
+      clientID: configService.getOrThrow<string>('ftAuth.clientid'),
+      clientSecret: configService.getOrThrow<string>('ftAuth.secret'),
+      callbackURL: configService.getOrThrow<string>('ftAuth.callbackuri'),
       passReqToCallback: true,
       profileFields: {
         user_id: 'id',

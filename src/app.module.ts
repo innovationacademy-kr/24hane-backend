@@ -1,22 +1,19 @@
-import {
-  CacheModule,
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-} from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import configuration from './configs/configuration';
 import TypeOrmConfigService from './configs/typeorm.config';
-import { ExtModule } from './ext/ext.module';
+import { Cabi42Module } from './external/cabi42/cabi42.module';
+import { Where42Module } from './external/where42/where42.module';
 import { SessionMiddleware } from './middleware/session-middleware';
-import { TagLogModule } from './tag-log-v1/tag-log.module';
-import { TagLogModule2 } from './tag-log-v2/tag-log-v2.module';
-import { UserModule } from './user/user.module';
-import { ReissueModule } from './reissue/reissue.module';
-import { StatisticsModule } from './statistics/statictics.module';
 import { RedirectModule } from './redirect/redirect.module';
+import { ReissueModule } from './reissue/reissue.module';
+import { StatisticsModule } from './statistics/statistics.module';
+import { TagLogModule3 } from './tag-log-v3/tag-log-v3.module';
+import { TagLogModule } from './tag-log/tag-log.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -33,9 +30,10 @@ import { RedirectModule } from './redirect/redirect.module';
     RedirectModule,
     AuthModule,
     TagLogModule,
-    TagLogModule2,
+    TagLogModule3,
     UserModule,
-    ExtModule,
+    Where42Module,
+    Cabi42Module,
     ReissueModule,
   ],
   providers: [SessionMiddleware],
