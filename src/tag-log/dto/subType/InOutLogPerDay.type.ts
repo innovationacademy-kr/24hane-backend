@@ -57,9 +57,11 @@ export function groupLogsByDay(
   // 로그를 날짜별로 그룹화
   logs.forEach((log) => {
     if (log.inTimeStamp && log.outTimeStamp) {
-      const inDate = new Date(log.inTimeStamp * 1000)
-        .toISOString()
-        .split('T')[0];
+      const date = new Date(log.inTimeStamp * 1000);
+
+      const inDate = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Seoul',
+      }).format(date);
 
       if (!dateGroups.has(inDate)) {
         dateGroups.set(inDate, []);
