@@ -8,11 +8,12 @@ import { StatisticsModule } from 'src/statistics/statistics.module';
 import { DeviceInfoRepository } from 'src/tag-log/repository/mysql/device-info.repository';
 import { PairInfoRepository } from 'src/tag-log/repository/mysql/pair-info.repository';
 import { TagLogRepository } from 'src/tag-log/repository/mysql/tag-log.repository';
+import { TagLogModule } from 'src/tag-log/tag-log.module';
+import { TagLogService } from 'src/tag-log/tag-log.service';
 import { UserModule } from 'src/user/user.module';
 import { DateCalculatorModule } from 'src/utils/data-calculator/data-calculator.module';
 import { MessageGeneratorModule } from 'src/utils/message-generator/message-generator.module';
 import { TagLogController } from './tag-log-v3.controller';
-import { TagLogService } from './tag-log-v3.service';
 
 const tagLogRepo = {
   provide: 'ITagLogRepository',
@@ -37,6 +38,7 @@ const deviceInfoRepo = {
     UserModule,
     MessageGeneratorModule,
     StatisticsModule,
+    TagLogModule,
   ],
   exports: [TypeOrmModule],
   controllers: [TagLogController],
