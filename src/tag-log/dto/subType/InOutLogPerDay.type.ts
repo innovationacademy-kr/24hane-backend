@@ -59,7 +59,7 @@ export function groupLogsByDay(
     if (log.inTimeStamp && log.outTimeStamp) {
       const date = new Date(log.inTimeStamp * 1000);
 
-      const inDate = new Intl.DateTimeFormat('en-US', {
+      const inDate = new Intl.DateTimeFormat('ko-KR', {
         timeZone: 'Asia/Seoul',
       }).format(date);
 
