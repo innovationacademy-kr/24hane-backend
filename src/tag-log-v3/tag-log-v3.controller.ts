@@ -23,6 +23,7 @@ import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
 import { StatisticsService } from 'src/statistics/statistics.service';
 import { UserInfoType } from 'src/tag-log/dto/user-Info.type';
 import { UserAccumulationTypeV3 } from 'src/tag-log/dto/user-accumulation.type.v3';
+import { TagLogService } from 'src/tag-log/tag-log.service';
 import { TWELVE_HOURS_IN_SECONDS } from 'src/utils/data-calculator/common.constants';
 import { MessageGenerator } from 'src/utils/message-generator/message-generator.component';
 import { UserMonthlyInOutLogsType } from '../tag-log/dto/UserMonthlyInOutLogs.type';
@@ -30,7 +31,6 @@ import {
   InOutLogPerDay,
   groupLogsByDay,
 } from '../tag-log/dto/subType/InOutLogPerDay.type';
-import { TagLogService } from './tag-log-v3.service';
 
 @ApiTags('체류 시간 산출 v3')
 @Controller({

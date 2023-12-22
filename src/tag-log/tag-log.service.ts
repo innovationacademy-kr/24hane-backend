@@ -636,4 +636,11 @@ export class TagLogService {
     }
     return taglogs;
   }
+
+  cutTime(duration: number): number {
+    const resultDuration = this.dateCalculator.cutTimeByLimit(duration);
+    return resultDuration > 12
+      ? this.dateCalculator.getTwelveHoursInSeconds()
+      : resultDuration;
+  }
 }
