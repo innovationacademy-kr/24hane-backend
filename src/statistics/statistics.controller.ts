@@ -1,9 +1,9 @@
-import { Controller, Get, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Controller, Get, Inject, Logger } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StatisticsService } from './statistics.service';
-import { CadetPerClusterDto } from './dto/cadet-per-cluster.dto';
 import { Cache } from 'cache-manager';
+import { CadetPerClusterDto } from './dto/cadet-per-cluster.dto';
+import { StatisticsService } from './statistics.service';
 
 @ApiTags('통계 관련 API')
 @Controller({

@@ -1,8 +1,8 @@
+import { auth, sheets } from '@googleapis/sheets';
 import { Inject, Logger } from '@nestjs/common';
-import { ICardReissueRepository } from '../interface/card-reissue.repository.interface';
 import { ConfigService } from '@nestjs/config';
-import { sheets, auth } from '@googleapis/sheets';
 import { CardReissue } from 'src/entities/card-reissue.entity';
+import { ICardReissueRepository } from '../interface/card-reissue.repository.interface';
 
 export class CardReissueRepository implements ICardReissueRepository {
   private logger = new Logger(CardReissueRepository.name);

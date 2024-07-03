@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import Cluster from 'src/enums/cluster.enum';
 import InOut from 'src/enums/inout.enum';
 
 export class Where42ResponseDto {

@@ -1,12 +1,12 @@
-import { Request, Response } from 'express';
 import {
   CanActivate,
   ExecutionContext,
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
+import { Request, Response } from 'express';
+import { Observable } from 'rxjs';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 
 /**

@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
 import { UserInfoRepository } from './repository/mysql/user-info.repository';
-import { UserV1Controller } from './user.v1.controller';
 import { UserService } from './user.service';
+import { UserV1Controller } from './user.v1.controller';
 
 const userInfoRepo = {
   provide: 'IUserInfoRepository',

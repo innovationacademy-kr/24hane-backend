@@ -11,11 +11,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from 'src/auth/user.decorator';
 import { UserSessionDto } from 'src/auth/dto/user.session.dto';
+import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
+import { User } from 'src/auth/user.decorator';
 import { IdLoginDto } from './dto/id-login.dto';
 import { UserService } from './user.service';
-import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
 
 @ApiTags('유저 정보 관련')
 @Controller({
