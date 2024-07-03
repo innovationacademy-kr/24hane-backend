@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  Body,
   ForbiddenException,
   Inject,
   Injectable,
   Logger,
+  Post,
 } from '@nestjs/common';
 import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 import { UserService } from 'src/user/user.service';
@@ -51,8 +53,23 @@ export class Where42Service {
     return {
       login,
       inoutState: device.inoutState,
-      cluster: device.cluster,
-      tag_at: last.tag_at,
     };
+  }
+
+  @Post('where42All')
+  async where42All(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
+    const res = [];
+    for (const login of logins) {
+      try {
+        res.push(await this.where42(login));
+      } catch (e) {
+        this.logger.error('정상적인 조회가 아님');
+        res.push({
+          login,
+          inoutState: null,
+        });
+      }
+    }
+    return res;
   }
 }

@@ -10,22 +10,9 @@ export class Where42ResponseDto {
   login: string;
 
   @ApiProperty({
-    description: '클러스터 체류 여부',
+    description: '클러스터 체류 여부, bocal은 null',
     enum: InOut,
     example: InOut.OUT,
   })
-  inoutState: InOut;
-
-  @ApiProperty({
-    description: '체류중인 클러스터',
-    enum: Cluster,
-    example: Cluster.GAEPO,
-  })
-  cluster: Cluster;
-
-  @ApiProperty({
-    description: '마지막으로 태깅한 시간',
-    type: Date,
-  })
-  tag_at: Date;
+  inoutState: InOut | null;
 }
