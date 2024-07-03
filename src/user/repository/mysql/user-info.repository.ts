@@ -1,9 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
-import { IUserInfoRepository } from '../interface/user-info-repository.interface';
-import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
-import { IdLoginDto } from 'src/user/dto/id-login.dto';
 import { CardDto } from 'src/user/dto/card.dto';
+import { IdLoginDto } from 'src/user/dto/id-login.dto';
+import { In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { IUserInfoRepository } from '../interface/user-info-repository.interface';
 
 export class UserInfoRepository implements IUserInfoRepository {
   constructor(
@@ -65,6 +65,18 @@ export class UserInfoRepository implements IUserInfoRepository {
     return result.map((r) => ({
       user_id: r.user_id,
       login: r.login,
+      is_admin: r.is_admin,
+    }));
+  }
+
+  async findUsersByLogins(logins: string[]): Promise<IdLoginDto[]> {
+    const users = await this.userInfoRepository.find({
+      where: { login: In(logins) },
+    });
+    return users.map((user) => ({
+      user_id: user.user_id,
+      login: user.login,
+      is_admin: user.is_admin,
     }));
   }
 }
