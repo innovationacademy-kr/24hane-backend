@@ -59,23 +59,6 @@ export class Where42Service {
 
   @Post('where42All')
   async where42All(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
-    const res = [];
-    for (const login of logins) {
-      try {
-        res.push(await this.where42(login));
-      } catch (e) {
-        this.logger.error('정상적인 조회가 아님');
-        res.push({
-          login,
-          inoutState: null,
-        });
-      }
-    }
-    return res;
-  }
-
-  @Post('where42All2')
-  async where42All2(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
     const res: Where42ResponseDto[] = [];
 
     const users = await this.userService.findUsersByLogins(logins);

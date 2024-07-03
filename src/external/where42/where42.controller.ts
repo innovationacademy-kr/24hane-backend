@@ -64,10 +64,4 @@ export class Where42Controller {
     this.logger.debug(`@where42All) where42All`);
     return this.where42Service.where42All(logins);
   }
-
-  @Post('where42All2')
-  async where42All2(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
-    this.logger.debug(`@where42All) where42All`);
-    return this.where42Service.where42All2(logins);
-  }
 }
