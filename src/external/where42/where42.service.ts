@@ -8,6 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
+import { IdLoginDto } from 'src/user/dto/id-login.dto';
 import { UserService } from 'src/user/user.service';
 import { Where42ResponseDto } from './dto/where42.response.dto';
 import { IDeviceInfoRepository } from './repository/interface/device-info.repository.interface';
@@ -70,6 +71,68 @@ export class Where42Service {
         });
       }
     }
+    return res;
+  }
+
+  @Post('where42All2')
+  async where42All2(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
+    const users = await this.userService.findUsersByLogins(logins);
+    const userMap = new Map<string, IdLoginDto>(
+      users.map((user) => [user.login, user]),
+    );
+
+    const res = [];
+
+    for (const login of logins) {
+      try {
+        const user = userMap.get(login);
+        if (!user) {
+          throw new BadRequestException('존재하지 않는 유저 ID입니다.');
+        }
+
+        const isAdmin = user.is_admin;
+
+        if (isAdmin) {
+          res.push({
+            login,
+            inoutState: null,
+          });
+          continue;
+        }
+
+        const cards = await this.userService.findCardsByUserId(
+          user.user_id,
+          new Date('2019-01-01 00:00:00'),
+          new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
+        );
+
+        const last = await this.tagLogRepository.findLatestTagLog(cards);
+        if (last === null) {
+          throw new ForbiddenException('태그 기록이 존재하지 않습니다.');
+        }
+
+        const device = await this.deviceInfoRepository.getDeviceInfo(
+          last.device_id,
+        );
+        if (device === null) {
+          throw new ForbiddenException(
+            '등록되지 않은 기기에 태그하였습니다. 관리자에게 문의하세요.',
+          );
+        }
+
+        res.push({
+          login,
+          inoutState: device.inoutState,
+        });
+      } catch (e) {
+        this.logger.error(`정상적인 조회가 아님: ${login}`);
+        res.push({
+          login,
+          inoutState: null,
+        });
+      }
+    }
+
     return res;
   }
 }
