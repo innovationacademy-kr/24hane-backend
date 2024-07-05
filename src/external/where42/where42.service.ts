@@ -12,6 +12,7 @@ import { IdLoginDto } from 'src/user/dto/id-login.dto';
 import { UserService } from 'src/user/user.service';
 import { Where42ResponseDto } from './dto/where42.response.dto';
 import { IDeviceInfoRepository } from './repository/interface/device-info.repository.interface';
+import Cluster from 'src/enums/cluster.enum';
 
 @Injectable()
 export class Where42Service {
@@ -54,11 +55,14 @@ export class Where42Service {
     return {
       login,
       inoutState: device.inoutState,
+      cluster: device.cluster,
+      tag_at: last.tag_at,
     };
   }
 
   @Post('where42All')
   async where42All(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
+    // todo: Where42ResponseDto의 inoutState, tag_at은 사라질 예정입니다.
     const res: Where42ResponseDto[] = [];
 
     const users = await this.userService.findUsersByLogins(logins);
@@ -72,15 +76,6 @@ export class Where42Service {
           const user = userMap.get(login);
           if (!user) {
             throw new BadRequestException('존재하지 않는 유저 ID입니다.');
-          }
-
-          const isAdmin = user.is_admin;
-          if (isAdmin) {
-            res.push({
-              login,
-              inoutState: null,
-            });
-            return;
           }
 
           const cards = await this.userService.findCardsByUserId(
@@ -103,15 +98,30 @@ export class Where42Service {
             );
           }
 
+          const isAdmin = user.is_admin;
+          if (isAdmin) {
+            res.push({
+              login,
+              inoutState: null,
+              cluster: Cluster.GAEPO,
+              tag_at: last.tag_at,
+            });
+            return;
+          }
+
           res.push({
             login,
             inoutState: device.inoutState,
+            cluster: Cluster.GAEPO,
+            tag_at: last.tag_at,
           });
         } catch (e) {
           this.logger.error(`정상적인 조회가 아님: ${login}`);
           res.push({
             login,
             inoutState: null,
+            cluster: Cluster.GAEPO,
+            tag_at: new Date(),
           });
         }
       }),
