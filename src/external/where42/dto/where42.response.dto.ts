@@ -22,10 +22,4 @@ export class Where42ResponseDto {
     example: Cluster.GAEPO,
   })
   cluster: Cluster;
-
-  @ApiProperty({
-    description: '마지막으로 태깅한 시간',
-    type: Date,
-  })
-  tag_at: Date;
 }

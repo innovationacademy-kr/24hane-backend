@@ -3,6 +3,6 @@
  */
 enum Cluster {
   GAEPO = 'GAEPO',
-  SEOCHO = 'SEOCHO',
+  //SEOCHO = 'SEOCHO',
 }
 export default Cluster;
