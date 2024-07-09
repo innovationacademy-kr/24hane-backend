@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StatisticsRepository } from './repository/mysql/statistics.repository';
-import { StatisticsService } from './statistics.service';
-import { StatisticsController } from './statistics.controller';
 import { TagLog } from 'src/entities/tag-log.entity';
+import { StatisticsRepository } from './repository/mysql/statistics.repository';
+import { StatisticsController } from './statistics.controller';
+import { StatisticsService } from './statistics.service';
 
 const statisticsRepo = {
   provide: 'IStatisticsRepository',

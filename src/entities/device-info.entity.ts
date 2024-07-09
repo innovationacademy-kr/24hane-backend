@@ -1,6 +1,6 @@
 import Cluster from 'src/enums/cluster.enum';
 import InOut from 'src/enums/inout.enum';
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('DEVICE_INFO')
 export class DeviceInfo {

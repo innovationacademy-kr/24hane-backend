@@ -12,4 +12,10 @@ export class IdLoginDto {
     example: 'joopark',
   })
   login: string;
+
+  @ApiProperty({
+    description: '관리자 여부',
+    example: true,
+  })
+  is_admin: boolean;
 }

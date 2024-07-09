@@ -1,7 +1,7 @@
-import { IUserCardRepository } from '../interface/user-card-no.repository.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'src/entities/user-info.entity';
 import { Repository } from 'typeorm/repository/Repository';
+import { IUserCardRepository } from '../interface/user-card-no.repository.interface';
 
 export class UserCardRepository implements IUserCardRepository {
   constructor(

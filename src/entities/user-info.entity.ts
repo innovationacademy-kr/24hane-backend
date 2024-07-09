@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { CardIssuance } from './card-issuance.entity';
 
 @Entity('USER_INFO')

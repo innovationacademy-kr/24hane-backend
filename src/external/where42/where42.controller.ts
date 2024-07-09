@@ -1,4 +1,12 @@
-import { Controller, Get, Logger, Param, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -49,5 +57,11 @@ export class Where42Controller {
   async where42(@Param('login') login: string): Promise<Where42ResponseDto> {
     this.logger.debug(`@islogin) where42: ${login}`);
     return this.where42Service.where42(login);
+  }
+
+  @Post('where42All')
+  async where42All(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
+    this.logger.debug(`@where42All) where42All`);
+    return this.where42Service.where42All(logins);
   }
 }

@@ -1,5 +1,5 @@
 import Cluster from 'src/enums/cluster.enum';
-import { Entity, Column, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 // deprecated
 @Entity()

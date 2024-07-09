@@ -1,6 +1,6 @@
-import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { CadetPerClusterDto } from './dto/cadet-per-cluster.dto';
 import { IStatisticsRepository } from './repository/interface/statistics.repository.interface';
 

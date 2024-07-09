@@ -28,4 +28,12 @@ export interface IUserInfoRepository {
    * @param admin true: 관리자만, false: 카뎃만, undefined: 모두
    */
   getAllIds(admin?: boolean): Promise<IdLoginDto[]>;
+
+  /**
+   * 로그인 ID 배열에 해당하는 사용자 정보를 반환합니다.
+   *
+   * @param logins 로그인 ID 배열
+   * @returns 사용자 정보 배열
+   */
+  findUsersByLogins(logins: string[]): Promise<IdLoginDto[]>;
 }

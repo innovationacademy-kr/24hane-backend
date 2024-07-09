@@ -1,8 +1,8 @@
-import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
-import { IStatisticsRepository } from '../interface/statistics.repository.interface';
-import { Repository } from 'typeorm';
-import { TagLog } from 'src/entities/tag-log.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TagLog } from 'src/entities/tag-log.entity';
+import { CadetPerClusterDto } from 'src/statistics/dto/cadet-per-cluster.dto';
+import { Repository } from 'typeorm';
+import { IStatisticsRepository } from '../interface/statistics.repository.interface';
 
 export class StatisticsRepository implements IStatisticsRepository {
   constructor(
