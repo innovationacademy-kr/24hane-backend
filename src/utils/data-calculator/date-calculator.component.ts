@@ -1,5 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+const SEC = 1000;
+const MIN = SEC * 60;
+const HOUR = MIN * 60;
+const HALF_DAY = HOUR * 24;
+const DAY = HOUR * 24;
+const WEEK = DAY * 7;
+
+// NOTE: 42 클러스터의 대략적인 오픈일
+export const START_DATE = new Date('2019-01-01T00:00:00Z');
+
 /**
  * 날짜/시간 관련 연산을 하기 위한 모듈입니다.
  */
@@ -8,8 +18,10 @@ export class DateCalculator {
   private logger = new Logger(DateCalculator.name);
 
   /**
-   * 인자로 주어진 일에 대해 가장 이른 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   *
+   * @param date Date 객체
+   * @returns 인자로 주어진 일에 대해 가장 이른 시간
    */
   getStartOfDate(date: Date): Date {
     const y = date.getFullYear();
@@ -19,21 +31,26 @@ export class DateCalculator {
   }
 
   /**
-   * 인자로 주어진 일에 대해 가장 늦은 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   *
+   * @param date Date 객체
+   * @returns 인자로 주어진 일에 대해 가장 늦은 시간
    */
   getEndOfDate(date: Date): Date {
     const y = date.getFullYear();
     const m = date.getMonth();
     const d = date.getDate();
-    const rtn = new Date(y, m, d + 1, 0, 0, 0, 0);
-    rtn.setTime(rtn.getTime() - 1);
-    return rtn;
+    const endOfDate = new Date(y, m, d + 1, 0, 0, 0, 0);
+    endOfDate.setTime(endOfDate.getTime() - 1);
+    return endOfDate;
   }
 
+  //todo: 리팩터릭
   /**
-   * 인자로 주어진 일에 대해 바로 전날의 가장 늦은 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   *
+   * @param date Date 객체
+   * @returns 인자로 주어진 일에 대해 바로 전날의 가장 늦은 시간
    */
   getEndOfLastDate(date: Date): Date {
     const rtn = new Date(
@@ -50,65 +67,62 @@ export class DateCalculator {
   }
 
   /**
-   * 인자로 주어진 일에 대해 그 주의 첫 날짜(월요일)의 가장 빠른 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   *
+   * @param date Date 객체
+   * @returns 인자로 주어진 일에 대해 그 주의 첫 날짜(월요일)의 가장 빠른 시간
    */
   getStartOfWeek(date: Date): Date {
     const dayOfWeek = date.getDay() - 1;
     const diff = dayOfWeek === -1 ? 6 : dayOfWeek;
-    const rtn = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate() - diff,
-    );
-    return rtn;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() - diff);
   }
 
+  //todo: get, setTime대신 milliseconds를 써야하는가?
   /**
-   * 인자로 주어진 일에 대해 그 주의 마지막 날짜(일요일)와 가장 늦은 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
+   *
+   * @param date Date 객체
+   * @returns 인자로 주어진 일에 대해 그 주의 마지막 날짜(일요일)의 가장 늦은 시간
    */
   getEndOfWeek(date: Date): Date {
     const startOfWeek = this.getStartOfWeek(date);
-    const rtn = new Date(startOfWeek);
-    rtn.setDate(startOfWeek.getDate() + 7);
-    rtn.setTime(rtn.getTime() - 1);
-    return rtn;
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+    endOfWeek.setTime(endOfWeek.getTime() - 1);
+    return endOfWeek;
   }
 
   /**
-   * 인자로 주어진 일에 대해 해당 월의 시작 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
    *
-   * @param date 임의의 시간
-   * @returns date에 속한 월의 시작 시간
+   * @param date Date 객체
+   * @returns 인자로 주어진 일에 대해 해당 월의 시작 시간
    */
   getStartOfMonth(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth());
   }
 
   /**
-   * 인자로 주어진 일에 대해 해당 월의 끝 시간을 반환합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
    *
-   * @param date 임의의 시간
-   * @returns date에 속한 월의 끝 시간
+   * @param date Date 객체
+   * @returns 인자로 주어진 일에 대해 해당 월의 끝 시간을 반환합니다.
    */
   getEndOfMonth(date: Date): Date {
-    const rtn = new Date(date.getFullYear(), date.getMonth() + 1);
-    rtn.setTime(rtn.getTime() - 1);
-    return rtn;
+    const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1);
+    endOfMonth.setTime(endOfMonth.getTime() - 1);
+    return endOfMonth;
   }
 
   /**
-   * 두 date 객체가 동일한 날짜인지 체크합니다.
    * NOTE: 서버의 로컬 시간에 맞게 동작함에 유의해야 함.
    *
-   * @param date1 date 객체 1
-   * @param date2 date 객체 2
+   * @param date1 Date 객체 1
+   * @param date2 Date 객체 2
+   * @returns 두 date 객체가 동일한 날짜인지 체크합니다.
    */
   checkEqualDay(date1: Date, date2: Date) {
-    //this.logger.debug(`@checkEqualDay) ${date1}, ${date2}`);
     return (
       date1.getFullYear() === date2.getFullYear() &&
       date1.getMonth() === date2.getMonth() &&
@@ -117,67 +131,70 @@ export class DateCalculator {
   }
 
   /**
-   * Date 객체가 가리키고 있는 시간을 타임스탬프로 반환합니다.
-   *
    * @param date Date 객체
-   * @return number 타임스탬프
+   * @return Date 객체가 가리키고 있는 시간의 초 단위 타임스탬프
    */
   toTimestamp(date: Date): number {
-    //this.logger.debug(`@toTimestamp) ${date}`);
-    return Math.floor(date.getTime() / 1000);
+    return Math.floor(date.getTime() / SEC);
   }
 
   /**
-   * 주어진 년, 월에 대해 일의 개수를 구합니다.
-   *
-   * @param year 년
+   * @param year 연도
    * @param month 월
-   * @return days 해당 달의 일의 개수
+   * @return 주어진 연도, 월에 대해 일의 개수
    */
   getDaysInMonth(year: number, month: number): number {
-    this.logger.debug(`@getDaysInMonth) ${year}, ${month}`);
     const date = new Date(year, month, 0);
     return date.getDate();
   }
 
   /**
-   * 주어진 년도와 주차에 대해 날짜 범위를 구합니다.
-   *
-   * @param year 년
+   * @param year 연도
    * @param week 주차
-   * @returns
+   * @returns 주어진 연도와 주차에 대해 날짜 범위를 구합니다.
    */
   getDateOfWeek(year: number, week: number): Date {
-    const januaryFirst = new Date(year, 0, 1);
-    const dayOfWeek = januaryFirst.getDay();
+    const firstDayOfYear = new Date(year, 0, 1);
+    const dayOfWeek = firstDayOfYear.getDay();
     const daysToAdd = 7 - dayOfWeek;
     const secondSundayOfYear = new Date(year, 0, daysToAdd + 1);
-    const rtn = new Date(
-      secondSundayOfYear.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000,
-    );
-    return rtn;
+    return new Date(secondSundayOfYear.getTime() + (week - 1) * WEEK);
   }
-  /**
-   *  12시간을 초단위로 반환합니다.
-   * @returns 초
-   */
 
-  getTwelveHoursInSeconds(): number {
-    return 12 * 60 * 60;
-  }
   /**
-   * 하루단위로 초를 계산하여 12시간으로 나눈 나머지를 리턴합니다.
-   *
-   * @param durationPerday 하루에 있었던 체류시간
-   * @returns number
+   * @returns 12시간을 초 단위로 변경한 것
+   */
+  getHalfDayInSeconds(): number {
+    return HALF_DAY / SEC;
+  }
+
+  /**
+   * @returns 하루를 초 단위로 변경한 것
+   */
+  getDayInSeconds(): number {
+    return DAY / SEC;
+  }
+
+  /**
+   * @returns 현재 시간을 반환합니다.
+   */
+  getCurrentDate(): Date {
+    return new Date();
+  }
+
+  /**
+   * @param durationPerday 하루에 있었던 체류시간 (초 단위)
+   * @returns 하루 단위로 초를 계산하여 12시간으로 나눈 나머지
    */
   cutTimeByLimit(durationPerday: number): number {
-    const twelveHoursInSeconds = this.getTwelveHoursInSeconds();
+    const halfDayInSeconds = this.getHalfDayInSeconds();
+    const dayInSeconds = this.getDayInSeconds();
+
+    //todo: 음수인 경우가 있나요?
+    //const seconds = durationPerday % dayInSeconds;
     const seconds =
-      ((durationPerday % (twelveHoursInSeconds * 2)) +
-        twelveHoursInSeconds * 2) %
-      (twelveHoursInSeconds * 2);
-    const remainder = seconds % twelveHoursInSeconds;
-    return remainder;
+      ((durationPerday % dayInSeconds) + dayInSeconds) % dayInSeconds;
+
+    return seconds % halfDayInSeconds;
   }
 }

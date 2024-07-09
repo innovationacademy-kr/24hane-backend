@@ -10,9 +10,12 @@ import {
 import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 import { IdLoginDto } from 'src/user/dto/id-login.dto';
 import { UserService } from 'src/user/user.service';
+import {
+  DateCalculator,
+  START_DATE,
+} from 'src/utils/data-calculator/date-calculator.component';
 import { Where42ResponseDto } from './dto/where42.response.dto';
 import { IDeviceInfoRepository } from './repository/interface/device-info.repository.interface';
-import Cluster from 'src/enums/cluster.enum';
 
 @Injectable()
 export class Where42Service {
@@ -24,6 +27,7 @@ export class Where42Service {
     private deviceInfoRepository: IDeviceInfoRepository,
     @Inject('ITagLogRepository')
     private tagLogRepository: ITagLogRepository,
+    private dateCalculator: DateCalculator,
   ) {}
 
   async where42(login: string): Promise<Where42ResponseDto> {
@@ -37,8 +41,8 @@ export class Where42Service {
 
     const cards = await this.userService.findCardsByUserId(
       user_id,
-      new Date('2019-01-01 00:00:00'),
-      new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
+      START_DATE,
+      this.dateCalculator.getCurrentDate(),
     );
     const last = await this.tagLogRepository.findLatestTagLog(cards);
     if (last === null) {
@@ -56,13 +60,11 @@ export class Where42Service {
       login,
       inoutState: device.inoutState,
       cluster: device.cluster,
-      tag_at: last.tag_at,
     };
   }
 
   @Post('where42All')
   async where42All(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
-    // todo: Where42ResponseDto의 inoutState, tag_at은 사라질 예정입니다.
     const res: Where42ResponseDto[] = [];
 
     const users = await this.userService.findUsersByLogins(logins);
@@ -80,8 +82,8 @@ export class Where42Service {
 
           const cards = await this.userService.findCardsByUserId(
             user.user_id,
-            new Date('2019-01-01 00:00:00'),
-            new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
+            START_DATE,
+            this.dateCalculator.getCurrentDate(),
           );
 
           const last = await this.tagLogRepository.findLatestTagLog(cards);
@@ -103,8 +105,7 @@ export class Where42Service {
             res.push({
               login,
               inoutState: null,
-              cluster: Cluster.GAEPO,
-              tag_at: last.tag_at,
+              cluster: device.cluster,
             });
             return;
           }
@@ -112,16 +113,14 @@ export class Where42Service {
           res.push({
             login,
             inoutState: device.inoutState,
-            cluster: Cluster.GAEPO,
-            tag_at: last.tag_at,
+            cluster: device.cluster,
           });
         } catch (e) {
           this.logger.error(`정상적인 조회가 아님: ${login}`);
           res.push({
             login,
             inoutState: null,
-            cluster: Cluster.GAEPO,
-            tag_at: new Date(),
+            cluster: null,
           });
         }
       }),

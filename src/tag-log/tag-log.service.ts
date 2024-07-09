@@ -3,7 +3,10 @@ import InOut from 'src/enums/inout.enum';
 import { StatisticsService } from 'src/statistics/statistics.service';
 import { CardDto } from 'src/user/dto/card.dto';
 import { UserService } from 'src/user/user.service';
-import { DateCalculator } from 'src/utils/data-calculator/date-calculator.component';
+import {
+  DateCalculator,
+  START_DATE,
+} from 'src/utils/data-calculator/date-calculator.component';
 import { DeviceInfoDto } from './dto/device-info.dto';
 import { InOutDto } from './dto/inout.dto';
 import { PairInfoDto } from './dto/pair-info.dto';
@@ -555,8 +558,8 @@ export class TagLogService {
     this.logger.debug(`@checkClusterById) ${userId}`);
     const cards = await this.userService.findCardsByUserId(
       userId,
-      new Date('2019-01-01 00:00:00'),
-      new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
+      START_DATE,
+      this.dateCalculator.getCurrentDate(),
     );
     const last = await this.tagLogRepository.findLatestTagLog(cards);
     const inCards = await this.pairInfoRepository.findInGates();
@@ -640,7 +643,7 @@ export class TagLogService {
   cutTime(duration: number): number {
     const resultDuration = this.dateCalculator.cutTimeByLimit(duration);
     return resultDuration > 12
-      ? this.dateCalculator.getTwelveHoursInSeconds()
+      ? this.dateCalculator.getHalfDayInSeconds()
       : resultDuration;
   }
 }
