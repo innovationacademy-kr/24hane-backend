@@ -7,7 +7,6 @@ import {
   Logger,
   Post,
 } from '@nestjs/common';
-import Cluster from 'src/enums/cluster.enum';
 import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 import { IdLoginDto } from 'src/user/dto/id-login.dto';
 import { UserService } from 'src/user/user.service';
@@ -121,7 +120,7 @@ export class Where42Service {
           res.push({
             login,
             inoutState: null,
-            cluster: Cluster.GAEPO,
+            cluster: null,
           });
         }
       }),
