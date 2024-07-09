@@ -11,6 +11,10 @@ import Cluster from 'src/enums/cluster.enum';
 import { ITagLogRepository } from 'src/tag-log/repository/interface/tag-log-repository.interface';
 import { IdLoginDto } from 'src/user/dto/id-login.dto';
 import { UserService } from 'src/user/user.service';
+import {
+  DateCalculator,
+  START_DATE,
+} from 'src/utils/data-calculator/date-calculator.component';
 import { Where42ResponseDto } from './dto/where42.response.dto';
 import { IDeviceInfoRepository } from './repository/interface/device-info.repository.interface';
 
@@ -24,6 +28,7 @@ export class Where42Service {
     private deviceInfoRepository: IDeviceInfoRepository,
     @Inject('ITagLogRepository')
     private tagLogRepository: ITagLogRepository,
+    private dateCalculator: DateCalculator,
   ) {}
 
   async where42(login: string): Promise<Where42ResponseDto> {
@@ -37,8 +42,8 @@ export class Where42Service {
 
     const cards = await this.userService.findCardsByUserId(
       user_id,
-      new Date('2019-01-01 00:00:00'),
-      new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
+      START_DATE,
+      this.dateCalculator.getCurrentDate(),
     );
     const last = await this.tagLogRepository.findLatestTagLog(cards);
     if (last === null) {
@@ -78,8 +83,8 @@ export class Where42Service {
 
           const cards = await this.userService.findCardsByUserId(
             user.user_id,
-            new Date('2019-01-01 00:00:00'),
-            new Date(), // NOTE: 대략 42 클러스터 오픈일부터 지금까지 조회
+            START_DATE,
+            this.dateCalculator.getCurrentDate(),
           );
 
           const last = await this.tagLogRepository.findLatestTagLog(cards);

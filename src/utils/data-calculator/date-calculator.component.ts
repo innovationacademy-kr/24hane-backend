@@ -7,6 +7,9 @@ const HALF_DAY = HOUR * 24;
 const DAY = HOUR * 24;
 const WEEK = DAY * 7;
 
+// NOTE: 42 클러스터의 대략적인 오픈일
+export const START_DATE = new Date('2019-01-01T00:00:00Z');
+
 /**
  * 날짜/시간 관련 연산을 하기 위한 모듈입니다.
  */
@@ -170,6 +173,13 @@ export class DateCalculator {
    */
   getDayInSeconds(): number {
     return DAY / SEC;
+  }
+
+  /**
+   * @returns 현재 시간을 반환합니다.
+   */
+  getCurrentDate(): Date {
+    return new Date();
   }
 
   /**
