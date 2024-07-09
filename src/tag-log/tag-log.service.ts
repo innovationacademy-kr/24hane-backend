@@ -640,7 +640,7 @@ export class TagLogService {
   cutTime(duration: number): number {
     const resultDuration = this.dateCalculator.cutTimeByLimit(duration);
     return resultDuration > 12
-      ? this.dateCalculator.getTwelveHoursInSeconds()
+      ? this.dateCalculator.getHalfDayInSeconds()
       : resultDuration;
   }
 }
