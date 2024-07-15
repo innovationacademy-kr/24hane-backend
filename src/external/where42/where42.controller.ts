@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -62,6 +63,30 @@ export class Where42Controller {
     return this.where42Service.where42(login);
   }
 
+  /**
+   * 여러 사용자가 클러스터에 체류중인지 확인합니다.
+   *
+   * @param logins 유저 로그인 ID (Where42RequestDto) 리스트
+   * @returns Where42ResponseDto[]
+   */
+  @ApiOperation({
+    summary: '여러 카뎃들의 클러스터 체류여부 확인',
+    description:
+      '여러명의 카뎃이 클러스터에 체류중인지 한번에 확인합니다. 마지막으로 체류했던 체류중인 클러스터의 장소 정보도 함께 가져옵니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    type: Where42ResponseDto,
+    isArray: true,
+    description: '조회 성공',
+  })
+  @ApiResponse({ status: 401, description: '접근 권한 없음 (토큰 만료 등)' })
+  @ApiResponse({ status: 403, description: '태그 기록이 존재하지 않는 카뎃' })
+  @ApiResponse({ status: 500, description: '서버 내부 에러' })
+  @ApiBody({
+    type: [Where42RequestDto],
+    description: '유저 로그인 ID 객체의 배열',
+  })
   @Post('where42/where42All')
   async where42All(
     @Body() logins: Where42RequestDto[],
