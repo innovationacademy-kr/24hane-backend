@@ -15,7 +15,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ExtAuthGuard } from 'src/auth/guard/ext-auth.guard';
-import { Where42ResponseDto } from './dto/where42.response.dto';
+import {
+  Where42RequestDto,
+  Where42ResponseDto,
+} from './dto/where42.response.dto';
 import { Where42Service } from './where42.service';
 
 @ApiTags('Where42 전용 API')
@@ -60,8 +63,11 @@ export class Where42Controller {
   }
 
   @Post('where42/where42All')
-  async where42All(@Body() logins: string[]): Promise<Where42ResponseDto[]> {
+  async where42All(
+    @Body() logins: Where42RequestDto[],
+  ): Promise<Where42ResponseDto[]> {
     this.logger.debug(`@where42All) where42All`);
-    return this.where42Service.where42All(logins);
+    const loginList = logins.map((loginDto) => loginDto.login);
+    return this.where42Service.where42All(loginList);
   }
 }

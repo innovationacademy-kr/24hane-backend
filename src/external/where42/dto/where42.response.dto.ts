@@ -23,3 +23,11 @@ export class Where42ResponseDto {
   })
   cluster: Cluster;
 }
+
+export class Where42RequestDto {
+  @ApiProperty({
+    description: '42 로그인 ID',
+    example: 'yeju',
+  })
+  login: string;
+}
