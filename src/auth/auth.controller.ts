@@ -141,6 +141,8 @@ export class Auth42Controller {
 
     const jwtSecret = this.configService.getOrThrow<string>('jwt.secret');
 
+    this.logger.debug(`@refreshToken) refreshToken : ${refreshToken}`);
+
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken);
 
@@ -149,8 +151,11 @@ export class Auth42Controller {
         { expiresIn: accessExpiresIn, secret: jwtSecret },
       );
 
+      const decodedAccessTokenForExpires =
+        await this.jwtService.verifyAsync(newAccessToken);
+
       const accessTokenExpires = new Date(
-        (await this.jwtService.verifyAsync(newAccessToken)['exp']) * 1000,
+        decodedAccessTokenForExpires['exp'] * 1000,
       );
 
       res.cookie('accessToken', newAccessToken, {
