@@ -15,7 +15,8 @@ export default () => ({
   },
   jwt: {
     secret: process.env.JWT_OR_SESSION_SECRET,
-    expiresIn: process.env.JWT_EXPIREIN,
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIREIN,
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIREIN,
   },
   log: process.env.LOG_DEBUG === 'true' ? true : false,
   googleApi: {

@@ -1,9 +1,11 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
@@ -16,7 +18,11 @@ import { UserSessionDto } from 'src/auth/dto/user.session.dto';
 export class JWTSignGuard implements CanActivate {
   private logger = new Logger(JWTSignGuard.name);
 
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    @Inject(ConfigService)
+    private configService: ConfigService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
@@ -33,14 +39,24 @@ export class JWTSignGuard implements CanActivate {
       return false;
     }
 
-    //todo; env설정 및 시간 변경
+    const accessExpiresIn = this.configService.getOrThrow<string>(
+      'jwt.accessExpiresIn',
+    );
+
+    const refreshExpiresIn = this.configService.getOrThrow<string>(
+      'jwt.refreshExpiresIn',
+    );
+
+    const jwtSecret = this.configService.getOrThrow<string>('jwt.secret');
+
     const accessToken = this.jwtService.sign(user, {
-      expiresIn: '15s',
-      secret: 'testing',
+      expiresIn: accessExpiresIn,
+      secret: jwtSecret,
     });
+
     const refreshToken = this.jwtService.sign(
       { ...user, type: 'refresh' },
-      { expiresIn: '30s', secret: 'testing' },
+      { expiresIn: refreshExpiresIn, secret: jwtSecret },
     );
 
     const host = request.headers.host;

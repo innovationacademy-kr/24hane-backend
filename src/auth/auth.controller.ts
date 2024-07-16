@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Inject,
   Logger,
   Post,
   Req,
@@ -9,6 +10,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
   ApiBearerAuth,
@@ -31,6 +33,8 @@ export class Auth42Controller {
   constructor(
     private googleApi: GoogleApi,
     private jwtService: JwtService,
+    @Inject(ConfigService)
+    private configService: ConfigService,
   ) {}
 
   @ApiOperation({
@@ -72,9 +76,6 @@ export class Auth42Controller {
     this.logger.verbose(`@ftcallback) login callback : ${user.login}`);
 
     const redirectUrl = req.cookies['redirect'];
-
-    //todo : delete test
-    this.logger.debug(`redirectUrl : ${redirectUrl}`);
 
     res.clearCookie('redirect');
 
@@ -134,12 +135,18 @@ export class Auth42Controller {
       throw new UnauthorizedException('Refresh 토큰을 찾을 수 없습니다.');
     }
 
+    const accessExpiresIn = this.configService.getOrThrow<string>(
+      'jwt.accessExpiresIn',
+    );
+
+    const jwtSecret = this.configService.getOrThrow<string>('jwt.secret');
+
     try {
       const payload = this.jwtService.verify(refreshToken);
 
       const newAccessToken = this.jwtService.sign(
         { login: payload.login, is_staff: payload.is_staff },
-        { expiresIn: '10s', secret: 'testing' }, //todo: env로 변경
+        { expiresIn: accessExpiresIn, secret: jwtSecret },
       );
 
       const accessTokenExpires = new Date(
@@ -150,21 +157,13 @@ export class Auth42Controller {
         expires: accessTokenExpires,
         httpOnly: false,
         domain: req.headers.host.split('.').slice(1).join('.'),
-        //req.headers.host,
       });
 
-      this.logger.debug('req.headers.host');
-      this.logger.debug(req.headers.host);
-
-      this.logger.debug(
-        `New access token generated for user: ${payload.login}`,
-      );
       return res.json({
         accessToken: newAccessToken,
         message: 'Access 토큰이 성공적으로 갱신되었습니다.',
       });
     } catch (e) {
-      this.logger.debug(`New access token generated for user: ${e.message}`);
       throw new UnauthorizedException(
         'Refresh 토큰이 유효하지 않거나 만료되었습니다.',
       );
