@@ -3,10 +3,13 @@ import {
   Get,
   HttpCode,
   Logger,
+  Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -25,7 +28,10 @@ import { User } from './user.decorator';
 export class Auth42Controller {
   private logger = new Logger(Auth42Controller.name);
 
-  constructor(private googleApi: GoogleApi) {}
+  constructor(
+    private googleApi: GoogleApi,
+    private jwtService: JwtService,
+  ) {}
 
   @ApiOperation({
     summary: '42 계정 로그인 링크',
@@ -64,8 +70,16 @@ export class Auth42Controller {
   @UseGuards(FtOAuthGuard, JWTSignGuard)
   async ftcallback(@Req() req, @Res() res, @User() user) {
     this.logger.verbose(`@ftcallback) login callback : ${user.login}`);
-    if (req.cookies['redirect']) {
-      res.status(302).redirect(req.cookies['redirect']);
+
+    const redirectUrl = req.cookies['redirect'];
+
+    //todo : delete test
+    this.logger.debug(`redirectUrl : ${redirectUrl}`);
+
+    res.clearCookie('redirect');
+
+    if (redirectUrl) {
+      res.status(302).redirect(redirectUrl);
     } else {
       if (user && user.is_staff) {
         /**
@@ -97,5 +111,63 @@ export class Auth42Controller {
   @HttpCode(204)
   async islogin() {
     this.logger.debug(`@islogin)`);
+  }
+
+  @ApiOperation({
+    summary: 'Access 토큰 갱신',
+    description: 'Refresh 토큰을 사용하여 새로운 Access 토큰을 발급합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '새로운 Access 토큰이 발급되었습니다.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh 토큰이 유효하지 않거나 만료되었습니다.',
+  })
+  @ApiBearerAuth()
+  @Post('refresh')
+  async refreshToken(@Req() req, @Res() res) {
+    const refreshToken = req.cookies['refreshToken'];
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh 토큰을 찾을 수 없습니다.');
+    }
+
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+
+      const newAccessToken = this.jwtService.sign(
+        { login: payload.login, is_staff: payload.is_staff },
+        { expiresIn: '10s', secret: 'testing' }, //todo: env로 변경
+      );
+
+      const accessTokenExpires = new Date(
+        this.jwtService.verify(newAccessToken)['exp'] * 1000,
+      );
+
+      res.cookie('accessToken', newAccessToken, {
+        expires: accessTokenExpires,
+        httpOnly: false,
+        domain: req.headers.host.split('.').slice(1).join('.'),
+        //req.headers.host,
+      });
+
+      this.logger.debug('req.headers.host');
+      this.logger.debug(req.headers.host);
+
+      this.logger.debug(
+        `New access token generated for user: ${payload.login}`,
+      );
+      return res.json({
+        accessToken: newAccessToken,
+        message: 'Access 토큰이 성공적으로 갱신되었습니다.',
+      });
+    } catch (e) {
+      this.logger.debug(`New access token generated for user: ${e.message}`);
+      throw new UnauthorizedException(
+        'Refresh 토큰이 유효하지 않거나 만료되었습니다.',
+      );
+    }
   }
 }

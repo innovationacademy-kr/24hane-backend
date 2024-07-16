@@ -26,9 +26,6 @@ const repo = {
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('jwt.secret'),
-        signOptions: {
-          expiresIn: configService.getOrThrow<string>('jwt.expiresIn'),
-        },
       }),
       inject: [ConfigService],
     }),

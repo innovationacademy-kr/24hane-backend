@@ -32,21 +32,48 @@ export class JWTSignGuard implements CanActivate {
       this.logger.error(`can't generate JWTToken`);
       return false;
     }
-    const token = this.jwtService.sign(user);
+
+    //todo; env설정 및 시간 변경
+    const accessToken = this.jwtService.sign(user, {
+      expiresIn: '15s',
+      secret: 'testing',
+    });
+    const refreshToken = this.jwtService.sign(
+      { ...user, type: 'refresh' },
+      { expiresIn: '30s', secret: 'testing' },
+    );
+
     const host = request.headers.host;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, ...words] = host.split('.');
     const domain = words.join('.');
+
     // NOTE: JWT token의 만료시간을 직접 가져옴.
-    const expires = new Date(this.jwtService.decode(token)['exp'] * 1000);
+    const accessTokenexpires = new Date(
+      this.jwtService.verify(accessToken)['exp'] * 1000,
+    );
+    const refreshTokenexpires = new Date(
+      this.jwtService.verify(refreshToken)['exp'] * 1000,
+    );
+
     const cookieOptions = {
-      expires,
+      expires: accessTokenexpires,
       httpOnly: false,
       domain,
     };
-    this.logger.debug(`token : ${token}`);
-    this.logger.debug(`cookieOptions : ${cookieOptions}`);
-    response.cookie('accessToken', token, cookieOptions);
+
+    const refreshcookieOptions = {
+      expires: refreshTokenexpires,
+      httpOnly: true,
+      domain,
+    };
+
+    this.logger.debug(`accessToken : ${accessToken}`);
+    this.logger.debug(`refreshToken : ${refreshToken}`);
+
+    response.cookie('accessToken', accessToken, cookieOptions);
+    response.cookie('refreshToken', refreshToken, refreshcookieOptions);
+
     return true;
   }
 }
