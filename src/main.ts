@@ -13,9 +13,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: log_level,
   });
+
   const configService = app.get(ConfigService);
-  const cors_uri = configService.getOrThrow<string>('frontend.uri');
-  const version = configService.getOrThrow<string>('version');
+  const cors_uri = configService.get<string>('frontend.uri');
+  const version = configService.get<string>('version');
+
   // enable CORS if exists
   if (cors_uri) {
     app.enableCors({
@@ -34,9 +36,13 @@ async function bootstrap() {
     .setVersion(version)
     .addBearerAuth()
     .build();
+
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, swaggerDocument);
 
-  await app.listen(parseInt(process.env.PORT, 10));
+  const port = configService.getOrThrow<number>('port');
+
+  await app.listen(port);
 }
+
 bootstrap();
