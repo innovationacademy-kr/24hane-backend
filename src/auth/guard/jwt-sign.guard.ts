@@ -32,7 +32,10 @@ export class JWTSignGuard implements CanActivate {
     return this.generateJWTToken(req, res);
   }
 
-  private generateJWTToken(request: Request, response: Response): boolean {
+  private async generateJWTToken(
+    request: Request,
+    response: Response,
+  ): Promise<boolean> {
     const user = request.user as UserSessionDto | undefined;
     if (user === undefined) {
       this.logger.error(`can't generate JWTToken`);
@@ -49,12 +52,12 @@ export class JWTSignGuard implements CanActivate {
 
     const jwtSecret = this.configService.getOrThrow<string>('jwt.secret');
 
-    const accessToken = this.jwtService.sign(user, {
+    const accessToken = await this.jwtService.signAsync(user, {
       expiresIn: accessExpiresIn,
       secret: jwtSecret,
     });
 
-    const refreshToken = this.jwtService.sign(
+    const refreshToken = await this.jwtService.signAsync(
       { ...user, type: 'refresh' },
       { expiresIn: refreshExpiresIn, secret: jwtSecret },
     );
@@ -66,10 +69,10 @@ export class JWTSignGuard implements CanActivate {
 
     // NOTE: JWT token의 만료시간을 직접 가져옴.
     const accessTokenexpires = new Date(
-      this.jwtService.verify(accessToken)['exp'] * 1000,
+      (await this.jwtService.verifyAsync(accessToken)['exp']) * 1000,
     );
     const refreshTokenexpires = new Date(
-      this.jwtService.verify(refreshToken)['exp'] * 1000,
+      (await this.jwtService.verifyAsync(refreshToken)['exp']) * 1000,
     );
 
     const cookieOptions = {
