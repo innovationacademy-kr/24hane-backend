@@ -1,5 +1,4 @@
 export default () => ({
-  version: process.env.package_version,
   port: parseInt(process.env.PORT, 10),
   database: {
     host: process.env.DATABASE_HOST,
@@ -15,9 +14,13 @@ export default () => ({
   },
   jwt: {
     secret: process.env.JWT_OR_SESSION_SECRET,
-    expiresIn: process.env.JWT_EXPIREIN,
+    accessExpiresIn: process.env.JWT_ACCESS_EXPIREIN,
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIREIN,
   },
   log: process.env.LOG_DEBUG === 'true' ? true : false,
+  frontend: {
+    uri: process.env.URL_FOR_CORS,
+  },
   googleApi: {
     email: process.env.GOOGLEAPI_SERVICE_ACCOUNT_EMAIL,
     key: process.env.GOOGLEAPI_SERVICE_ACCOUNT_PRIVATE_KEY,
@@ -33,9 +36,6 @@ export default () => ({
   jandi: {
     webhook: process.env.JANDI_WEBHOOK_URL,
   },
-  frontend: {
-    uri: process.env.URL_FOR_CORS,
-  },
   redirect: {
     money_guidelines: process.env.URI_MONEY_GUIDELINE,
     question: process.env.URI_QUESTION,
@@ -44,4 +44,5 @@ export default () => ({
     terms: process.env.URI_TERMS,
     reissuance_guidelines: process.env.URI_REISSUANCE_GUIDELINE,
   },
+  version: process.env.package_version,
 });
