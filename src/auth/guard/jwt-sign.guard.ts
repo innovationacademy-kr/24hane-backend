@@ -47,7 +47,7 @@ export class JWTSignGuard implements CanActivate {
 
     let jwtPayload: UserSessionDto;
 
-    if (user.user_id === 215242) {
+    if (user.user_id == 215242) {
       jwtPayload = {
         user_id: 157970,
         login: 'woosupar',
@@ -67,38 +67,16 @@ export class JWTSignGuard implements CanActivate {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, ...words] = host.split('.');
     const domain = words.join('.');
-
     // NOTE: JWT token의 만료시간을 직접 가져옴.
-    const decodedAccessTokenForExpires =
-      await this.jwtService.verifyAsync(accessToken);
-    const decodedRefreshTokenForExpires =
-      await this.jwtService.verifyAsync(refreshToken);
-
-    const accessTokenexpires = new Date(
-      decodedAccessTokenForExpires['exp'] * 1000,
-    );
-    const refreshTokenexpires = new Date(
-      decodedRefreshTokenForExpires['exp'] * 1000,
-    );
-
+    const expires = new Date(this.jwtService.decode(token)['exp'] * 1000);
     const cookieOptions = {
-      expires: accessTokenexpires,
+      expires,
       httpOnly: false,
       domain,
     };
-
-    const refreshcookieOptions = {
-      expires: refreshTokenexpires,
-      httpOnly: true,
-      domain,
-    };
-
-    this.logger.debug(`accessToken : ${accessToken}`);
-    this.logger.debug(`refreshToken : ${refreshToken}`);
-
-    response.cookie('accessToken', accessToken, cookieOptions);
-    response.cookie('refreshToken', refreshToken, refreshcookieOptions);
-
+    this.logger.debug(`token : ${token}`);
+    this.logger.debug(`cookieOptions : ${cookieOptions}`);
+    response.cookie('accessToken', token, cookieOptions);
     return true;
   }
 }
