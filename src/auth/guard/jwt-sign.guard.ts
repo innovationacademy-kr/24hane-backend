@@ -42,25 +42,26 @@ export class JWTSignGuard implements CanActivate {
       return false;
     }
 
-    const accessExpiresIn = this.configService.getOrThrow<string>(
-      'jwt.accessExpiresIn',
-    );
+    // note: intra id가 지워지는 일이 있어 DB 변경 전까지 임시 처리 (하네DB는 새 인트라 정보가 업데이트 되지 않음)
+    // 157970+woosupar -> 215242+woospark
 
-    const refreshExpiresIn = this.configService.getOrThrow<string>(
-      'jwt.refreshExpiresIn',
-    );
+    let jwtPayload: UserSessionDto;
 
-    const jwtSecret = this.configService.getOrThrow<string>('jwt.secret');
+    if (user.user_id === 215242) {
+      jwtPayload = {
+        user_id: 157970,
+        login: 'woosupar',
+        is_staff: user.is_staff,
+        iat: user.iat,
+        ext: user.ext,
+        image_url: user.image_url,
+        email: user.email,
+      };
+    } else {
+      jwtPayload = { ...user };
+    }
 
-    const accessToken = await this.jwtService.signAsync(user, {
-      expiresIn: accessExpiresIn,
-      secret: jwtSecret,
-    });
-
-    const refreshToken = await this.jwtService.signAsync(
-      { ...user, type: 'refresh' },
-      { expiresIn: refreshExpiresIn, secret: jwtSecret },
-    );
+    const token = this.jwtService.sign(jwtPayload);
 
     const host = request.headers.host;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
